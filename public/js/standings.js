@@ -32,7 +32,7 @@ async function buildSeasonPicker() {
 
 function renderConferenceTable(title, rows) {
   const body = rows.map((r) => `
-    <tr class="${r.rank <= 8 ? 'playoff-row' : ''}">
+    <tr class="team-row ${r.rank <= 8 ? 'playoff-row' : ''}" data-team-id="${r.team.id}" style="cursor:pointer">
       <td>${r.rank}</td>
       <td style="text-align:left;display:flex;align-items:center;gap:10px;padding-left:4px">
         ${logoImgOrBadge(r.team.abbreviation, 24)}
@@ -83,6 +83,12 @@ async function loadStandings() {
         ${renderConferenceTable('Conferencia Oeste', data.West)}
       </div>
     `;
+
+    container.querySelectorAll('tr.team-row').forEach((row) => {
+      row.addEventListener('click', () => {
+        window.location.href = `/team.html?id=${row.dataset.teamId}`;
+      });
+    });
   } catch (err) {
     container.innerHTML = '<p class="error-msg">No se pudo cargar la clasificación.</p>';
   }
