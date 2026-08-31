@@ -9,7 +9,7 @@ const {
   getGamesForSeason,
   currentSeasonYear
 } = require('./src/balldontlie');
-const { refreshAll } = require('./src/refreshAll');
+const { refreshAll, refreshSalaries, refreshRatings2k, refreshDraftArchive } = require('./src/refreshAll');
 const { startScheduler } = require('./src/scheduler');
 const { getTeamInfo } = require('./src/teamInfo');
 const { normalizeName, LEAGUE_SALARY_CAP_2025_26 } = require('./src/salaries');
@@ -364,5 +364,23 @@ app.listen(PORT, async () => {
       );
       console.error(err.message);
     }
+  }
+
+  // Salarios, valoraciones 2K y el archivo de draft normalmente solo se
+  // refrescan en el cron semanal (cambian poco), pero si el hosting no tiene
+  // disco persistente, cada redeploy borra la cache y tocaria esperar hasta
+  // el domingo para volver a verlos. Los rellenamos tambien en el primer
+  // arranque si faltan, igual que equipos y noticias.
+  if (!readCache('salaries')) {
+    console.log('[startup] no hay cache de salarios, lanzando refresco...');
+    refreshSalaries().catch((err) => console.error('[startup] fallo refresco de salarios:', err.message));
+  }
+  if (!readCache('ratings2k')) {
+    console.log('[startup] no hay cache de valoraciones 2K, lanzando refresco...');
+    refreshRatings2k().catch((err) => console.error('[startup] fallo refresco de valoraciones 2K:', err.message));
+  }
+  if (!readCache('draft_archive')) {
+    console.log('[startup] no hay cache de draft, lanzando refresco...');
+    refreshDraftArchive().catch((err) => console.error('[startup] fallo refresco de draft:', err.message));
   }
 });
