@@ -62,7 +62,7 @@ function buildShopGrid() {
       <div class="shop-grid">
         ${cat.items.map((item) => `
           <a class="shop-tile" href="${item.url}" target="_blank" rel="sponsored noopener noreferrer">
-            ${item.image ? `<img class="shop-tile-img" src="${item.image}" alt="${item.title}" loading="lazy" onerror="this.remove()">` : ''}
+            ${item.image ? `<img class="shop-tile-img" src="${item.image}" alt="${item.title}" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}
             <span class="shop-tile-retailer">${item.retailer}</span>
             <span class="shop-tile-title">${item.title}</span>
             <span class="shop-tile-desc">${item.desc}</span>
