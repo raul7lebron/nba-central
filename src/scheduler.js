@@ -8,8 +8,8 @@ function startScheduler() {
     refreshAll().catch((err) => console.error('[cron] error refresco diario:', err));
   });
 
-  // Noticias: cada 2 horas, para que la portada este mas al dia
-  cron.schedule('0 */2 * * *', () => {
+  // Noticias: cada 30 minutos, para que la portada este mas al dia
+  cron.schedule('*/30 * * * *', () => {
     console.log('[cron] refresco de noticias');
     refreshNews().catch((err) => console.error('[cron] error refresco noticias:', err));
   });
@@ -32,7 +32,7 @@ function startScheduler() {
     refreshDraftArchive().catch((err) => console.error('[cron] error refresco draft:', err));
   });
 
-  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 2h, salarios/2K/draft domingos 07:00');
+  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft domingos 07:00');
 }
 
 module.exports = { startScheduler };

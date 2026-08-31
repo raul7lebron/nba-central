@@ -53,7 +53,7 @@ Mientras el proceso `npm start` esté corriendo, tres tareas programadas
 (`node-cron`) se encargan de mantener los datos al día:
 
 - **06:00 cada día**: refresca equipos, plantillas y noticias.
-- **Cada 2 horas**: refresca solo noticias.
+- **Cada 30 minutos**: refresca solo noticias.
 - **Domingos 07:00**: refresca salarios, valoraciones 2K y el archivo de
   draft (todos cambian poco, no hace falta más frecuencia).
 
