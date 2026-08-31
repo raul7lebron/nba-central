@@ -1,4 +1,4 @@
-# NBA Central
+# El Rompearos
 
 Web con los 30 equipos de la NBA, sus plantillas, estadísticas de jugadores
 (temporada actual e históricas) y una portada de noticias agregadas de varios

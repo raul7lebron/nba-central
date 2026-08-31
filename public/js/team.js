@@ -70,7 +70,7 @@ function renderHero(team, teamId) {
 // por JS; en cuanto sabemos que equipo es, los hacemos especificos (mejor
 // para SEO que un titulo igual en las 30 paginas de equipo).
 function updateSeoForTeam(team) {
-  const title = `${team.full_name} - Plantilla, salarios y valoración 2K | NBA Central`;
+  const title = `${team.full_name} - Plantilla, salarios y valoración 2K | El Rompearos`;
   const description = `Plantilla actual de ${team.full_name}: estadísticas, salarios y valoración NBA 2K de cada jugador. ${team.conference}ern Conference, división ${team.division}.`;
 
   document.title = title;
