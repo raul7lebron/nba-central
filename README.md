@@ -128,7 +128,7 @@ node src/refreshAll.js salaries   # solo salarios
 - **Mercado de fichajes** (`/market.html`): no existe ninguna API gratuita de
   transacciones (ni balldontlie ni NBA.com la exponen sin scraping pesado
   contra protección anti-bots). En su lugar, `src/transactions.js` reutiliza
-  las mismas noticias de Marca/Mundo Deportivo/Gigantes del Basket y detecta
+  las mismas noticias de Marca/AS/Mundo Deportivo/Sport/Gigantes del Basket y detecta
   por palabras clave ("ficha", "traspaso", "firma con", etc.) cuáles hablan de
   fichajes. Cada refresco de noticias (cada 2h) añade las nuevas coincidencias
   a un archivo acumulado de 6 meses (`data/transactions.json`), podando lo más
@@ -216,7 +216,7 @@ src/playoffs.js        Reconstrucción de series/rondas de playoffs
 src/salaries.js        Scraper de contratos de HoopsHype + tope salarial
 src/ratings2k.js        Cliente de nba2kapi.com (valoraciones NBA 2K)
 src/teamInfo.js         Tabla estática de fundación/campeonatos por equipo
-src/news.js             Agregador de RSS (Marca, Mundo Deportivo, Gigantes del Basket)
+src/news.js             Agregador de RSS (Marca, AS, Mundo Deportivo, Sport, Gigantes del Basket)
 src/transactions.js     Detección de fichajes/traspasos por palabras clave
 src/refreshAll.js       Lógica de refresco de toda la caché
 src/scheduler.js        Tareas cron internas

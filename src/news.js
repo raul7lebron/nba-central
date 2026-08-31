@@ -13,7 +13,9 @@ const parser = new Parser({
 const FEEDS = [
   { name: 'Marca', url: 'https://www.marca.com/rss/baloncesto/nba.xml' },
   { name: 'Mundo Deportivo', url: 'https://www.mundodeportivo.com/rss/baloncesto/nba.xml' },
-  { name: 'Gigantes del Basket', url: 'https://www.gigantes.com/nba/feed/' }
+  { name: 'Gigantes del Basket', url: 'https://www.gigantes.com/nba/feed/' },
+  { name: 'AS', url: 'https://feeds.as.com/mrss-s/pages/as/site/as.com/section/baloncesto/subsection/nba/' },
+  { name: 'Sport', url: 'https://www.sport.es/es/rss/nba/rss.xml' }
 ];
 
 // Cada medio trae la imagen de portada de una forma distinta: Marca via
