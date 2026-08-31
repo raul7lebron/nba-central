@@ -39,7 +39,10 @@ function renderPick(p) {
         <div class="player-name">${p.first_name} ${p.last_name}</div>
         <div class="player-meta">${p.position || 'N/D'} · ${p.college || p.country || 'N/D'}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">${teamBadge}${ratingBadge}</div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
+        ${ratingBadge}
+        <div style="display:flex;align-items:center;gap:6px">${teamBadge}</div>
+      </div>
     </div>
   `;
 }
