@@ -36,6 +36,10 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
+
 // Sitemap dinamico: incluye las paginas fijas + una entrada por cada uno de
 // los 30 equipos (paginas de contenido real y distinto, altas para SEO).
 // IMPORTANTE: cambia SITE_URL por tu dominio real antes de publicar la web;
