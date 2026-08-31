@@ -197,6 +197,10 @@ en Render, Railway, un VPS con PM2, etc. Recuerda:
 
 - Configurar las variables de entorno `BALLDONTLIE_API_KEY`, `NBA2KAPI_KEY` y
   `SITE_URL` (tu dominio real, para el sitemap) en el panel del hosting.
+- Si tu hosting permite disco persistente (ej. Render Disks), móntalo y
+  añade la variable `DATA_DIR` apuntando a esa ruta (ej. `/var/data`). Así la
+  caché de `data/*.json` sobrevive a los redeploys en vez de rehacerse desde
+  cero cada vez (ver `src/cache.js`).
 - El proceso debe quedarse corriendo de forma continua (no serverless "one-shot")
   para que los cron internos se ejecuten. Si tu hosting es serverless, sustituye
   `src/scheduler.js` por un cron externo de la plataforma que llame a
