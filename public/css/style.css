@@ -569,16 +569,6 @@ table.stats-table tbody tr.playoff-row td {
 table.stats-table tbody tr.playoff-row:hover td { background: rgba(62, 207, 110, 0.22); }
 table.stats-table tbody tr.playoff-row:nth-of-type(8) td { border-bottom: 2px solid rgba(62, 207, 110, 0.5); }
 
-.playoff-legend-swatch {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-  border-radius: 2px;
-  background: rgba(62, 207, 110, 0.6);
-  margin-right: 4px;
-  vertical-align: middle;
-}
-
 .back-link {
   display: inline-flex;
   align-items: center;

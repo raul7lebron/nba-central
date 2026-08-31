@@ -78,9 +78,6 @@ async function loadStandings() {
     }
 
     container.innerHTML = `
-      <p class="subtitle" style="margin-bottom:16px">
-        <span class="playoff-legend-swatch"></span> Los 8 primeros de cada conferencia clasifican a playoffs
-      </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
         ${renderConferenceTable('Conferencia Este', data.East)}
         ${renderConferenceTable('Conferencia Oeste', data.West)}
