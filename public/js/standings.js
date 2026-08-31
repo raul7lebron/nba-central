@@ -32,7 +32,7 @@ async function buildSeasonPicker() {
 
 function renderConferenceTable(title, rows) {
   const body = rows.map((r) => `
-    <tr>
+    <tr class="${r.rank <= 8 ? 'playoff-row' : ''}">
       <td>${r.rank}</td>
       <td style="text-align:left;display:flex;align-items:center;gap:10px;padding-left:4px">
         ${logoImgOrBadge(r.team.abbreviation, 24)}
@@ -78,6 +78,9 @@ async function loadStandings() {
     }
 
     container.innerHTML = `
+      <p class="subtitle" style="margin-bottom:16px">
+        <span class="playoff-legend-swatch"></span> Los 8 primeros de cada conferencia clasifican a playoffs
+      </p>
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
         ${renderConferenceTable('Conferencia Este', data.East)}
         ${renderConferenceTable('Conferencia Oeste', data.West)}
