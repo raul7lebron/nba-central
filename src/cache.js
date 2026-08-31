@@ -1,7 +1,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = path.join(__dirname, '..', 'data');
+// Si el hosting tiene un disco persistente montado (ej. Render "Disks"),
+// DATA_DIR apunta ahí para que la cache sobreviva a los redeploys. Sin esa
+// variable, sigue usando la carpeta local de siempre (comportamiento actual).
+const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, '..', 'data');
 
 function filePath(name) {
   return path.join(DATA_DIR, `${name}.json`);
