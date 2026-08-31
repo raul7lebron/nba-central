@@ -602,6 +602,15 @@ table.stats-table tbody tr:last-child td { border-bottom: none; }
   box-shadow: var(--shadow);
 }
 
+.shop-tile-img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: contain;
+  background: #fff;
+  border-radius: calc(var(--radius-lg) - 6px);
+  margin-bottom: 2px;
+}
+
 .shop-tile-retailer {
   font-size: 0.68rem;
   font-weight: 700;
