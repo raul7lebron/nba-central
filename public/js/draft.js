@@ -27,6 +27,11 @@ function renderPick(p) {
     ? `${logoImgOrBadge(p.currentTeam.abbreviation, 22)}<span class="player-meta">${p.currentTeam.abbreviation}</span>`
     : '<span class="player-meta">—</span>';
 
+  const rating = p.isActive ? p.rating2k : p.peakRating2k;
+  const ratingBadge = rating
+    ? `<span class="pill" style="padding:2px 8px;font-size:0.7rem;color:${rating2kColor(rating)};border-color:${rating2kColor(rating)}66">${rating}</span>`
+    : '';
+
   return `
     <div class="player-card" data-id="${p.id}">
       <div class="player-jersey">#${p.pick}</div>
@@ -34,7 +39,7 @@ function renderPick(p) {
         <div class="player-name">${p.first_name} ${p.last_name}</div>
         <div class="player-meta">${p.position || 'N/D'} · ${p.college || p.country || 'N/D'}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px">${teamBadge}</div>
+      <div style="display:flex;align-items:center;gap:6px">${teamBadge}${ratingBadge}</div>
     </div>
   `;
 }
