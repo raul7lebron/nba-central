@@ -1,6 +1,4 @@
-# IMPORTANTE: cambia la URL de abajo por tu dominio real antes de publicar
-# (debe coincidir con SITE_URL en el servidor).
 User-agent: *
 Allow: /
 
-Sitemap: https://TU-DOMINIO.com/sitemap.xml
+Sitemap: https://www.elrompearos.com/sitemap.xml
