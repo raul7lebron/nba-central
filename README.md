@@ -190,7 +190,49 @@ los propios programas de afiliados; no lo quites.
   (Next.js, Astro, etc.) — es un cambio de arquitectura grande, no un ajuste
   de SEO. Lo de aquí es el máximo razonable sin llegar a eso.
 
-## 11. Desplegar en un servicio real
+## 11. Modo Fantasy
+
+`/fantasy.html`: cada usuario se registra (usuario/contraseña, hash bcrypt,
+sesión por token en `localStorage`, sin cookies ni dependencias extra), crea
+o se une con un código de invitación a una **liga de hasta 10 usuarios**, y
+ficha jugadores reales de la NBA con un presupuesto inicial de **$160M**
+(`src/fantasy/groups.js`). Dentro de una misma liga cada jugador solo puede
+estar en una plantilla a la vez (máximo 15 jugadores por plantilla); se
+puede vender un jugador en cualquier momento al precio de mercado del
+momento para recuperar liquidez y fichar a otro.
+
+- **Precio de cada jugador**: se calcula a partir de su valoración NBA 2K
+  interpolando una tabla de anclas (`src/fantasy/pricing.js`), ej. 65 de
+  valoración ≈ $2M, 79 ≈ $20M, 91 ≈ $40M. La primera vez que se pide un
+  jugador se guarda su precio en `data/fantasy_prices.json` y a partir de
+  ahí solo lo mueve el rendimiento en los partidos, no vuelve a
+  recalcularse desde la valoración 2K.
+- **Ajuste de precio por partido**: tras cada partido se calcula la
+  "valoración" (PIR: puntos + rebotes + asistencias + robos + tapones,
+  menos tiros fallados y pérdidas — la misma fórmula que ya usa el resto de
+  la web) de cada jugador y se compara con lo esperado para su valoración
+  2K. Un partido por encima de lo esperado sube el precio, uno por debajo
+  lo baja, con un tope de ±15% por partido para que un solo partido no
+  dispare el mercado.
+- **Dinero por partido**: cada usuario gana dinero según la valoración que
+  consigan los jugadores de su plantilla, a razón de **$10.000 por punto de
+  valoración** (ej. 30 de valoración → $300.000), acreditado tras cada
+  partido y reutilizable para fichar más jugadores.
+- **Clasificación de la liga**: se ordena por la valoración total acumulada
+  por la plantilla de cada usuario a lo largo de la temporada (no por
+  dinero), que es al fin y al cabo a quién compite el modo Fantasy.
+- **Limitación importante y honesta**: el ajuste de precios y el reparto de
+  dinero necesitan el box score partido a partido (`/stats` de
+  balldontlie.io), que igual que `/season_averages` requiere el plan de
+  pago **ALL-STAR** o superior (ver sección 1). Con el plan gratuito, el
+  modo Fantasy funciona igualmente para fichar/vender con el precio inicial
+  basado en la valoración 2K, pero los precios no se moverán solos ni se
+  repartirá dinero por partido hasta tener ese plan.
+- Se procesa automáticamente cada 2 horas (`src/scheduler.js`,
+  `src/fantasy/gameProcessor.js`); para forzarlo a mano:
+  `npm run fantasy:process`.
+
+## 12. Desplegar en un servicio real
 
 Este proyecto es una app Node.js estándar (Express), así que puedes desplegarla
 en Render, Railway, un VPS con PM2, etc. Recuerda:
@@ -221,6 +263,14 @@ src/transactions.js     Detección de fichajes/traspasos por palabras clave
 src/refreshAll.js       Lógica de refresco de toda la caché
 src/scheduler.js        Tareas cron internas
 src/cache.js            Lectura/escritura de la caché en data/*.json
+src/fantasy/store.js        Lectura/escritura de la caché del modo Fantasy
+src/fantasy/auth.js         Registro/login y sesiones por token
+src/fantasy/groups.js       Ligas (crear/unirse por código, hasta 10 usuarios)
+src/fantasy/roster.js       Fichar/vender jugadores dentro de una liga
+src/fantasy/market.js       Lista de jugadores con su precio actual
+src/fantasy/pricing.js      Fórmulas de precio, valoración y dinero por partido
+src/fantasy/gameProcessor.js  Procesa partidos terminados: ajusta precios y reparte dinero
+src/fantasy/routes.js       Rutas /api/fantasy/*
 public/js/ads.js        Configuración y huecos de Google AdSense
 public/                 Frontend (HTML/CSS/JS vanilla)
 ```

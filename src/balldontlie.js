@@ -175,6 +175,23 @@ async function getGamesForSeason(season) {
   return fetchAllPages(`/games?seasons[]=${season}&per_page=100`, 20);
 }
 
+// Estadisticas partido a partido de una lista de partidos concretos (usado
+// por el modo Fantasy para calcular la valoracion de cada jugador tras cada
+// jornada). Igual que /season_averages, requiere el plan de pago ALL-STAR
+// o superior.
+async function getStatsForGameIds(gameIds) {
+  if (!gameIds.length) return [];
+  const query = gameIds.map((id) => `game_ids[]=${id}`).join('&');
+  try {
+    return await fetchAllPages(`/stats?${query}&per_page=100`, 20);
+  } catch (err) {
+    if (String(err.message).includes('401') || String(err.message).includes('403')) {
+      return { error: 'PAID_TIER_REQUIRED' };
+    }
+    throw err;
+  }
+}
+
 // No existe filtro por año de draft en la API. Para construir el archivo de
 // drafts hay que traer el historial COMPLETO de jugadores de cada equipo
 // (no solo /active) y quedarnos con los que tengan draft_year.
@@ -188,6 +205,7 @@ module.exports = {
   getPlayerStatsHistory,
   getPlayerCareerStatsHistory,
   getGamesForSeason,
+  getStatsForGameIds,
   getFullPlayerHistoryForTeam,
   currentSeasonYear
 };

@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { refreshAll, refreshNews, refreshSalaries, refreshRatings2k, refreshDraftArchive } = require('./refreshAll');
+const { processFinishedGames } = require('./fantasy/gameProcessor');
 
 function startScheduler() {
   // Equipos, plantillas y noticias completas: todos los dias a las 06:00
@@ -32,7 +33,16 @@ function startScheduler() {
     refreshDraftArchive().catch((err) => console.error('[cron] error refresco draft:', err));
   });
 
-  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft domingos 07:00');
+  // Modo Fantasy: procesa los partidos recien terminados (ajusta precios y
+  // reparte dinero) cada 2 horas. Con eso basta durante la temporada, ya
+  // que la caché de partidos del día solo se refresca a diario a las 06:00
+  // y en directo casi nunca hace falta más frecuencia que esa.
+  cron.schedule('0 */2 * * *', () => {
+    console.log('[cron] procesando partidos para el modo Fantasy');
+    processFinishedGames().catch((err) => console.error('[cron] error procesando fantasy:', err));
+  });
+
+  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft domingos 07:00, fantasy cada 2h');
 }
 
 module.exports = { startScheduler };

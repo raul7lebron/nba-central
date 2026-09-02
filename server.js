@@ -34,7 +34,9 @@ async function getOrFetchSeasonGames(season) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/api/fantasy', require('./src/fantasy/routes'));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -49,7 +51,7 @@ const SITE_URL = process.env.SITE_URL || 'https://TU-DOMINIO.com';
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
     '/index.html', '/teams.html', '/standings.html', '/calendar.html',
-    '/playoffs.html', '/draft.html', '/market.html', '/store.html'
+    '/playoffs.html', '/draft.html', '/market.html', '/store.html', '/fantasy.html'
   ];
   const teams = readCache('teams', []);
   const teamUrls = teams.map((t) => `/team.html?id=${t.id}`);

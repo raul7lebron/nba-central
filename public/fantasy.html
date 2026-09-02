@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Playoffs NBA - Resultados de series por ronda y año</title>
-<meta name="description" content="Resultados de los playoffs NBA por ronda: primera ronda, semifinales de conferencia, finales de conferencia y Finales NBA. Historial completo desde 1980.">
+<title>Fantasy NBA - Ficha jugadores y compite en tu liga</title>
+<meta name="description" content="Modo Fantasy: ficha jugadores reales de la NBA con un presupuesto según su valoración NBA 2K, gana dinero por su rendimiento en cada partido y compite en una liga de hasta 10 usuarios.">
 <meta name="robots" content="index, follow">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="El Rompearos">
 <meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Playoffs NBA - Resultados por ronda">
-<meta property="og:description" content="Resultados de las series de playoffs NBA, ronda a ronda, desde 1980.">
+<meta property="og:title" content="Fantasy NBA - El Rompearos">
+<meta property="og:description" content="Ficha jugadores reales de la NBA y compite en una liga de hasta 10 usuarios a ver quién consigue más valoración.">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,37 +29,29 @@
     <a href="/teams.html">Equipos</a>
     <a href="/standings.html">Clasificación</a>
     <a href="/calendar.html">Calendario</a>
-    <a href="/playoffs.html" class="active">Playoffs</a>
+    <a href="/playoffs.html">Playoffs</a>
     <a href="/draft.html">Draft</a>
     <a href="/market.html">Mercado</a>
     <a href="/store.html">Tienda</a>
-    <a href="/fantasy.html">Fantasy</a>
+    <a href="/fantasy.html" class="active">Fantasy</a>
   </nav>
 </header>
 
 <main>
-  <div class="page-head">
-    <h1>Playoffs NBA</h1>
-    <div id="season-picker-wrap" style="margin-top:10px"></div>
-  </div>
-  <div id="playoffs-container">
-    <p class="state-msg">Cargando playoffs...</p>
+  <div id="fantasy-root">
+    <p class="state-msg">Cargando...</p>
   </div>
 </main>
 
 <footer class="site-footer">
-  Series reconstruidas a partir de resultados de
-  <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
+  Modo Fantasy: el precio de cada jugador se basa en su valoración NBA 2K y se ajusta solo según su
+  rendimiento en cada partido de la temporada regular.
   <br><a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a>
 </footer>
 
 <script src="/js/navToggle.js"></script>
-<script src="/js/teamColors.js"></script>
-<script src="/js/teamLogos.js"></script>
 <script src="/js/cookieConsent.js"></script>
-<script src="/js/ads.js"></script>
-<script src="/js/playerModal.js"></script>
-<script src="/js/search.js"></script>
-<script src="/js/playoffs.js"></script>
+<script src="/js/fantasy/common.js"></script>
+<script src="/js/fantasy/dashboard.js"></script>
 </body>
 </html>
