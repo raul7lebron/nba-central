@@ -48,7 +48,7 @@ function renderConferenceTable(title, rows) {
 
   return `
     <div>
-      <h3 style="margin-bottom:10px">${title}</h3>
+      <h3 class="standings-title" style="margin-bottom:10px">${title}</h3>
       <div class="table-scroll">
         <table class="stats-table">
           <thead>
@@ -78,7 +78,7 @@ async function loadStandings() {
     }
 
     container.innerHTML = `
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
+      <div class="standings-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
         ${renderConferenceTable('Conferencia Este', data.East)}
         ${renderConferenceTable('Conferencia Oeste', data.West)}
       </div>

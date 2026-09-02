@@ -160,6 +160,14 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
   /* con el menu plegado, el buscador vuelve a quedar junto al icono hamburguesa */
   .nav-toggle ~ .nav-search { margin-left: 0; }
+
+  /* clasificacion: menos espacio entre bloques para que quepa mas sin scroll */
+  body.standings-page main { padding-top: 24px; }
+  body.standings-page .page-head { margin-bottom: 16px; }
+  .standings-grid { gap: 10px !important; }
+  .standings-title { margin-bottom: 4px !important; font-size: 1rem; }
+  body.standings-page table.stats-table th,
+  body.standings-page table.stats-table td { padding: 6px 8px; }
 }
 
 /* ---------- Buscador de jugadores ---------- */
