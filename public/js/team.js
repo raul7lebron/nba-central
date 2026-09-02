@@ -1,3 +1,7 @@
+function escapeAttr(text) {
+  return (text || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
 function getTeamId() {
   const params = new URLSearchParams(window.location.search);
   return params.get('id');
@@ -23,7 +27,7 @@ async function showTeamNews(team) {
 
     body.innerHTML = `<div class="news-list">${news.map((item) => `
       <a class="news-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
-        ${item.image ? `<img class="news-thumb" src="${item.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+        ${item.image ? `<img class="news-thumb" src="${item.image}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
         <div class="news-body">
           <span class="news-source">${item.source}</span>
           <div class="news-title">${item.title}</div>
@@ -78,6 +82,17 @@ function updateSeoForTeam(team) {
   document.getElementById('meta-description').setAttribute('content', description);
   document.getElementById('og-title').setAttribute('content', title);
   document.getElementById('og-description').setAttribute('content', description);
+
+  const canonicalUrl = `https://www.elrompearos.com/team.html?id=${team.id}`;
+  const canonicalLink = document.createElement('link');
+  canonicalLink.rel = 'canonical';
+  canonicalLink.href = canonicalUrl;
+  document.head.appendChild(canonicalLink);
+
+  const ogUrl = document.createElement('meta');
+  ogUrl.setAttribute('property', 'og:url');
+  ogUrl.setAttribute('content', canonicalUrl);
+  document.head.appendChild(ogUrl);
 
   const ldJson = document.createElement('script');
   ldJson.type = 'application/ld+json';

@@ -1,3 +1,7 @@
+function escapeAttr(text) {
+  return (text || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
 function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -22,7 +26,7 @@ async function loadMarket() {
     container.innerHTML = items.map((item, i) => `
       ${i > 0 && i % NEWS_PER_AD === 0 ? renderAdSlot('newsInline') : ''}
       <a class="news-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
-        ${item.image ? `<img class="news-thumb" src="${item.image}" alt="" loading="lazy" onerror="this.remove()">` : ''}
+        ${item.image ? `<img class="news-thumb" src="${item.image}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
         <div class="news-body">
           <span class="news-source">${item.source}</span>
           <div class="news-title">${item.title}</div>

@@ -34,7 +34,7 @@ async function getOrFetchSeasonGames(season) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -55,9 +55,11 @@ app.get('/sitemap.xml', (req, res) => {
   const teamUrls = teams.map((t) => `/team.html?id=${t.id}`);
   const urls = [...staticPages, ...teamUrls];
 
+  const lastmod = (readCache('meta', {}).lastFullRefresh || new Date().toISOString()).slice(0, 10);
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${urls.map((u) => `  <url><loc>${SITE_URL}${u}</loc></url>`).join('\n')}
+${urls.map((u) => `  <url><loc>${SITE_URL}${u}</loc><lastmod>${lastmod}</lastmod></url>`).join('\n')}
 </urlset>`;
 
   res.type('application/xml').send(xml);
