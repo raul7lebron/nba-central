@@ -167,8 +167,13 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   .standings-grid { gap: 10px !important; }
   .standings-title { margin-bottom: 4px !important; font-size: 1rem; }
   body.standings-page table.stats-table th,
-  body.standings-page table.stats-table td { padding: 6px 8px; }
+  body.standings-page table.stats-table td { padding: 6px 6px; }
+  body.standings-page table.stats-table { min-width: unset; }
+  body.standings-page .team-full-name { display: none; }
+  body.standings-page .team-abbr-name { display: inline; }
 }
+
+.team-abbr-name { display: none; }
 
 /* ---------- Buscador de jugadores ---------- */
 
