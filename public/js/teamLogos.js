@@ -12,7 +12,7 @@ const TEAM_LOGO_SLUGS = {
 // del oficial de ESPN.
 const TEAM_LOGO_OVERRIDES = {
   MIN: '/img/logo-min.webp',
-  MIL: '/img/logo-mil.jpg'
+  MIL: '/img/logo-mil.png'
 };
 
 function teamLogoUrl(abbreviation) {
