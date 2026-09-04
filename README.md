@@ -176,11 +176,20 @@ los propios programas de afiliados; no lo quites.
   inyectado por JS en cada página de equipo.
 - **robots.txt y sitemap.xml**: `public/robots.txt` y la ruta dinámica
   `/sitemap.xml` (en `server.js`, incluye las 8 páginas fijas + las 30 de
-  equipo). **Antes de publicar, cambia `TU-DOMINIO.com`** en `robots.txt` y
-  en la variable de entorno `SITE_URL` — un sitemap apuntando a un dominio
-  que no es el tuyo no sirve de nada a los buscadores.
+  equipo, con `<lastmod>`) ya apuntan al dominio real (`www.elrompearos.com`),
+  tanto en `robots.txt` como en el valor por defecto de `SITE_URL` en
+  `server.js`. Si despliegas bajo otro dominio, cambia ambos sitios y la
+  variable de entorno `SITE_URL` — un sitemap apuntando a un dominio que no
+  es el tuyo no sirve de nada a los buscadores.
+- **URLs canónicas**: cada página fija tiene `<link rel="canonical">` y
+  `og:url` autorreferenciados; `team.html` los genera por JavaScript con el
+  id del equipo en cuanto lo conoce. Evita contenido duplicado por
+  variantes www/no-www o parámetros de consulta.
 - **Rendimiento**: los logos de equipo cargan con `loading="lazy"` y
-  `width`/`height` fijos para evitar saltos de layout (Core Web Vitals).
+  `width`/`height` fijos para evitar saltos de layout (Core Web Vitals);
+  las imágenes de noticias/mercado llevan `alt` con el titular real del
+  artículo. Los assets estáticos (css/js/imágenes) se sirven con caché de
+  1h (`express.static maxAge`).
 - **Limitación importante y honesta**: esta web renderiza el contenido con
   JavaScript en el navegador (fetch + innerHTML), no en el servidor. Google
   consigue indexarla porque ejecuta JavaScript, pero Bing y otros motores lo

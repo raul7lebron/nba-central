@@ -42,9 +42,9 @@ app.get('/health', (req, res) => {
 
 // Sitemap dinamico: incluye las paginas fijas + una entrada por cada uno de
 // los 30 equipos (paginas de contenido real y distinto, altas para SEO).
-// IMPORTANTE: cambia SITE_URL por tu dominio real antes de publicar la web;
-// un sitemap con localhost no sirve de nada a los buscadores.
-const SITE_URL = process.env.SITE_URL || 'https://TU-DOMINIO.com';
+// El fallback coincide con el dominio ya fijado en robots.txt y en las
+// etiquetas canonical/og:url de cada pagina.
+const SITE_URL = process.env.SITE_URL || 'https://www.elrompearos.com';
 
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
