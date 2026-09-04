@@ -3,14 +3,16 @@
 const TEAM_LOGO_SLUGS = {
   ATL: 'atl', BOS: 'bos', BKN: 'bkn', CHA: 'cha', CHI: 'chi', CLE: 'cle',
   DAL: 'dal', DEN: 'den', DET: 'det', GSW: 'gs', HOU: 'hou', IND: 'ind',
-  LAC: 'lac', LAL: 'lal', MEM: 'mem', MIA: 'mia', MIL: 'mil',
+  LAC: 'lac', LAL: 'lal', MEM: 'mem', MIA: 'mia',
   NOP: 'no', NYK: 'ny', OKC: 'okc', ORL: 'orl', PHI: 'phi', PHX: 'phx',
   POR: 'por', SAC: 'sac', SAS: 'sa', TOR: 'tor', UTA: 'utah', WAS: 'wsh'
 };
 
-// Timberwolves: logo personalizado servido localmente en vez del oficial de ESPN.
+// Timberwolves y Bucks: logos personalizados servidos localmente en vez
+// del oficial de ESPN.
 const TEAM_LOGO_OVERRIDES = {
-  MIN: '/img/logo-min.webp'
+  MIN: '/img/logo-min.webp',
+  MIL: '/img/logo-mil.jpg'
 };
 
 function teamLogoUrl(abbreviation) {
