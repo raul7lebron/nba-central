@@ -3,12 +3,18 @@
 const TEAM_LOGO_SLUGS = {
   ATL: 'atl', BOS: 'bos', BKN: 'bkn', CHA: 'cha', CHI: 'chi', CLE: 'cle',
   DAL: 'dal', DEN: 'den', DET: 'det', GSW: 'gs', HOU: 'hou', IND: 'ind',
-  LAC: 'lac', LAL: 'lal', MEM: 'mem', MIA: 'mia', MIL: 'mil', MIN: 'min',
+  LAC: 'lac', LAL: 'lal', MEM: 'mem', MIA: 'mia', MIL: 'mil',
   NOP: 'no', NYK: 'ny', OKC: 'okc', ORL: 'orl', PHI: 'phi', PHX: 'phx',
   POR: 'por', SAC: 'sac', SAS: 'sa', TOR: 'tor', UTA: 'utah', WAS: 'wsh'
 };
 
+// Timberwolves: logo personalizado servido localmente en vez del oficial de ESPN.
+const TEAM_LOGO_OVERRIDES = {
+  MIN: '/img/logo-min.webp'
+};
+
 function teamLogoUrl(abbreviation) {
+  if (TEAM_LOGO_OVERRIDES[abbreviation]) return TEAM_LOGO_OVERRIDES[abbreviation];
   const slug = TEAM_LOGO_SLUGS[abbreviation];
   return slug ? `https://a.espncdn.com/i/teamlogos/nba/500/${slug}.png` : null;
 }
