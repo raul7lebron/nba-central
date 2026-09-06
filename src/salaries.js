@@ -52,27 +52,63 @@ function extractContracts(html) {
   return [];
 }
 
+// HoopsHype marca algunas temporadas de un contrato como opcion de jugador,
+// opcion de equipo o no garantizada. No hemos podido confirmar el nombre
+// exacto del campo en su JSON (bloqueado el acceso a hoopshype.com desde
+// el entorno donde se escribio esto), asi que se prueban los nombres mas
+// plausibles; si ninguno aparece, sencillamente no se muestra ninguna
+// etiqueta para esa temporada en vez de arriesgarse a inventar el dato.
+function normalizeSeasonOption(seasonRaw) {
+  const raw = seasonRaw.option ?? seasonRaw.contractOption ?? seasonRaw.type ?? seasonRaw.note ?? seasonRaw.label;
+  if (!raw || typeof raw !== 'string') return null;
+  const normalized = raw.toLowerCase();
+  if (normalized.includes('player')) return 'player';
+  if (normalized.includes('team')) return 'team';
+  if (normalized.includes('guarant')) return 'non-guaranteed';
+  return null;
+}
+
+let loggedRawSeasonKeysOnce = false;
+
 // balldontlie numera la temporada por el año en que EMPIEZA (2025 = temporada
 // 2025-26); HoopsHype numera por el año en que TERMINA (2026 = temporada
-// 2025-26). Hay que sumar 1 para pedir el mismo año real.
+// 2025-26). Hay que restar 1 a cada temporada de HoopsHype para pasarla a
+// numeracion balldontlie.
 async function getTeamSalaries(abbreviation, season) {
   const slug = TEAM_SLUGS[abbreviation];
   if (!slug) return [];
 
-  const hoopshypeSeason = season + 1;
   const html = await fetchTeamContractsHtml(slug);
   const contracts = extractContracts(html);
 
+  // Ayuda a depurar el nombre real del campo de opcion de contrato: se
+  // imprime una sola vez por proceso, con las claves crudas de la primera
+  // temporada del primer contrato que se procese.
+  if (!loggedRawSeasonKeysOnce && contracts[0]?.seasons?.[0]) {
+    console.log('[salaries] campos disponibles por temporada (debug):', Object.keys(contracts[0].seasons[0]));
+    loggedRawSeasonKeysOnce = true;
+  }
+
   return contracts
     .map((c) => {
-      const seasonRow =
-        c.seasons.find((s) => s.season === hoopshypeSeason) || c.seasons[0];
-      if (!seasonRow) return null;
+      const allSeasons = (c.seasons || [])
+        .filter((s) => s.salary != null)
+        .map((s) => ({
+          season: s.season - 1,
+          salary: s.salary,
+          option: normalizeSeasonOption(s)
+        }))
+        .sort((a, b) => a.season - b.season);
+
+      const currentSeasonRow = allSeasons.find((s) => s.season === season) || allSeasons[0];
+      if (!currentSeasonRow) return null;
+
       return {
         playerName: c.playerName,
         normalizedName: normalizeName(c.playerName),
-        salary: seasonRow.salary,
-        season: seasonRow.season - 1
+        salary: currentSeasonRow.salary,
+        season: currentSeasonRow.season,
+        contract: allSeasons
       };
     })
     .filter(Boolean);

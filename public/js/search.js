@@ -83,21 +83,12 @@ function injectPlayerSearch() {
       }
 
       results.innerHTML = players.map((p) => `
-        <div class="search-result-item" data-id="${p.id}">
+        <a class="search-result-item" href="${playerUrl(p)}">
           ${p.currentTeam ? logoImgOrBadge(p.currentTeam.abbreviation, 20) : '<span class="team-badge" style="width:20px;height:20px;font-size:0.6rem">?</span>'}
           <span>${p.first_name} ${p.last_name}</span>
           <span class="search-result-tag">${p.isActive ? 'Activo' : 'Retirado'}</span>
-        </div>
+        </a>
       `).join('');
-
-      results.querySelectorAll('.search-result-item').forEach((item) => {
-        const player = players.find((p) => String(p.id) === item.dataset.id);
-        item.addEventListener('click', () => {
-          closePanel();
-          if (player.isActive) showPlayerStats(player);
-          else showRetiredPlayerCard(player);
-        });
-      });
     } catch (err) {
       results.innerHTML = '<div class="search-result-empty">No se pudo buscar</div>';
     }

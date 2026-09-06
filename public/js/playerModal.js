@@ -88,76 +88,34 @@ function openModal(innerHTML) {
   });
 }
 
-function draftLine(player) {
-  if (!player.draft_year) return '<p class="player-meta">No drafteado</p>';
-  return `<p class="player-meta">Draft ${player.draft_year} · Ronda ${player.draft_round} · Pick nº${player.draft_number}</p>`;
+const CONTRACT_OPTION_LABELS = {
+  player: 'Opción jugador',
+  team: 'Opción equipo',
+  'non-guaranteed': 'No garantizado'
+};
+
+// Contrato completo (todos los años firmados), no solo el salario de la
+// temporada en curso. La opcion de jugador/equipo depende de que HoopsHype
+// la marque en su web; si no la marca, esa columna sale en blanco (mejor
+// no mostrar nada que inventar el dato).
+function renderContractTable(contract, currentSalary) {
+  if (!contract || !contract.length) return '';
+  const rows = contract.map((row) => `
+    <tr${row.salary === currentSalary ? ' style="font-weight:700;color:var(--accent)"' : ''}>
+      <td>${row.season}-${String(row.season + 1).slice(2)}</td>
+      <td>${formatMoney(row.salary)}</td>
+      <td>${row.option ? CONTRACT_OPTION_LABELS[row.option] || row.option : '—'}</td>
+    </tr>
+  `).join('');
+
+  return `
+    <div class="table-scroll">
+      <table class="stats-table">
+        <thead><tr><th>Temporada</th><th>Salario</th><th>Opción</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="player-meta" style="margin-top:6px">Datos de contrato de HoopsHype. Puede haber opciones de jugador/equipo no marcadas en la fuente.</p>
+  `;
 }
 
-// Ficha de jugador activo: temporada actual, salario, valoración 2K vigente.
-async function showPlayerStats(player) {
-  const ratingLine = player.rating2k
-    ? `<p class="player-meta">Valoración NBA 2K: <span style="color:${rating2kColor(player.rating2k)};font-weight:700">${player.rating2k}</span></p>`
-    : '';
-  const salaryLine = player.salary
-    ? `<p class="player-meta">Salario ${formatMoney(player.salary)} (temporada actual)</p>`
-    : '';
-
-  openModal(`
-    <h2>${player.first_name} ${player.last_name}</h2>
-    <p class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}</p>
-    ${draftLine(player)}
-    ${ratingLine}
-    ${salaryLine}
-    <div id="stats-body"><p class="state-msg">Cargando estadísticas...</p></div>
-  `);
-
-  const statsBody = document.getElementById('stats-body');
-  try {
-    const res = await fetch(`/api/players/${player.id}/stats`);
-    if (res.status === 402) {
-      const data = await res.json();
-      statsBody.innerHTML = `<p class="error-msg">${data.error}</p>`;
-      return;
-    }
-    const data = await res.json();
-    statsBody.innerHTML = `
-      <h3>Historial por temporada</h3>
-      ${renderStatsTable(data.history)}
-    `;
-  } catch (err) {
-    statsBody.innerHTML = '<p class="error-msg">No se pudieron cargar las estadísticas.</p>';
-  }
-}
-
-// Ficha de jugador retirado/inactivo: estadísticas de toda su carrera y la
-// mejor valoración 2K que haya tenido nunca (si el juego llegó a incluirlo).
-async function showRetiredPlayerCard(player) {
-  const peakLine = player.peakRating2k
-    ? `<p class="player-meta">Mejor valoración NBA 2K de su carrera: <span style="color:${rating2kColor(player.peakRating2k)};font-weight:700">${player.peakRating2k}</span></p>`
-    : '<p class="player-meta">Sin valoración NBA 2K disponible</p>';
-
-  openModal(`
-    <h2>${player.first_name} ${player.last_name}</h2>
-    <p class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''} · Retirado/inactivo</p>
-    ${draftLine(player)}
-    ${peakLine}
-    <div id="stats-body"><p class="state-msg">Cargando estadísticas de carrera...</p></div>
-  `);
-
-  const statsBody = document.getElementById('stats-body');
-  try {
-    const res = await fetch(`/api/players/${player.id}/career-stats?fromYear=${player.draft_year || ''}`);
-    if (res.status === 402) {
-      const data = await res.json();
-      statsBody.innerHTML = `<p class="error-msg">${data.error}</p>`;
-      return;
-    }
-    const data = await res.json();
-    statsBody.innerHTML = `
-      <h3>Estadísticas de toda su carrera</h3>
-      ${renderStatsTable(data.history)}
-    `;
-  } catch (err) {
-    statsBody.innerHTML = '<p class="error-msg">No se pudieron cargar las estadísticas.</p>';
-  }
-}

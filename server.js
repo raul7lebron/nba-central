@@ -13,6 +13,7 @@ const { refreshAll, refreshSalaries, refreshRatings2k, refreshDraftArchive } = r
 const { startScheduler } = require('./src/scheduler');
 const { getTeamInfo } = require('./src/teamInfo');
 const { normalizeName, LEAGUE_SALARY_CAP_2025_26 } = require('./src/salaries');
+const { playerSlug } = require('./src/playerSlug');
 const { normalizeName: normalize2kName, getPeakRatingByName } = require('./src/ratings2k');
 const { computeStandings } = require('./src/standings');
 const { computePlayoffBracket } = require('./src/playoffs');
@@ -40,6 +41,14 @@ app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
 });
 
+// URL con el nombre del jugador (ej. /jugador/lebron-james-237) en vez de
+// un parametro de consulta: mejor para SEO porque la propia URL lleva la
+// palabra clave. El slug es cosmetico, solo se usa el id del final; player.js
+// lo extrae con una expresion regular y pide los datos por id.
+app.get('/jugador/:slug', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'player.html'));
+});
+
 // Sitemap dinamico: incluye las paginas fijas + una entrada por cada uno de
 // los 30 equipos (paginas de contenido real y distinto, altas para SEO).
 // El fallback coincide con el dominio ya fijado en robots.txt y en las
@@ -53,7 +62,16 @@ app.get('/sitemap.xml', (req, res) => {
   ];
   const teams = readCache('teams', []);
   const teamUrls = teams.map((t) => `/team.html?id=${t.id}`);
-  const urls = [...staticPages, ...teamUrls];
+
+  // Solo jugadores de plantillas activas: son los unicos con ficha completa
+  // (salario, contrato, valoracion 2K). El archivo historico del draft tiene
+  // muchos menos datos y de momento se deja fuera del sitemap.
+  const rosters = readCache('rosters', {});
+  const playerUrls = Object.values(rosters)
+    .flat()
+    .map((p) => `/jugador/${playerSlug(p)}`);
+
+  const urls = [...staticPages, ...teamUrls, ...playerUrls];
 
   const lastmod = (readCache('meta', {}).lastFullRefresh || new Date().toISOString()).slice(0, 10);
 
@@ -108,6 +126,7 @@ function enrichPlayer(p, maps) {
     currentTeam: p.team || null,
     isActive,
     salary: isActive && salaryMatch ? salaryMatch.salary : null,
+    contract: isActive && salaryMatch ? salaryMatch.contract : null,
     rating2k: isActive && currentRatingMatch ? currentRatingMatch.overall : null,
     peakRating2k: peakRatingMatch ? peakRatingMatch.overall : null
   };
@@ -152,6 +171,7 @@ app.get('/api/teams/:id/players', (req, res) => {
     return {
       ...p,
       salary: salaryMatch ? salaryMatch.salary : null,
+      contract: salaryMatch ? salaryMatch.contract : null,
       rating2k: ratingMatch ? ratingMatch.overall : null
     };
   });
@@ -232,14 +252,10 @@ app.get('/api/draft', (req, res) => {
   });
 });
 
-// Busca cualquier jugador (activo o retirado) por nombre para poder ir
-// directo a su ficha desde el buscador de la cabecera. Combina el archivo
-// de draft (historico completo) con las plantillas activas (por si alguien
-// no fue drafteado y por eso no aparece en el archivo de draft).
-app.get('/api/players/search', (req, res) => {
-  const q = normalizeName(req.query.q || '');
-  if (q.length < 2) return res.json([]);
-
+// Combina el archivo de draft (historico completo) con las plantillas
+// activas (por si alguien no fue drafteado y por eso no aparece en el
+// archivo de draft), sin duplicar por id.
+function getAllKnownPlayers() {
   const archive = readCache('draft_archive', []);
   const rosters = readCache('rosters', {});
   const activeExtras = Object.values(rosters).flat();
@@ -248,14 +264,32 @@ app.get('/api/players/search', (req, res) => {
   for (const p of [...archive, ...activeExtras]) {
     if (!byId.has(p.id)) byId.set(p.id, p);
   }
+  return [...byId.values()];
+}
+
+// Busca cualquier jugador (activo o retirado) por nombre para poder ir
+// directo a su ficha desde el buscador de la cabecera.
+app.get('/api/players/search', (req, res) => {
+  const q = normalizeName(req.query.q || '');
+  if (q.length < 2) return res.json([]);
 
   const maps = buildPlayerEnrichmentMaps();
-  const matches = [...byId.values()]
+  const matches = getAllKnownPlayers()
     .filter((p) => normalizeName(`${p.first_name} ${p.last_name}`).includes(q))
     .slice(0, 8)
     .map((p) => enrichPlayer(p, maps));
 
   res.json(matches);
+});
+
+// Ficha completa de un jugador por id, para su pagina individual
+// (/jugador/<slug>-<id>). Mismo enriquecimiento que busqueda/draft.
+app.get('/api/players/:id', (req, res) => {
+  const player = getAllKnownPlayers().find((p) => String(p.id) === req.params.id);
+  if (!player) return res.status(404).json({ error: 'Jugador no encontrado' });
+
+  const maps = buildPlayerEnrichmentMaps();
+  res.json(enrichPlayer(player, maps));
 });
 
 app.get('/api/standings', async (req, res) => {

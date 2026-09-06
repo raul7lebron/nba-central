@@ -71,6 +71,17 @@ node src/refreshAll.js salaries   # solo salarios
   que publica los mismos datos de contratos en abierto (están incrustados como
   JSON en cada página de equipo). Se guardan en `data/salaries.json` y se cruzan
   con la plantilla por nombre de jugador.
+- **Contrato completo**: no solo el salario de la temporada actual — `contract`
+  trae el salario de cada año firmado (pasado y futuro) y, si HoopsHype lo
+  marca, si esa temporada tiene opción de jugador, de equipo o es no
+  garantizada (`src/salaries.js`, `normalizeSeasonOption`). El nombre exacto
+  del campo de opción en el JSON de HoopsHype no se pudo confirmar al
+  escribir esto (sin acceso de red a hoopshype.com desde ese entorno), así
+  que se prueban varios nombres plausibles; si el refresco no encuentra
+  ninguno, esa columna simplemente sale vacía en vez de inventar el dato.
+  `refreshSalaries()` imprime en el log del servidor las claves reales de la
+  primera temporada que procesa (`[salaries] campos disponibles...`) — sirve
+  para afinar `normalizeSeasonOption` si las opciones no aparecen bien.
 - **Margen salarial**: se calcula como tope salarial NBA 2025-26
   ($154.647M, fijado por la liga) menos la suma de contratos del equipo. El
   tope es una cifra fija de temporada — hay que actualizarla a mano en
@@ -174,16 +185,33 @@ los propios programas de afiliados; no lo quites.
 
 ## 10. SEO
 
-- **Metadatos**: las 9 páginas tienen `<title>` y `<meta name="description">`
+- **Metadatos**: las 10 páginas tienen `<title>` y `<meta name="description">`
   únicos y orientados a búsqueda, más Open Graph y Twitter Card para que se
-  vean bien al compartir. La página de plantilla (`team.html`) actualiza su
-  título/descripción por JavaScript en cuanto sabe qué equipo es (30
-  variantes reales en vez de un título genérico repetido).
+  vean bien al compartir. Las páginas de plantilla (`team.html`) y de
+  jugador (`player.html`) actualizan su título/descripción por JavaScript en
+  cuanto saben qué equipo/jugador son (variantes reales en vez de un título
+  genérico repetido).
+- **Página individual por jugador** (`/jugador/<slug>-<id>`, ej.
+  `/jugador/lebron-james-237`): antes cada jugador solo existía dentro de un
+  modal en `team.html?id=X`, sin URL propia — buscar el nombre de un jugador
+  no tenía ninguna página concreta a la que Google pudiera enlazar. Ahora
+  `public/player.html` + `public/js/player.js` le dan una URL, título,
+  descripción, canonical y JSON-LD (`Person`) propios, con su ficha completa
+  (equipo, contrato, valoración 2K, histórico de estadísticas). El slug
+  (`src/playerSlug.js` en el servidor, `public/js/playerLinks.js` en el
+  navegador — misma lógica duplicada en los dos sitios al no haber
+  empaquetador de JS) es solo cosmético: lo único que importa es el id del
+  final de la URL. Los nombres de jugador en plantillas, draft y buscador
+  enlazan aquí en vez de abrir un modal. Solo se generan para jugadores de
+  plantillas **activas** (los que tienen ficha completa); el archivo
+  histórico del draft se queda de momento fuera.
 - **Datos estructurados (JSON-LD)**: `WebSite` en la portada, `SportsTeam`
-  inyectado por JS en cada página de equipo.
+  (con cada jugador de la plantilla como `athlete`) en cada página de
+  equipo, `Person` en cada página de jugador.
 - **robots.txt y sitemap.xml**: `public/robots.txt` y la ruta dinámica
   `/sitemap.xml` (en `server.js`, incluye las 8 páginas fijas + las 30 de
-  equipo, con `<lastmod>`) ya apuntan al dominio real (`www.elrompearos.com`),
+  equipo + una por cada jugador de plantilla activa, con `<lastmod>`) ya
+  apuntan al dominio real (`www.elrompearos.com`),
   tanto en `robots.txt` como en el valor por defecto de `SITE_URL` en
   `server.js`. Si despliegas bajo otro dominio, cambia ambos sitios y la
   variable de entorno `SITE_URL` — un sitemap apuntando a un dominio que no
@@ -230,6 +258,7 @@ src/balldontlie.js     Cliente de la API de equipos/jugadores/stats/partidos
 src/standings.js       Cálculo de clasificación a partir de /games
 src/playoffs.js        Reconstrucción de series/rondas de playoffs
 src/salaries.js        Scraper de contratos de HoopsHype + tope salarial
+src/playerSlug.js       Slug de la URL de jugador (servidor, para el sitemap)
 src/ratings2k.js        Cliente de nba2kapi.com (valoraciones NBA 2K)
 src/teamInfo.js         Tabla estática de fundación/campeonatos por equipo
 src/news.js             Agregador de RSS (Marca, AS, Mundo Deportivo, Sport, Gigantes del Basket)
@@ -238,5 +267,7 @@ src/refreshAll.js       Lógica de refresco de toda la caché
 src/scheduler.js        Tareas cron internas
 src/cache.js            Lectura/escritura de la caché en data/*.json
 public/js/ads.js        Configuración y huecos de Google AdSense
+public/js/playerLinks.js Slug de la URL de jugador (navegador, para enlaces)
+public/player.html      Ficha individual de jugador (/jugador/<slug>-<id>)
 public/                 Frontend (HTML/CSS/JS vanilla)
 ```

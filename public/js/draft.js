@@ -33,7 +33,7 @@ function renderPick(p) {
     : '';
 
   return `
-    <div class="player-card" data-id="${p.id}">
+    <a class="player-card" href="${playerUrl(p)}">
       <div class="player-jersey">#${p.pick}</div>
       <div style="flex:1">
         <div class="player-name">${p.first_name} ${p.last_name}</div>
@@ -43,7 +43,7 @@ function renderPick(p) {
         ${ratingBadge}
         <div style="display:flex;align-items:center;gap:6px">${teamBadge}</div>
       </div>
-    </div>
+    </a>
   `;
 }
 
@@ -60,8 +60,6 @@ async function loadDraft() {
       return;
     }
 
-    const allPlayers = data.rounds.flatMap((round) => round.players);
-
     container.innerHTML = data.rounds.map((round) => `
       <div style="margin-bottom:28px">
         <h3 style="margin-bottom:12px">Ronda ${round.round}</h3>
@@ -70,14 +68,6 @@ async function loadDraft() {
         </div>
       </div>
     `).join('');
-
-    container.querySelectorAll('.player-card').forEach((card) => {
-      const player = allPlayers.find((p) => String(p.id) === card.dataset.id);
-      card.addEventListener('click', () => {
-        if (player.isActive) showPlayerStats(player);
-        else showRetiredPlayerCard(player);
-      });
-    });
   } catch (err) {
     container.innerHTML = '<p class="error-msg">No se pudo cargar el draft.</p>';
   }

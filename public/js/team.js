@@ -164,7 +164,7 @@ async function loadTeam() {
     if (team) injectTeamJsonLd(team, players);
 
     container.innerHTML = players.map((p) => `
-      <div class="player-card" data-id="${p.id}">
+      <a class="player-card" href="${playerUrl(p)}">
         <div class="player-jersey">${p.jersey_number ? '#' + p.jersey_number : '—'}</div>
         <div style="flex:1">
           <div class="player-name">${p.first_name} ${p.last_name}</div>
@@ -174,13 +174,8 @@ async function loadTeam() {
           ${p.rating2k ? `<span class="pill" style="padding:2px 8px;font-size:0.7rem;color:${rating2kColor(p.rating2k)};border-color:${rating2kColor(p.rating2k)}66">${p.rating2k}</span>` : ''}
           ${p.salary ? `<div class="player-meta" style="font-weight:700;color:var(--accent)">${formatMoney(p.salary)}</div>` : ''}
         </div>
-      </div>
+      </a>
     `).join('');
-
-    container.querySelectorAll('.player-card').forEach((card) => {
-      const player = players.find((p) => String(p.id) === card.dataset.id);
-      card.addEventListener('click', () => showPlayerStats(player));
-    });
 
     document.getElementById('team-ad-slot').innerHTML = renderAdSlot('teamFooter');
     activateAdSlots();

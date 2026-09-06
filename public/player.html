@@ -3,19 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Equipos NBA 2025-26 - Plantillas, salarios y valoración 2K</title>
-<meta name="description" content="Los 30 equipos de baloncesto NBA con su plantilla actual, estadísticas NBA, salarios de jugadores y valoración NBA 2K de cada uno. Clasificación, fundación y títulos de cada franquicia.">
+<title id="page-title">El Rompearos - Ficha de jugador NBA</title>
+<meta id="meta-description" name="description" content="Estadísticas, contrato y ficha de jugadores de la NBA: temporada actual e histórico de toda su carrera.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.elrompearos.com/teams.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.elrompearos.com/teams.html">
 <meta property="og:site_name" content="El Rompearos">
 <meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Equipos NBA 2025-26 - Plantillas y salarios">
-<meta property="og:description" content="Consulta la plantilla, salarios y valoración 2K de los 30 equipos de la NBA.">
+<meta id="og-title" property="og:title" content="Ficha de jugador NBA">
+<meta id="og-description" property="og:description" content="Estadísticas, contrato y ficha de jugadores de la NBA.">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Equipos NBA 2025-26">
-<meta name="twitter:description" content="Consulta la plantilla, salarios y valoración 2K de los 30 equipos de la NBA.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,14 +37,20 @@
 </header>
 
 <main>
-  <div class="page-head">
-    <h1 class="visually-hidden">Equipos NBA</h1>
-    <p class="visually-hidden">Consulta la plantilla, estadísticas NBA y salarios de cualquier jugador de baloncesto de los 30 equipos de la NBA, además de su historia, fundación y títulos.</p>
+  <a class="back-link" href="/teams.html">&larr; Volver a equipos</a>
+
+  <div id="player-hero" class="team-hero">
+    <p class="state-msg">Cargando jugador...</p>
   </div>
-  <div id="teams-container" class="grid-teams">
-    <p class="state-msg">Cargando equipos...</p>
-  </div>
+
+  <div id="player-contract" style="margin-top:20px"></div>
+
+  <div id="player-stats" style="margin-top:20px"></div>
+
+  <div id="player-ad-slot"></div>
 </main>
+
+<div id="modal-root"></div>
 
 <footer class="site-footer">
   Datos vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
@@ -59,12 +61,12 @@
 <script src="/js/navToggle.js"></script>
 <script src="/js/teamColors.js"></script>
 <script src="/js/teamLogos.js"></script>
-<script src="/js/playerLinks.js"></script>
 <script src="/js/cookieConsent.js"></script>
 <script src="/js/analytics.js"></script>
 <script src="/js/ads.js"></script>
 <script src="/js/playerModal.js"></script>
+<script src="/js/playerLinks.js"></script>
 <script src="/js/search.js"></script>
-<script src="/js/teams.js"></script>
+<script src="/js/player.js"></script>
 </body>
 </html>
