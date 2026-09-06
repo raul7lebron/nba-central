@@ -171,6 +171,12 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   body.standings-page table.stats-table { min-width: unset; }
   body.standings-page .team-full-name { display: none; }
   body.standings-page .team-abbr-name { display: inline; }
+
+  /* ficha de jugador: menos aire entre columnas de estadisticas para que
+     haga falta menos scroll horizontal en movil */
+  body.player-page table.stats-table th,
+  body.player-page table.stats-table td { padding: 6px 5px; font-size: 0.78rem; }
+  body.player-page table.stats-table:not(.contract-table) { min-width: 620px; }
 }
 
 .team-abbr-name { display: none; }
