@@ -110,7 +110,7 @@ function renderContractTable(contract, currentSalary) {
 
   return `
     <div class="table-scroll">
-      <table class="stats-table">
+      <table class="stats-table contract-table">
         <thead><tr><th>Temporada</th><th>Salario</th><th>Opción</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>

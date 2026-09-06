@@ -578,6 +578,11 @@ table.stats-table {
   font-size: 0.85rem;
 }
 
+/* La tabla de contrato solo tiene 3 columnas (temporada, salario, opción):
+   con el min-width de 700px de la tabla de estadísticas se veía cortada y
+   pedía scroll horizontal para nada. Cabe entera sin scroll. */
+table.stats-table.contract-table { min-width: unset; }
+
 table.stats-table th, table.stats-table td {
   border-bottom: 1px solid var(--border);
   padding: 9px 10px;
