@@ -4,7 +4,7 @@
 // (G-XXXXXXXXXX), pegalo aqui y el seguimiento se activa solo, respetando
 // el mismo consentimiento de cookies que ya usa AdSense.
 const ANALYTICS_CONFIG = {
-  measurementId: '' // ej. 'G-XXXXXXXXXX'
+  measurementId: 'G-2LZHNEBGZ5'
 };
 
 function analyticsEnabled() {
