@@ -59,14 +59,19 @@ function renderPlayerHero(player) {
       ? `<span class="pill">Mejor 2K de su carrera: <span style="color:${rating2kColor(player.peakRating2k)};font-weight:700">${player.peakRating2k}</span></span>`
       : '');
 
+  const salaryPill = player.isActive && player.salary
+    ? `<span class="pill">Salario ${formatMoney(player.salary)} (temporada actual)</span>`
+    : '';
+
   heroEl.innerHTML = `
     <div style="flex:1">
       <h1>${player.first_name} ${player.last_name}</h1>
-      <p class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</p>
-      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+      <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
         ${teamLine}
         ${draftPill}
         ${ratingPill}
+        ${salaryPill}
       </div>
     </div>
   `;
@@ -120,8 +125,8 @@ async function loadPlayer() {
 
     updateSeoForPlayer(player);
     renderPlayerHero(player);
-    renderPlayerContract(player);
     renderPlayerStats(player);
+    renderPlayerContract(player);
 
     document.getElementById('player-ad-slot').innerHTML = renderAdSlot('teamFooter');
     activateAdSlots();
