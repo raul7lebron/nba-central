@@ -137,7 +137,7 @@ node src/refreshAll.js salaries   # solo salarios
   acumular desde que se activó esta función, tardará 6 meses reales en cubrir
   la ventana completa.
 
-## 8. Valoración NBA 2K y publicidad
+## 8. Valoración NBA 2K, publicidad y analítica
 
 - **Valoración 2K**: viene de [nba2kapi.com](https://www.nba2kapi.com), una
   API gratuita dedicada a esto (hace falta registrarse y añadir
@@ -153,6 +153,13 @@ node src/refreshAll.js salaries   # solo salarios
   (se oculta en pantallas de menos de 1500px para no molestar). En cuanto
   tengas tu ID de editor (`ca-pub-...`) y los IDs de bloque, rellena
   `ADSENSE_CONFIG` en `public/js/ads.js` y los huecos se activan solos.
+- **Analítica (Google Analytics)**: preparado en `public/js/analytics.js`,
+  también **vacío por defecto**. Crea una propiedad GA4 en
+  https://analytics.google.com, copia el ID de medición (`G-XXXXXXXXXX`) y
+  rellena `ANALYTICS_CONFIG.measurementId` — el script de `gtag.js` se carga
+  solo a partir de ahí. Igual que AdSense, respeta el banner de cookies
+  (`public/js/cookieConsent.js`): no se carga nada hasta que el usuario
+  acepta, y `public/cookies.html` ya lista esta cookie de terceros.
 
 ## 9. Tienda de afiliados
 

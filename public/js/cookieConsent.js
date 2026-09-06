@@ -28,9 +28,10 @@ function cookieConsentGranted() {
 
 function injectCookieBanner() {
   if (getCookieConsent()) {
-    // ya hay una decision guardada: si acepto, activamos publicidad ahora
-    if (cookieConsentGranted() && typeof activateAdSlots === 'function') {
-      activateAdSlots();
+    // ya hay una decision guardada: si acepto, activamos publicidad y analitica ahora
+    if (cookieConsentGranted()) {
+      if (typeof activateAdSlots === 'function') activateAdSlots();
+      if (typeof activateAnalytics === 'function') activateAnalytics();
     }
     return;
   }
@@ -56,6 +57,7 @@ function injectCookieBanner() {
     setCookieConsent('accepted');
     banner.remove();
     if (typeof activateAdSlots === 'function') activateAdSlots();
+    if (typeof activateAnalytics === 'function') activateAnalytics();
   });
 
   document.getElementById('cookie-reject').addEventListener('click', () => {
