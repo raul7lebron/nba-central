@@ -36,6 +36,12 @@ function computeValoracion(row) {
   return val;
 }
 
+// balldontlie da las medias con hasta 3 decimales (ej. 20.821); con uno
+// solo (20.8) se lee igual de bien y la tabla ocupa menos ancho.
+function formatStat(value) {
+  return value != null ? Number(value).toFixed(1) : '-';
+}
+
 function renderStatsTable(history) {
   if (!history || !history.length) {
     return '<p class="state-msg">No hay estadísticas de temporadas disponibles para este jugador.</p>';
@@ -46,11 +52,11 @@ function renderStatsTable(history) {
       <td>${row.season}-${String(row.season + 1).slice(2)}</td>
       <td>${row.games_played ?? '-'}</td>
       <td>${row.min ?? '-'}</td>
-      <td>${row.pts ?? '-'}</td>
-      <td>${row.reb ?? '-'}</td>
-      <td>${row.ast ?? '-'}</td>
-      <td>${row.stl ?? '-'}</td>
-      <td>${row.blk ?? '-'}</td>
+      <td>${formatStat(row.pts)}</td>
+      <td>${formatStat(row.reb)}</td>
+      <td>${formatStat(row.ast)}</td>
+      <td>${formatStat(row.stl)}</td>
+      <td>${formatStat(row.blk)}</td>
       <td>${row.fg_pct != null ? (row.fg_pct * 100).toFixed(1) + '%' : '-'}</td>
       <td>${row.fg3_pct != null ? (row.fg3_pct * 100).toFixed(1) + '%' : '-'}</td>
       <td style="font-weight:700;color:var(--accent)">${computeValoracion(row).toFixed(1)}</td>
