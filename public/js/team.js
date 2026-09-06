@@ -75,7 +75,7 @@ function renderHero(team, teamId) {
 // para SEO que un titulo igual en las 30 paginas de equipo).
 function updateSeoForTeam(team) {
   const title = `${team.full_name} - Plantilla, salarios y valoración 2K | El Rompearos`;
-  const description = `Plantilla actual de ${team.full_name}: estadísticas, salarios y valoración NBA 2K de cada jugador. ${team.conference}ern Conference, división ${team.division}.`;
+  const description = `Plantilla actual de ${team.full_name}: estadísticas NBA, salarios y valoración NBA 2K de cada jugador de baloncesto. ${team.conference}ern Conference, división ${team.division}.`;
 
   document.title = title;
   document.getElementById('page-title').textContent = title;
@@ -93,7 +93,12 @@ function updateSeoForTeam(team) {
   ogUrl.setAttribute('property', 'og:url');
   ogUrl.setAttribute('content', canonicalUrl);
   document.head.appendChild(ogUrl);
+}
 
+// Se llama por separado (no en updateSeoForTeam) porque necesita la plantilla,
+// que llega despues del equipo. Listar a cada jugador como "athlete" ayuda a
+// que Google asocie su nombre con esta pagina, ya que no tienen URL propia.
+function injectTeamJsonLd(team, players) {
   const ldJson = document.createElement('script');
   ldJson.type = 'application/ld+json';
   ldJson.textContent = JSON.stringify({
@@ -104,7 +109,12 @@ function updateSeoForTeam(team) {
     memberOf: {
       '@type': 'SportsOrganization',
       name: 'National Basketball Association'
-    }
+    },
+    athlete: players.map((p) => ({
+      '@type': 'Person',
+      name: `${p.first_name} ${p.last_name}`,
+      ...(p.position ? { jobTitle: p.position } : {})
+    }))
   });
   document.head.appendChild(ldJson);
 }
@@ -151,6 +161,7 @@ async function loadTeam() {
     }
 
     players.sort((a, b) => a.last_name.localeCompare(b.last_name));
+    if (team) injectTeamJsonLd(team, players);
 
     container.innerHTML = players.map((p) => `
       <div class="player-card" data-id="${p.id}">
