@@ -160,7 +160,14 @@ async function loadTeam() {
       return;
     }
 
-    players.sort((a, b) => a.last_name.localeCompare(b.last_name));
+    // De mayor a menor valoracion 2K; los que no tienen valoracion van al
+    // final, ordenados por apellido entre ellos.
+    players.sort((a, b) => {
+      if (a.rating2k != null && b.rating2k != null) return b.rating2k - a.rating2k;
+      if (a.rating2k != null) return -1;
+      if (b.rating2k != null) return 1;
+      return a.last_name.localeCompare(b.last_name);
+    });
     if (team) injectTeamJsonLd(team, players);
 
     container.innerHTML = players.map((p) => `
