@@ -10,6 +10,7 @@ const {
 const { fetchAllNews } = require('./news');
 const { getTeamSalaries } = require('./salaries');
 const { getAllPlayerRatings } = require('./ratings2k');
+const { getBirthYearsForPlayers } = require('./birthYear');
 const { updateTransactionsArchive } = require('./transactions');
 
 function sleep(ms) {
@@ -77,6 +78,17 @@ async function refreshRatings2k() {
   console.log(`[refresh] ${ratings.length} valoraciones 2K actualizadas.`);
 }
 
+// El año de nacimiento no cambia nunca: se refresca en el cron semanal,
+// junto con salarios/2K/draft. Solo se busca para plantillas activas.
+async function refreshBirthYears() {
+  console.log('[refresh] descargando años de nacimiento (Wikidata)...');
+  const rosters = readCache('rosters', {});
+  const players = Object.values(rosters).flat();
+  const birthYears = await getBirthYearsForPlayers(players);
+  writeCache('birth_years', birthYears);
+  console.log(`[refresh] ${Object.keys(birthYears).length} de ${players.length} jugadores con año de nacimiento encontrado.`);
+}
+
 // No existe filtro por año de draft en la API: hay que traer el historial
 // COMPLETO de jugadores de cada equipo (no solo /active) y quedarse con los
 // que tengan draft_year. Se ejecuta en el cron semanal (no cambia a diario,
@@ -127,6 +139,7 @@ if (require.main === module) {
   const task =
     mode === 'salaries' ? refreshSalaries() :
     mode === 'ratings2k' ? refreshRatings2k() :
+    mode === 'birthyears' ? refreshBirthYears() :
     mode === 'draft' ? refreshDraftArchive() :
     mode === 'games' ? refreshCurrentSeasonGames() :
     refreshAll();
@@ -147,6 +160,7 @@ module.exports = {
   refreshTeamsAndRosters,
   refreshSalaries,
   refreshRatings2k,
+  refreshBirthYears,
   refreshDraftArchive,
   refreshCurrentSeasonGames
 };

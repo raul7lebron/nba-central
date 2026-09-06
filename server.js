@@ -9,7 +9,7 @@ const {
   getGamesForSeason,
   currentSeasonYear
 } = require('./src/balldontlie');
-const { refreshAll, refreshSalaries, refreshRatings2k, refreshDraftArchive } = require('./src/refreshAll');
+const { refreshAll, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshDraftArchive } = require('./src/refreshAll');
 const { startScheduler } = require('./src/scheduler');
 const { getTeamInfo } = require('./src/teamInfo');
 const { normalizeName, LEAGUE_SALARY_CAP_2025_26 } = require('./src/salaries');
@@ -101,7 +101,9 @@ function buildPlayerEnrichmentMaps() {
   );
   const peakRatingByName = getPeakRatingByName(allRatings);
 
-  return { activeIds, salaryByName, currentRatingByName, peakRatingByName };
+  const birthYearByName = readCache('birth_years', {});
+
+  return { activeIds, salaryByName, currentRatingByName, peakRatingByName, birthYearByName };
 }
 
 function enrichPlayer(p, maps) {
@@ -110,6 +112,7 @@ function enrichPlayer(p, maps) {
   const salaryMatch = maps.salaryByName.get(normalizeName(fullName));
   const currentRatingMatch = maps.currentRatingByName.get(normalize2kName(fullName));
   const peakRatingMatch = maps.peakRatingByName.get(normalize2kName(fullName));
+  const birthYear = maps.birthYearByName[normalizeName(fullName)] || null;
 
   return {
     id: p.id,
@@ -128,7 +131,8 @@ function enrichPlayer(p, maps) {
     salary: isActive && salaryMatch ? salaryMatch.salary : null,
     contract: isActive && salaryMatch ? salaryMatch.contract : null,
     rating2k: isActive && currentRatingMatch ? currentRatingMatch.overall : null,
-    peakRating2k: peakRatingMatch ? peakRatingMatch.overall : null
+    peakRating2k: peakRatingMatch ? peakRatingMatch.overall : null,
+    birthYear
   };
 }
 
@@ -164,6 +168,8 @@ app.get('/api/teams/:id/players', (req, res) => {
   const ratings2kCurrent = readCache('ratings2k', []).filter((r) => r.teamType === 'curr');
   const ratingByName = new Map(ratings2kCurrent.map((r) => [r.normalizedName, r]));
 
+  const birthYearByName = readCache('birth_years', {});
+
   const enriched = players.map((p) => {
     const fullName = `${p.first_name} ${p.last_name}`;
     const salaryMatch = salaryByName.get(normalizeName(fullName));
@@ -172,7 +178,8 @@ app.get('/api/teams/:id/players', (req, res) => {
       ...p,
       salary: salaryMatch ? salaryMatch.salary : null,
       contract: salaryMatch ? salaryMatch.contract : null,
-      rating2k: ratingMatch ? ratingMatch.overall : null
+      rating2k: ratingMatch ? ratingMatch.overall : null,
+      birthYear: birthYearByName[normalizeName(fullName)] || null
     };
   });
 
@@ -418,5 +425,9 @@ app.listen(PORT, async () => {
   if (!readCache('draft_archive')) {
     console.log('[startup] no hay cache de draft, lanzando refresco...');
     refreshDraftArchive().catch((err) => console.error('[startup] fallo refresco de draft:', err.message));
+  }
+  if (!readCache('birth_years')) {
+    console.log('[startup] no hay cache de años de nacimiento, lanzando refresco...');
+    refreshBirthYears().catch((err) => console.error('[startup] fallo refresco de años de nacimiento:', err.message));
   }
 });

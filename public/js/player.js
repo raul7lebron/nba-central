@@ -66,7 +66,7 @@ function renderPlayerHero(player) {
   heroEl.innerHTML = `
     <div style="flex:1">
       <h1>${player.first_name} ${player.last_name}</h1>
-      <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>
+      <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.birthYear ? ' · ' + player.birthYear : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
         ${teamLine}
         ${draftPill}

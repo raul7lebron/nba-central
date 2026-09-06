@@ -175,7 +175,7 @@ async function loadTeam() {
         <div class="player-jersey">${p.jersey_number ? '#' + p.jersey_number : '—'}</div>
         <div style="flex:1">
           <div class="player-name">${p.first_name} ${p.last_name}</div>
-          <div class="player-meta">${p.position || 'N/D'}${p.height ? ' · ' + p.height : ''}${p.weight ? ' · ' + p.weight + ' lb' : ''}</div>
+          <div class="player-meta">${p.position || 'N/D'}${p.height ? ' · ' + p.height : ''}${p.weight ? ' · ' + p.weight + ' lb' : ''}${p.birthYear ? ' · ' + p.birthYear : ''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           ${p.rating2k ? `<span class="pill" style="padding:2px 8px;font-size:0.7rem;color:${rating2kColor(p.rating2k)};border-color:${rating2kColor(p.rating2k)}66">${p.rating2k}</span>` : ''}

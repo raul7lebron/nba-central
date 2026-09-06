@@ -54,8 +54,9 @@ Mientras el proceso `npm start` esté corriendo, tres tareas programadas
 
 - **06:00 cada día**: refresca equipos, plantillas y noticias.
 - **Cada 30 minutos**: refresca solo noticias.
-- **Domingos 07:00**: refresca salarios, valoraciones 2K y el archivo de
-  draft (todos cambian poco, no hace falta más frecuencia).
+- **Domingos 07:00**: refresca salarios, valoraciones 2K, el archivo de
+  draft y años de nacimiento (todos cambian poco, no hace falta más
+  frecuencia).
 
 Si quieres forzar un refresco manual sin esperar al cron:
 
@@ -91,6 +92,17 @@ node src/refreshAll.js salaries   # solo salarios
   que están en una tabla estática en `src/teamInfo.js`, verificada a fecha de
   la temporada 2024-25. Si un equipo gana un título nuevo, hay que sumarlo ahí
   a mano.
+- **Año de nacimiento**: tampoco lo da ninguna API de baloncesto conectada.
+  `src/birthYear.js` lo busca en Wikidata (público, sin API key): busca al
+  jugador por nombre y solo acepta el resultado si su descripción menciona
+  "basketball", para no confundirlo con otra persona del mismo nombre. Si no
+  encuentra un match seguro, no se muestra el dato en vez de arriesgarse a
+  que sea el de otra persona. Solo se busca para plantillas activas, en el
+  cron semanal junto con salarios/2K/draft. **No se pudo probar el acceso
+  real a wikidata.org** al escribir esto (sin salida a internet desde ese
+  entorno) — revisa el log `[refresh] N de M jugadores con año de nacimiento
+  encontrado` tras el primer refresco en producción; si N es muy bajo,
+  revisa el emparejamiento en `findPlayerEntityId`.
 - **Noticias del equipo**: el botón "Noticias del equipo" en la página de
   plantilla filtra la caché de noticias por el apodo del equipo (ej.
   "Lakers"). No hace falta una fuente nueva, reutiliza `data/news.json`.
@@ -260,6 +272,7 @@ src/playoffs.js        Reconstrucción de series/rondas de playoffs
 src/salaries.js        Scraper de contratos de HoopsHype + tope salarial
 src/playerSlug.js       Slug de la URL de jugador (servidor, para el sitemap)
 src/ratings2k.js        Cliente de nba2kapi.com (valoraciones NBA 2K)
+src/birthYear.js        Año de nacimiento vía Wikidata (por nombre)
 src/teamInfo.js         Tabla estática de fundación/campeonatos por equipo
 src/news.js             Agregador de RSS (Marca, AS, Mundo Deportivo, Sport, Gigantes del Basket)
 src/transactions.js     Detección de fichajes/traspasos por palabras clave

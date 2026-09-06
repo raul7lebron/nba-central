@@ -1,5 +1,5 @@
 const cron = require('node-cron');
-const { refreshAll, refreshNews, refreshSalaries, refreshRatings2k, refreshDraftArchive } = require('./refreshAll');
+const { refreshAll, refreshNews, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshDraftArchive } = require('./refreshAll');
 
 function startScheduler() {
   // Equipos, plantillas y noticias completas: todos los dias a las 06:00
@@ -32,7 +32,13 @@ function startScheduler() {
     refreshDraftArchive().catch((err) => console.error('[cron] error refresco draft:', err));
   });
 
-  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft domingos 07:00');
+  // Año de nacimiento (Wikidata): no cambia nunca, semanal como el resto
+  cron.schedule('0 7 * * 0', () => {
+    console.log('[cron] refresco semanal de años de nacimiento');
+    refreshBirthYears().catch((err) => console.error('[cron] error refresco años de nacimiento:', err));
+  });
+
+  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft/nacimientos domingos 07:00');
 }
 
 module.exports = { startScheduler };
