@@ -86,7 +86,7 @@ function renderPlayerContract(player) {
 async function renderPlayerStats(player) {
   const el = document.getElementById('player-stats');
   el.innerHTML = `
-    <h2>${player.isActive ? 'Estadísticas por temporada' : 'Estadísticas de toda su carrera'}</h2>
+    <h2>${player.isActive ? 'Historial por temporada' : 'Estadísticas de toda su carrera'}</h2>
     <div id="player-stats-body"><p class="state-msg">Cargando estadísticas...</p></div>
   `;
   const body = document.getElementById('player-stats-body');
