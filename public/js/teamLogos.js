@@ -8,11 +8,12 @@ const TEAM_LOGO_SLUGS = {
   POR: 'por', SAC: 'sac', SAS: 'sa', TOR: 'tor', UTA: 'utah', WAS: 'wsh'
 };
 
-// Timberwolves y Bucks: logos personalizados servidos localmente en vez
-// del oficial de ESPN.
+// Timberwolves, Bucks y Magic: logos personalizados servidos localmente en
+// vez del oficial de ESPN.
 const TEAM_LOGO_OVERRIDES = {
   MIN: '/img/logo-min.webp',
-  MIL: '/img/logo-mil.png'
+  MIL: '/img/logo-mil.png',
+  ORL: '/img/logo-orl.png'
 };
 
 function teamLogoUrl(abbreviation) {
