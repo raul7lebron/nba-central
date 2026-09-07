@@ -72,9 +72,12 @@ async function runSearch(slotKey, q, resultsEl) {
 function renderPlayerCard(slotKey) {
   const player = slots[slotKey].player;
   const el = document.getElementById(`slot-${slotKey}`);
+  // Se reserva el hueco de la foto aunque no la tenga (div vacio del mismo
+  // tamaño), para que el nombre y los datos de los dos jugadores empiecen
+  // siempre a la misma altura, tenga foto o no cada uno.
   const photoHtml = player.photoUrl
-    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="90" height="90" loading="lazy" onerror="this.remove()">`
-    : '';
+    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="90" height="90" loading="lazy" onerror="this.outerHTML='<div class=&quot;player-photo&quot;></div>'">`
+    : '<div class="player-photo"></div>';
 
   el.innerHTML = `
     <div class="compare-card">
