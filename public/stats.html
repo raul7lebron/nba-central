@@ -3,14 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title id="page-title">El Rompearos - Ficha de jugador NBA</title>
-<meta id="meta-description" name="description" content="Estadísticas, contrato y ficha de jugadores de la NBA: temporada actual e histórico de toda su carrera.">
+<title>Estadísticas NBA 2025-26 - Líderes por valoración, puntos y más</title>
+<meta name="description" content="Los 50 mejores jugadores de baloncesto NBA de la temporada en curso, ordenados por valoración, puntos, rebotes, asistencias o cualquier otra estadística. Se actualiza automáticamente cada día.">
 <meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.elrompearos.com/stats.html">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://www.elrompearos.com/stats.html">
 <meta property="og:site_name" content="El Rompearos">
 <meta property="og:locale" content="es_ES">
-<meta id="og-title" property="og:title" content="Ficha de jugador NBA">
-<meta id="og-description" property="og:description" content="Estadísticas, contrato y ficha de jugadores de la NBA.">
+<meta property="og:title" content="Estadísticas NBA - Líderes de la temporada">
+<meta property="og:description" content="Los 50 mejores jugadores NBA de la temporada en curso, ordenados por la estadística que elijas.">
 <meta name="twitter:card" content="summary">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,7 +20,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="player-page">
+<body class="stats-page">
 <header class="site-header">
   <a class="brand" href="/index.html">
     <span class="brand-mark"><img src="/img/brand-mark.jpg" alt="" width="44" height="44"></span>
@@ -26,9 +28,9 @@
   </a>
   <nav class="site-nav">
     <a href="/index.html">Noticias</a>
-    <a href="/teams.html" class="active">Equipos</a>
+    <a href="/teams.html">Equipos</a>
     <a href="/standings.html">Clasificación</a>
-    <a href="/stats.html">Estadísticas</a>
+    <a href="/stats.html" class="active">Estadísticas</a>
     <a href="/calendar.html">Calendario</a>
     <a href="/playoffs.html">Playoffs</a>
     <a href="/draft.html">Draft</a>
@@ -38,36 +40,31 @@
 </header>
 
 <main>
-  <a class="back-link" href="/teams.html">&larr; Volver a equipos</a>
-
-  <div id="player-hero" class="team-hero player-hero">
-    <p class="state-msg">Cargando jugador...</p>
+  <div class="page-head">
+    <h1 class="visually-hidden">Estadísticas NBA</h1>
+    <p class="visually-hidden">Top 50 jugadores de baloncesto NBA de la temporada en curso, ordenados por valoración, puntos, rebotes, asistencias, robos, tapones o porcentajes de tiro.</p>
+    <div id="stats-toolbar" style="margin-top:10px"></div>
   </div>
-
-  <div id="player-stats" style="margin-top:14px"></div>
-
-  <div id="player-contract" style="margin-top:14px"></div>
-
-  <div id="player-ad-slot"></div>
+  <div id="stats-container">
+    <p class="state-msg">Cargando estadísticas...</p>
+  </div>
 </main>
 
-<div id="modal-root"></div>
-
 <footer class="site-footer">
-  Datos vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
-  · Logos vía <a href="https://www.espn.com" target="_blank" rel="noopener">ESPN</a>
+  Estadísticas vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>,
+  medias por partido de la temporada en curso. Se actualiza a diario.
   <br><a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a>
 </footer>
 
 <script src="/js/navToggle.js" defer></script>
 <script src="/js/teamColors.js" defer></script>
 <script src="/js/teamLogos.js" defer></script>
+<script src="/js/playerLinks.js" defer></script>
 <script src="/js/cookieConsent.js" defer></script>
 <script src="/js/analytics.js" defer></script>
 <script src="/js/ads.js" defer></script>
 <script src="/js/playerModal.js" defer></script>
-<script src="/js/playerLinks.js" defer></script>
 <script src="/js/search.js" defer></script>
-<script src="/js/player.js" defer></script>
+<script src="/js/stats.js" defer></script>
 </body>
 </html>

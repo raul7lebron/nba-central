@@ -130,6 +130,17 @@ node src/refreshAll.js salaries   # solo salarios
 - Ambas páginas comparten la caché `data/games_<temporada>.json`. La
   temporada en curso se refresca en el cron diario de las 06:00; las
   temporadas ya terminadas no hace falta refrescarlas nunca.
+- **Estadísticas / líderes de la temporada** (`/stats.html`): top 50
+  jugadores de la temporada en curso, ordenable por cualquier estadística
+  (valoración, puntos, rebotes, asistencias, robos, tapones, % de tiro,
+  minutos) sin recargar la página — el filtro solo reordena en el
+  navegador. `refreshSeasonLeaders()` (`src/refreshAll.js`) pide las medias
+  por partido (`/season_averages`) de cada jugador de plantilla activa vía
+  `getSeasonAveragesForPlayer`, usando el equipo que ya trae la plantilla
+  (así solo hace falta una llamada por jugador, no dos). Se ejecuta en el
+  cron diario de las 06:00, junto con partidos — los promedios cambian con
+  cada partido jugado. Solo entran jugadores con al menos un partido jugado
+  esta temporada; no incluye histórico de temporadas pasadas.
 
 ## 7. Playoffs, draft y mercado de fichajes
 
@@ -288,5 +299,6 @@ src/cache.js            Lectura/escritura de la caché en data/*.json
 public/js/ads.js        Configuración y huecos de Google AdSense
 public/js/playerLinks.js Slug de la URL de jugador (navegador, para enlaces)
 public/player.html      Ficha individual de jugador (/jugador/<slug>-<id>)
+public/stats.html       Top 50 lideres de la temporada, filtrable
 public/                 Frontend (HTML/CSS/JS vanilla)
 ```

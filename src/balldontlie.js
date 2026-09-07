@@ -187,6 +187,7 @@ module.exports = {
   getPlayersForTeam,
   getPlayerStatsHistory,
   getPlayerCareerStatsHistory,
+  getSeasonAveragesForPlayer,
   getGamesForSeason,
   getFullPlayerHistoryForTeam,
   currentSeasonYear

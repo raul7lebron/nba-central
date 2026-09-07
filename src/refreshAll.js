@@ -5,6 +5,7 @@ const {
   getPlayersForTeam,
   getGamesForSeason,
   getFullPlayerHistoryForTeam,
+  getSeasonAveragesForPlayer,
   currentSeasonYear
 } = require('./balldontlie');
 const { fetchAllNews } = require('./news');
@@ -127,10 +128,44 @@ async function refreshCurrentSeasonGames() {
   console.log(`[refresh] ${games.length} partidos actualizados.`);
 }
 
+// Medias de la temporada en curso de cada jugador de plantilla activa, para
+// la pagina de estadisticas/lideres. Se apoya en la plantilla ya descargada
+// (un jugador ya trae su equipo actual ahi), asi que solo hace falta una
+// llamada por jugador en vez de dos. Se ejecuta a diario porque las medias
+// cambian con cada partido jugado.
+async function refreshSeasonLeaders() {
+  const season = currentSeasonYear();
+  console.log(`[refresh] descargando estadisticas de lideres de la temporada ${season}...`);
+  const rosters = readCache('rosters', {});
+  const players = Object.values(rosters).flat();
+
+  const leaders = [];
+  for (const p of players) {
+    try {
+      const rows = await getSeasonAveragesForPlayer(p.id, season);
+      if (rows && rows.error === 'PAID_TIER_REQUIRED') {
+        console.error('[refresh] /season_averages requiere el plan de pago ALL-STAR o superior; cancelando lideres de temporada.');
+        return;
+      }
+      if (rows && rows.length > 0 && rows[0].games_played > 0) {
+        leaders.push({ id: p.id, first_name: p.first_name, last_name: p.last_name, team: p.team || null, ...rows[0] });
+      }
+    } catch (err) {
+      // jugador sin datos todavia (lesionado, recien fichado, sin minutos jugados...)
+    }
+    await sleep(700);
+  }
+
+  writeCache('season_leaders', leaders);
+  writeCache('season_leaders_meta', { season, lastRefresh: new Date().toISOString() });
+  console.log(`[refresh] ${leaders.length} de ${players.length} jugadores con estadisticas de la temporada ${season}.`);
+}
+
 async function refreshAll() {
   await refreshNews();
   await refreshTeamsAndRosters();
   await refreshCurrentSeasonGames();
+  await refreshSeasonLeaders();
   writeCache('meta', { lastFullRefresh: new Date().toISOString() });
 }
 
@@ -140,6 +175,7 @@ if (require.main === module) {
     mode === 'salaries' ? refreshSalaries() :
     mode === 'ratings2k' ? refreshRatings2k() :
     mode === 'birthyears' ? refreshBirthYears() :
+    mode === 'leaders' ? refreshSeasonLeaders() :
     mode === 'draft' ? refreshDraftArchive() :
     mode === 'games' ? refreshCurrentSeasonGames() :
     refreshAll();
@@ -161,6 +197,7 @@ module.exports = {
   refreshSalaries,
   refreshRatings2k,
   refreshBirthYears,
+  refreshSeasonLeaders,
   refreshDraftArchive,
   refreshCurrentSeasonGames
 };

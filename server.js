@@ -10,7 +10,7 @@ const {
   getGamesForSeason,
   currentSeasonYear
 } = require('./src/balldontlie');
-const { refreshAll, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshDraftArchive } = require('./src/refreshAll');
+const { refreshAll, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshSeasonLeaders, refreshDraftArchive } = require('./src/refreshAll');
 const { startScheduler } = require('./src/scheduler');
 const { getTeamInfo } = require('./src/teamInfo');
 const { normalizeName, LEAGUE_SALARY_CAP_2025_26 } = require('./src/salaries');
@@ -62,7 +62,7 @@ const SITE_URL = process.env.SITE_URL || 'https://www.elrompearos.com';
 
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
-    '/index.html', '/teams.html', '/standings.html', '/calendar.html',
+    '/index.html', '/teams.html', '/standings.html', '/stats.html', '/calendar.html',
     '/playoffs.html', '/draft.html', '/market.html', '/store.html'
   ];
   const teams = readCache('teams', []);
@@ -246,6 +246,16 @@ app.get('/api/transactions', (req, res) => {
 app.get('/api/seasons', (req, res) => {
   res.set('Cache-Control', 'public, max-age=3600');
   res.json({ current: currentSeasonYear(), earliest: EARLIEST_SEASON });
+});
+
+// Medias por partido de la temporada en curso, de todos los jugadores de
+// plantillas activas con al menos un partido jugado. Se refresca a diario
+// (refreshSeasonLeaders); el cliente ordena/filtra por la columna que
+// elija y se queda con el top 50, no hace falta paginar en el servidor.
+app.get('/api/stats/leaders', (req, res) => {
+  const leaders = readCache('season_leaders', []);
+  const meta = readCache('season_leaders_meta', { season: currentSeasonYear(), lastRefresh: null });
+  res.json({ season: meta.season, lastRefresh: meta.lastRefresh, leaders });
 });
 
 app.get('/api/draft/years', (req, res) => {
@@ -447,5 +457,9 @@ app.listen(PORT, async () => {
   if (!readCache('birth_years')) {
     console.log('[startup] no hay cache de años de nacimiento, lanzando refresco...');
     refreshBirthYears().catch((err) => console.error('[startup] fallo refresco de años de nacimiento:', err.message));
+  }
+  if (!readCache('season_leaders')) {
+    console.log('[startup] no hay cache de lideres de temporada, lanzando refresco...');
+    refreshSeasonLeaders().catch((err) => console.error('[startup] fallo refresco de lideres de temporada:', err.message));
   }
 });

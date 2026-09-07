@@ -177,6 +177,11 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   body.player-page table.stats-table th,
   body.player-page table.stats-table td { padding: 6px 5px; font-size: 0.78rem; }
   body.player-page table.stats-table:not(.contract-table) { min-width: 620px; }
+
+  /* lideres de estadisticas: mismo criterio que la ficha de jugador */
+  body.stats-page table.stats-table th,
+  body.stats-page table.stats-table td { padding: 6px 5px; font-size: 0.78rem; }
+  body.stats-page table.stats-table { min-width: 620px; }
 }
 
 .team-abbr-name { display: none; }
