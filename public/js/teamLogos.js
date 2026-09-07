@@ -10,8 +10,8 @@ const TEAM_LOGO_SLUGS = {
 
 // Timberwolves, Bucks, Magic, Grizzlies, Pelicans, Trail Blazers, Lakers,
 // Rockets, Mavericks, Suns, Clippers, Kings, Warriors, Nuggets, Pacers,
-// Wizards, Nets y Bulls: logos personalizados servidos localmente en vez
-// del oficial de ESPN.
+// Wizards, Nets, Bulls, Jazz y Pistons: logos personalizados servidos
+// localmente en vez del oficial de ESPN.
 const TEAM_LOGO_OVERRIDES = {
   MIN: '/img/logo-min.webp',
   MIL: '/img/logo-mil.png',
@@ -30,7 +30,9 @@ const TEAM_LOGO_OVERRIDES = {
   IND: '/img/logo-ind.png',
   WAS: '/img/logo-was.png',
   BKN: '/img/logo-bkn.png',
-  CHI: '/img/logo-chi.png'
+  CHI: '/img/logo-chi.png',
+  UTA: '/img/logo-uta.png',
+  DET: '/img/logo-det.png'
 };
 
 function teamLogoUrl(abbreviation) {
