@@ -721,19 +721,21 @@ table.stats-table tbody tr.playoff-row td {
 table.stats-table tbody tr.playoff-row:hover td { background: rgba(62, 207, 110, 0.22); }
 table.stats-table tbody tr.playoff-row:nth-of-type(8) td { border-bottom: 2px solid rgba(62, 207, 110, 0.5); }
 
-.back-link {
-  display: inline-flex;
+.breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 6px;
   margin-bottom: 20px;
   color: var(--text-dim);
-  text-decoration: none;
   font-weight: 600;
   font-size: 0.88rem;
-  transition: color 0.15s ease;
 }
 
-.back-link:hover { color: var(--accent); }
+.breadcrumb a { color: var(--text-dim); text-decoration: none; transition: color 0.15s ease; }
+.breadcrumb a:hover { color: var(--accent); }
+.breadcrumb .sep { color: var(--text-faint); }
+.breadcrumb [aria-current="page"] { color: var(--text); }
 
 /* ---------- Tienda ---------- */
 

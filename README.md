@@ -248,7 +248,23 @@ los propios programas de afiliados; no lo quites.
   histórico del draft se queda de momento fuera.
 - **Datos estructurados (JSON-LD)**: `WebSite` en la portada, `SportsTeam`
   (con cada jugador de la plantilla como `athlete`) en cada página de
-  equipo, `Person` en cada página de jugador.
+  equipo, `Person` en cada página de jugador, `ItemList`+`NewsArticle` para
+  las noticias de portada y del mercado de fichajes, y `BreadcrumbList` en
+  las páginas de equipo y jugador.
+- **Noticias como `<article>`**: cada tarjeta de noticia/fichaje
+  (`news.js`, `market.js`, modal de noticias de equipo en `team.js`) va
+  envuelta en un `<article>` semántico (con `display:contents` para no
+  afectar el layout de la cuadrícula). Además, `news.js` y `market.js`
+  inyectan un bloque `ItemList` de `NewsArticle` con los datos de cada
+  noticia (titular, imagen, fecha, URL y editor real) — atribuido siempre al
+  medio original (Marca, AS...), nunca como si fuera contenido propio, tal
+  y como hacen los agregadores de noticias habituales. Limitado a las 20
+  primeras noticias para no meter un bloque enorme en el `<head>`.
+- **Migas de pan (breadcrumbs)**: `team.html` y `player.html` (antes tenían
+  un simple enlace "&larr; Volver a equipos") muestran ahora una ruta de
+  navegación completa (Inicio &gt; Equipos &gt; Equipo [&gt; Jugador]) con su
+  `BreadcrumbList` a juego, para que Google pueda mostrar la ruta en el
+  resultado de búsqueda en vez de solo la URL.
 - **robots.txt y sitemap.xml**: `public/robots.txt` y la ruta dinámica
   `/sitemap.xml` (en `server.js`, incluye las 10 páginas fijas + las 30 de
   equipo + una por cada jugador de plantilla activa, con `<lastmod>`) ya

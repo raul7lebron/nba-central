@@ -86,6 +86,43 @@ function renderPlayerHero(player) {
   `;
 }
 
+// Migas de pan (Inicio > Equipos > Equipo > Nombre, o sin el equipo si no
+// se conoce) + su JSON-LD, para que Google pueda mostrar la ruta en el
+// resultado de busqueda.
+function updateBreadcrumb(player) {
+  const nav = document.getElementById('breadcrumb');
+  if (!nav) return;
+
+  const crumbs = [
+    { name: 'Inicio', url: 'https://www.elrompearos.com/', href: '/index.html' },
+    { name: 'Equipos', url: 'https://www.elrompearos.com/teams.html', href: '/teams.html' }
+  ];
+  if (player.currentTeam) {
+    crumbs.push({
+      name: player.currentTeam.full_name,
+      url: `https://www.elrompearos.com/team.html?id=${player.currentTeam.id}`,
+      href: `/team.html?id=${player.currentTeam.id}`
+    });
+  }
+  const playerName = `${player.first_name} ${player.last_name}`;
+
+  nav.innerHTML = crumbs.map((c) =>
+    `<a href="${c.href}">${c.name}</a> <span class="sep" aria-hidden="true">/</span>`
+  ).join('') + `<span aria-current="page">${playerName}</span>`;
+
+  const ldJson = document.createElement('script');
+  ldJson.type = 'application/ld+json';
+  ldJson.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      ...crumbs.map((c, i) => ({ '@type': 'ListItem', position: i + 1, name: c.name, item: c.url })),
+      { '@type': 'ListItem', position: crumbs.length + 1, name: playerName, item: `https://www.elrompearos.com${playerUrl(player)}` }
+    ]
+  });
+  document.head.appendChild(ldJson);
+}
+
 function renderPlayerContract(player) {
   const el = document.getElementById('player-contract');
   if (!player.contract || !player.contract.length) return;
@@ -133,6 +170,7 @@ async function loadPlayer() {
     const player = await res.json();
 
     updateSeoForPlayer(player);
+    updateBreadcrumb(player);
     renderPlayerHero(player);
     renderPlayerStats(player);
     renderPlayerContract(player);

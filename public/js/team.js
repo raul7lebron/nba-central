@@ -26,15 +26,17 @@ async function showTeamNews(team) {
     }
 
     body.innerHTML = `<div class="news-list">${news.map((item) => `
-      <a class="news-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
-        ${item.image ? `<img class="news-thumb" src="${item.image}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
-        <div class="news-body">
-          <span class="news-source">${item.source}</span>
-          <div class="news-title">${item.title}</div>
-          <div class="news-summary">${item.summary || ''}</div>
-          <div class="news-date">${formatDate(item.pubDate)}</div>
-        </div>
-      </a>
+      <article style="display:contents">
+        <a class="news-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
+          ${item.image ? `<img class="news-thumb" src="${item.image}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
+          <div class="news-body">
+            <span class="news-source">${item.source}</span>
+            <div class="news-title">${item.title}</div>
+            <div class="news-summary">${item.summary || ''}</div>
+            <div class="news-date">${formatDate(item.pubDate)}</div>
+          </div>
+        </a>
+      </article>
     `).join('')}</div>`;
   } catch (err) {
     body.innerHTML = '<p class="error-msg">No se pudieron cargar las noticias.</p>';
@@ -68,6 +70,32 @@ function renderHero(team, teamId) {
   document.getElementById('team-news-btn').addEventListener('click', () => showTeamNews(team));
   loadSalarySummary(teamId);
   updateSeoForTeam(team);
+  updateBreadcrumb(team);
+}
+
+// Migas de pan (Inicio > Equipos > Nombre) + su JSON-LD a juego, para que
+// Google pueda mostrar la ruta en el resultado de busqueda.
+function updateBreadcrumb(team) {
+  const nav = document.getElementById('breadcrumb');
+  if (!nav) return;
+  nav.innerHTML = `
+    <a href="/index.html">Inicio</a> <span class="sep" aria-hidden="true">/</span>
+    <a href="/teams.html">Equipos</a> <span class="sep" aria-hidden="true">/</span>
+    <span aria-current="page">${team.full_name}</span>
+  `;
+
+  const ldJson = document.createElement('script');
+  ldJson.type = 'application/ld+json';
+  ldJson.textContent = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Inicio', item: 'https://www.elrompearos.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Equipos', item: 'https://www.elrompearos.com/teams.html' },
+      { '@type': 'ListItem', position: 3, name: team.full_name, item: `https://www.elrompearos.com/team.html?id=${team.id}` }
+    ]
+  });
+  document.head.appendChild(ldJson);
 }
 
 // El titulo/descripcion base son genericos porque la pagina carga el equipo
