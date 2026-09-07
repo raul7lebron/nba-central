@@ -68,7 +68,7 @@ function renderPlayerHero(player) {
   // todos los jugadores tienen una; si no hay o falla al cargar, se omite
   // en vez de mostrar un hueco roto.
   const photoHtml = player.photoUrl
-    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="84" height="84" loading="lazy" onerror="this.remove()">`
+    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="120" height="120" loading="lazy" onerror="this.remove()">`
     : '';
 
   heroEl.innerHTML = `
