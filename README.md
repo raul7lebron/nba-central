@@ -147,6 +147,18 @@ node src/refreshAll.js salaries   # solo salarios
   cron diario de las 06:00, junto con partidos — los promedios cambian con
   cada partido jugado. Solo entran jugadores con al menos un partido jugado
   esta temporada; no incluye histórico de temporadas pasadas.
+- **Comparador de jugadores** (`/compare.html`): busca dos jugadores
+  cualquiera y compara sus estadísticas, cada uno en la temporada que
+  elijas por separado (no tienen que coincidir). El dato más alto de cada
+  fila se resalta en verde y el más bajo en rojo (empate = sin colorear,
+  redondeando antes de comparar para que dos valores que se ven iguales,
+  ej. "20.2" y "20.2", nunca salgan coloreados como si fueran distintos por
+  un resto de coma flotante). No hace falta ningún endpoint nuevo: la
+  búsqueda reutiliza `/api/players/search` y las temporadas
+  `/api/players/:id/career-stats` (si se sabe el año de draft, cubre toda
+  la carrera) o `/api/players/:id/stats` como respaldo para jugadores no
+  drafteados (solo las últimas 5 temporadas). Empieza por la foto (si la
+  tiene), nombre, posición, altura, peso y dónde fue elegido en el draft.
 
 ## 7. Playoffs, draft y mercado de fichajes
 
@@ -214,7 +226,7 @@ los propios programas de afiliados; no lo quites.
 
 ## 10. SEO
 
-- **Metadatos**: las 10 páginas tienen `<title>` y `<meta name="description">`
+- **Metadatos**: las 12 páginas tienen `<title>` y `<meta name="description">`
   únicos y orientados a búsqueda, más Open Graph y Twitter Card para que se
   vean bien al compartir. Las páginas de plantilla (`team.html`) y de
   jugador (`player.html`) actualizan su título/descripción por JavaScript en
@@ -238,7 +250,7 @@ los propios programas de afiliados; no lo quites.
   (con cada jugador de la plantilla como `athlete`) en cada página de
   equipo, `Person` en cada página de jugador.
 - **robots.txt y sitemap.xml**: `public/robots.txt` y la ruta dinámica
-  `/sitemap.xml` (en `server.js`, incluye las 8 páginas fijas + las 30 de
+  `/sitemap.xml` (en `server.js`, incluye las 10 páginas fijas + las 30 de
   equipo + una por cada jugador de plantilla activa, con `<lastmod>`) ya
   apuntan al dominio real (`www.elrompearos.com`),
   tanto en `robots.txt` como en el valor por defecto de `SITE_URL` en
@@ -306,5 +318,6 @@ public/js/ads.js        Configuración y huecos de Google AdSense
 public/js/playerLinks.js Slug de la URL de jugador (navegador, para enlaces)
 public/player.html      Ficha individual de jugador (/jugador/<slug>-<id>)
 public/stats.html       Top 50 lideres de la temporada, filtrable
+public/compare.html     Comparador de dos jugadores por temporada
 public/                 Frontend (HTML/CSS/JS vanilla)
 ```
