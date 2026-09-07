@@ -108,8 +108,9 @@ function buildPlayerEnrichmentMaps() {
 
   const birthYearByName = readCache('birth_years', {});
   const photoByName = readCache('player_photos', {});
+  const awardsByName = readCache('player_awards', {});
 
-  return { activeIds, salaryByName, currentRatingByName, peakRatingByName, birthYearByName, photoByName };
+  return { activeIds, salaryByName, currentRatingByName, peakRatingByName, birthYearByName, photoByName, awardsByName };
 }
 
 function enrichPlayer(p, maps) {
@@ -120,6 +121,7 @@ function enrichPlayer(p, maps) {
   const peakRatingMatch = maps.peakRatingByName.get(normalize2kName(fullName));
   const birthYear = maps.birthYearByName[normalizeName(fullName)] || null;
   const photoUrl = maps.photoByName[normalizeName(fullName)] || null;
+  const awards = maps.awardsByName[normalizeName(fullName)] || null;
 
   return {
     id: p.id,
@@ -140,7 +142,8 @@ function enrichPlayer(p, maps) {
     rating2k: isActive && currentRatingMatch ? currentRatingMatch.overall : null,
     peakRating2k: peakRatingMatch ? peakRatingMatch.overall : null,
     birthYear,
-    photoUrl
+    photoUrl,
+    awards
   };
 }
 

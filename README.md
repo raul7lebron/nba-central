@@ -106,9 +106,23 @@ node src/refreshAll.js salaries   # solo salarios
   cron semanal junto con salarios/2K/draft. **No se pudo probar el acceso
   real a wikidata.org ni a commons.wikimedia.org** al escribir esto (sin
   salida a internet desde ese entorno) — revisa el log `[refresh] N de M
-  jugadores con año de nacimiento, K con foto libre encontrada` tras el
-  primer refresco en producción; si N o K son muy bajos, revisa el
-  emparejamiento en `findPlayerEntityId`.
+  jugadores con año de nacimiento, K con foto libre encontrada, K con algún
+  premio individual detectado` tras el primer refresco en producción; si
+  algún número es muy bajo, revisa el emparejamiento en
+  `findPlayerEntityId`.
+- **Premios individuales** (MVP, All-Star, quinteto defensivo, rookie del
+  año): en la misma llamada a Wikidata de arriba (`getFactsFromEntity`) se
+  cuentan las declaraciones "award received"/"participant of" cuyo valor
+  coincide con el identificador Wikidata de cada premio, y se guardan en
+  `data/player_awards.json`. Se muestran como pills destacadas en la ficha
+  del jugador (`public/js/player.js`, `renderAwardPills`) solo cuando el
+  jugador tiene al menos uno; si no hay ninguno, no se añade nada. **Los
+  identificadores de premio usados (`AWARD_QIDS` en `src/birthYear.js`) se
+  localizaron por búsqueda, pero no se pudieron verificar contra la ficha
+  real de ningún jugador** desde el entorno donde se escribió esto (mismo
+  bloqueo de red de arriba) — si tras desplegar los premios salen siempre a
+  0, o claramente mal (por ejemplo un jugador conocido sin ningún premio
+  detectado), es la primera pista a revisar.
 - **Noticias del equipo**: el botón "Noticias del equipo" en la página de
   plantilla filtra la caché de noticias por el apodo del equipo (ej.
   "Lakers"). No hace falta una fuente nueva, reutiliza `data/news.json`.

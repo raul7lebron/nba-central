@@ -44,6 +44,26 @@ function updateSeoForPlayer(player) {
   document.head.appendChild(ldJson);
 }
 
+// Premios individuales (MVP, All-Star, quinteto defensivo, rookie del año),
+// vía Wikidata (ver src/birthYear.js). No todos los jugadores tienen ficha
+// en Wikidata o premios registrados ahí; si no hay ninguno, no se muestra
+// nada en vez de una fila de pills vacía.
+function renderAwardPills(awards) {
+  if (!awards) return '';
+  const items = [];
+  if (awards.mvp > 0) items.push(`🏆 ${awards.mvp > 1 ? awards.mvp + '× ' : ''}MVP`);
+  if (awards.allStar > 0) items.push(`⭐ ${awards.allStar}× All-Star`);
+  if (awards.allDefensive > 0) items.push(`🛡️ ${awards.allDefensive}× Quinteto defensivo`);
+  if (awards.rookieOfYear > 0) items.push('🌱 Rookie del año');
+  if (!items.length) return '';
+
+  return `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+      ${items.map((t) => `<span class="pill" style="border-color:var(--accent);color:var(--accent)">${t}</span>`).join('')}
+    </div>
+  `;
+}
+
 function renderPlayerHero(player) {
   const heroEl = document.getElementById('player-hero');
   const teamLine = player.currentTeam
@@ -82,6 +102,7 @@ function renderPlayerHero(player) {
         ${ratingPill}
         ${salaryPill}
       </div>
+      ${renderAwardPills(player.awards)}
     </div>
   `;
 }

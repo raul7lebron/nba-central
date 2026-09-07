@@ -82,23 +82,30 @@ async function refreshRatings2k() {
 // El año de nacimiento no cambia nunca: se refresca en el cron semanal,
 // junto con salarios/2K/draft. Solo se busca para plantillas activas.
 async function refreshBirthYears() {
-  console.log('[refresh] descargando años de nacimiento y fotos (Wikidata)...');
+  console.log('[refresh] descargando años de nacimiento, fotos y premios (Wikidata)...');
   const rosters = readCache('rosters', {});
   const players = Object.values(rosters).flat();
   const facts = await getPlayerFactsForPlayers(players);
 
   const birthYears = {};
   const photos = {};
+  const awards = {};
   let withYear = 0;
   let withPhoto = 0;
+  let withAward = 0;
   for (const [name, f] of Object.entries(facts)) {
     if (f.birthYear) { birthYears[name] = f.birthYear; withYear++; }
     if (f.photoUrl) { photos[name] = f.photoUrl; withPhoto++; }
+    if (f.awards && Object.values(f.awards).some((n) => n > 0)) {
+      awards[name] = f.awards;
+      withAward++;
+    }
   }
 
   writeCache('birth_years', birthYears);
   writeCache('player_photos', photos);
-  console.log(`[refresh] ${withYear} de ${players.length} jugadores con año de nacimiento, ${withPhoto} con foto libre encontrada.`);
+  writeCache('player_awards', awards);
+  console.log(`[refresh] ${withYear} de ${players.length} jugadores con año de nacimiento, ${withPhoto} con foto libre encontrada, ${withAward} con algún premio individual detectado.`);
 }
 
 // No existe filtro por año de draft en la API: hay que traer el historial
