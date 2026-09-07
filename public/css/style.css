@@ -466,7 +466,7 @@ h1 {
 .compare-search input:focus { outline: none; border-color: var(--accent); }
 .compare-search .search-results { text-align: left; margin-top: 8px; max-height: 280px; overflow-y: auto; }
 
-.compare-card .player-photo { margin: 0 auto; }
+.compare-card .player-photo { margin: 0 auto; width: 90px; height: 90px; }
 .compare-card h2 { margin: 10px 0 4px; font-size: 1.25rem; }
 .compare-card h2 a { text-decoration: none; }
 .compare-card h2 a:hover { color: var(--accent); }
@@ -503,7 +503,15 @@ h1 {
 }
 
 @media (max-width: 640px) {
-  .compare-grid { grid-template-columns: 1fr; }
+  /* Los dos jugadores siempre uno junto al otro, nunca apilados, para que
+     las fotos y los datos de ambos queden a la misma altura. */
+  .compare-grid { gap: 8px; }
+  .compare-card, .compare-search { padding: 12px 8px; }
+  .compare-card .player-photo { width: 64px; height: 64px; }
+  .compare-card h2 { font-size: 1rem; margin: 8px 0 2px; }
+  .compare-card .player-meta { font-size: 0.68rem; }
+  .compare-change-btn { top: 8px; right: 8px; font-size: 0.6rem; padding: 2px 6px; }
+  .compare-search input { font-size: 0.85rem; padding: 8px 10px; }
 }
 
 .pill {
