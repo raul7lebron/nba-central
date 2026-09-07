@@ -236,7 +236,13 @@ los propios programas de afiliados; no lo quites.
   `width`/`height` fijos para evitar saltos de layout (Core Web Vitals);
   las imágenes de noticias/mercado llevan `alt` con el titular real del
   artículo. Los assets estáticos (css/js/imágenes) se sirven con caché de
-  1h (`express.static maxAge`).
+  1h (`express.static maxAge`). Todas las respuestas (HTML/CSS/JS/JSON) se
+  comprimen con gzip (`compression`). Los `<script>` de cada página llevan
+  `defer`, para que el navegador los descargue todos en paralelo en vez de
+  uno detrás de otro. `team.html` pide el equipo y la plantilla en paralelo
+  (antes traía los 30 equipos solo para encontrar uno; ahora hay un
+  endpoint `/api/teams/:id` para eso). `/api/teams` y `/api/seasons` llevan
+  `Cache-Control` de unos minutos, ya que apenas cambian.
 - **Limitación importante y honesta**: esta web renderiza el contenido con
   JavaScript en el navegador (fetch + innerHTML), no en el servidor. Google
   consigue indexarla porque ejecuta JavaScript, pero Bing y otros motores lo

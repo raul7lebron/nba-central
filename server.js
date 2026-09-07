@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 
 const { readCache, writeCache } = require('./src/cache');
@@ -35,6 +36,10 @@ async function getOrFetchSeasonGames(season) {
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Comprime HTML/CSS/JS/JSON con gzip antes de enviarlos: menos bytes por la
+// red, sobre todo notable en movil. Las imagenes/webp ya van comprimidas,
+// compression las deja pasar tal cual.
+app.use(compression());
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
 
 app.get('/health', (req, res) => {
@@ -153,7 +158,19 @@ app.get('/api/meta', (req, res) => {
 app.get('/api/teams', (req, res) => {
   const teams = readCache('teams', []);
   const enriched = teams.map((t) => ({ ...t, ...getTeamInfo(t.abbreviation) }));
+  // Los equipos solo cambian en el refresco diario: cachear un rato en el
+  // navegador evita volver a pedir los 30 en cada pagina de equipo.
+  res.set('Cache-Control', 'public, max-age=300');
   res.json(enriched);
+});
+
+// Un solo equipo, para no tener que traer los 30 solo para encontrar uno
+// (lo usa team.html).
+app.get('/api/teams/:id', (req, res) => {
+  const team = getTeamOr404(req, res);
+  if (!team) return;
+  res.set('Cache-Control', 'public, max-age=300');
+  res.json({ ...team, ...getTeamInfo(team.abbreviation) });
 });
 
 app.get('/api/teams/:id/players', (req, res) => {
@@ -227,6 +244,7 @@ app.get('/api/transactions', (req, res) => {
 });
 
 app.get('/api/seasons', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=3600');
   res.json({ current: currentSeasonYear(), earliest: EARLIEST_SEASON });
 });
 

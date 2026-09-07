@@ -147,12 +147,15 @@ async function loadTeam() {
   }
 
   try {
-    const teamsRes = await fetch('/api/teams');
-    const teams = await teamsRes.json();
-    const team = teams.find((t) => String(t.id) === String(teamId));
+    // Equipo y plantilla no dependen entre si: pedirlos en paralelo en vez
+    // de uno detras de otro ahorra un viaje de red completo.
+    const [teamRes, playersRes] = await Promise.all([
+      fetch(`/api/teams/${teamId}`),
+      fetch(`/api/teams/${teamId}/players`)
+    ]);
+    const team = teamRes.ok ? await teamRes.json() : null;
     renderHero(team, teamId);
 
-    const playersRes = await fetch(`/api/teams/${teamId}/players`);
     const players = await playersRes.json();
 
     if (!players.length) {
