@@ -36,6 +36,7 @@ function updateSeoForPlayer(player) {
     '@type': 'Person',
     name: `${player.first_name} ${player.last_name}`,
     jobTitle: player.position || undefined,
+    image: player.photoUrl || undefined,
     memberOf: player.currentTeam
       ? { '@type': 'SportsTeam', name: player.currentTeam.full_name }
       : undefined
@@ -63,7 +64,15 @@ function renderPlayerHero(player) {
     ? `<span class="pill">Salario ${formatMoney(player.salary)} (temporada actual)</span>`
     : '';
 
+  // Foto libre de Wikimedia Commons, vía Wikidata (ver src/birthYear.js). No
+  // todos los jugadores tienen una; si no hay o falla al cargar, se omite
+  // en vez de mostrar un hueco roto.
+  const photoHtml = player.photoUrl
+    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="84" height="84" loading="lazy" onerror="this.remove()">`
+    : '';
+
   heroEl.innerHTML = `
+    ${photoHtml}
     <div style="flex:1">
       <h1>${player.first_name} ${player.last_name}</h1>
       <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.birthYear ? ' · ' + player.birthYear : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>

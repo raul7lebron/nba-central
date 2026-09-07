@@ -92,17 +92,23 @@ node src/refreshAll.js salaries   # solo salarios
   que están en una tabla estática en `src/teamInfo.js`, verificada a fecha de
   la temporada 2024-25. Si un equipo gana un título nuevo, hay que sumarlo ahí
   a mano.
-- **Año de nacimiento**: tampoco lo da ninguna API de baloncesto conectada.
-  `src/birthYear.js` lo busca en Wikidata (público, sin API key): busca al
-  jugador por nombre y solo acepta el resultado si su descripción menciona
-  "basketball", para no confundirlo con otra persona del mismo nombre. Si no
-  encuentra un match seguro, no se muestra el dato en vez de arriesgarse a
-  que sea el de otra persona. Solo se busca para plantillas activas, en el
+- **Año de nacimiento y foto**: tampoco los da ninguna API de baloncesto
+  conectada. `src/birthYear.js` los busca en Wikidata (público, sin API
+  key): busca al jugador por nombre y solo acepta el resultado si su
+  descripción menciona "basketball", para no confundirlo con otra persona
+  del mismo nombre. La foto es la que Wikidata enlaza en Wikimedia Commons
+  (licencia libre — CC, dominio público o cedida por el autor); si el
+  jugador no tiene ficha en Wikidata, o la tiene pero sin foto, sencillamente
+  no se muestra nada en vez de usar una que no sea realmente libre — cubre
+  sobre todo a jugadores conocidos/veteranos, no a toda la plantilla. Ambos
+  datos se piden juntos en una sola llamada por jugador (`getFactsFromEntity`)
+  para no duplicar peticiones. Solo se busca para plantillas activas, en el
   cron semanal junto con salarios/2K/draft. **No se pudo probar el acceso
-  real a wikidata.org** al escribir esto (sin salida a internet desde ese
-  entorno) — revisa el log `[refresh] N de M jugadores con año de nacimiento
-  encontrado` tras el primer refresco en producción; si N es muy bajo,
-  revisa el emparejamiento en `findPlayerEntityId`.
+  real a wikidata.org ni a commons.wikimedia.org** al escribir esto (sin
+  salida a internet desde ese entorno) — revisa el log `[refresh] N de M
+  jugadores con año de nacimiento, K con foto libre encontrada` tras el
+  primer refresco en producción; si N o K son muy bajos, revisa el
+  emparejamiento en `findPlayerEntityId`.
 - **Noticias del equipo**: el botón "Noticias del equipo" en la página de
   plantilla filtra la caché de noticias por el apodo del equipo (ej.
   "Lakers"). No hace falta una fuente nueva, reutiliza `data/news.json`.
@@ -289,7 +295,7 @@ src/playoffs.js        Reconstrucción de series/rondas de playoffs
 src/salaries.js        Scraper de contratos de HoopsHype + tope salarial
 src/playerSlug.js       Slug de la URL de jugador (servidor, para el sitemap)
 src/ratings2k.js        Cliente de nba2kapi.com (valoraciones NBA 2K)
-src/birthYear.js        Año de nacimiento vía Wikidata (por nombre)
+src/birthYear.js        Año de nacimiento y foto libre vía Wikidata (por nombre)
 src/teamInfo.js         Tabla estática de fundación/campeonatos por equipo
 src/news.js             Agregador de RSS (Marca, AS, Mundo Deportivo, Sport, Gigantes del Basket)
 src/transactions.js     Detección de fichajes/traspasos por palabras clave

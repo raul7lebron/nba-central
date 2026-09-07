@@ -107,8 +107,9 @@ function buildPlayerEnrichmentMaps() {
   const peakRatingByName = getPeakRatingByName(allRatings);
 
   const birthYearByName = readCache('birth_years', {});
+  const photoByName = readCache('player_photos', {});
 
-  return { activeIds, salaryByName, currentRatingByName, peakRatingByName, birthYearByName };
+  return { activeIds, salaryByName, currentRatingByName, peakRatingByName, birthYearByName, photoByName };
 }
 
 function enrichPlayer(p, maps) {
@@ -118,6 +119,7 @@ function enrichPlayer(p, maps) {
   const currentRatingMatch = maps.currentRatingByName.get(normalize2kName(fullName));
   const peakRatingMatch = maps.peakRatingByName.get(normalize2kName(fullName));
   const birthYear = maps.birthYearByName[normalizeName(fullName)] || null;
+  const photoUrl = maps.photoByName[normalizeName(fullName)] || null;
 
   return {
     id: p.id,
@@ -137,7 +139,8 @@ function enrichPlayer(p, maps) {
     contract: isActive && salaryMatch ? salaryMatch.contract : null,
     rating2k: isActive && currentRatingMatch ? currentRatingMatch.overall : null,
     peakRating2k: peakRatingMatch ? peakRatingMatch.overall : null,
-    birthYear
+    birthYear,
+    photoUrl
   };
 }
 
@@ -186,6 +189,7 @@ app.get('/api/teams/:id/players', (req, res) => {
   const ratingByName = new Map(ratings2kCurrent.map((r) => [r.normalizedName, r]));
 
   const birthYearByName = readCache('birth_years', {});
+  const photoByName = readCache('player_photos', {});
 
   const enriched = players.map((p) => {
     const fullName = `${p.first_name} ${p.last_name}`;
@@ -196,7 +200,8 @@ app.get('/api/teams/:id/players', (req, res) => {
       salary: salaryMatch ? salaryMatch.salary : null,
       contract: salaryMatch ? salaryMatch.contract : null,
       rating2k: ratingMatch ? ratingMatch.overall : null,
-      birthYear: birthYearByName[normalizeName(fullName)] || null
+      birthYear: birthYearByName[normalizeName(fullName)] || null,
+      photoUrl: photoByName[normalizeName(fullName)] || null
     };
   });
 
@@ -454,9 +459,9 @@ app.listen(PORT, async () => {
     console.log('[startup] no hay cache de draft, lanzando refresco...');
     refreshDraftArchive().catch((err) => console.error('[startup] fallo refresco de draft:', err.message));
   }
-  if (!readCache('birth_years')) {
-    console.log('[startup] no hay cache de años de nacimiento, lanzando refresco...');
-    refreshBirthYears().catch((err) => console.error('[startup] fallo refresco de años de nacimiento:', err.message));
+  if (!readCache('birth_years') || !readCache('player_photos')) {
+    console.log('[startup] no hay cache de años de nacimiento/fotos, lanzando refresco...');
+    refreshBirthYears().catch((err) => console.error('[startup] fallo refresco de años de nacimiento/fotos:', err.message));
   }
   if (!readCache('season_leaders')) {
     console.log('[startup] no hay cache de lideres de temporada, lanzando refresco...');

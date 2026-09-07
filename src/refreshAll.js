@@ -11,7 +11,7 @@ const {
 const { fetchAllNews } = require('./news');
 const { getTeamSalaries } = require('./salaries');
 const { getAllPlayerRatings } = require('./ratings2k');
-const { getBirthYearsForPlayers } = require('./birthYear');
+const { getPlayerFactsForPlayers } = require('./birthYear');
 const { updateTransactionsArchive } = require('./transactions');
 
 function sleep(ms) {
@@ -82,12 +82,23 @@ async function refreshRatings2k() {
 // El año de nacimiento no cambia nunca: se refresca en el cron semanal,
 // junto con salarios/2K/draft. Solo se busca para plantillas activas.
 async function refreshBirthYears() {
-  console.log('[refresh] descargando años de nacimiento (Wikidata)...');
+  console.log('[refresh] descargando años de nacimiento y fotos (Wikidata)...');
   const rosters = readCache('rosters', {});
   const players = Object.values(rosters).flat();
-  const birthYears = await getBirthYearsForPlayers(players);
+  const facts = await getPlayerFactsForPlayers(players);
+
+  const birthYears = {};
+  const photos = {};
+  let withYear = 0;
+  let withPhoto = 0;
+  for (const [name, f] of Object.entries(facts)) {
+    if (f.birthYear) { birthYears[name] = f.birthYear; withYear++; }
+    if (f.photoUrl) { photos[name] = f.photoUrl; withPhoto++; }
+  }
+
   writeCache('birth_years', birthYears);
-  console.log(`[refresh] ${Object.keys(birthYears).length} de ${players.length} jugadores con año de nacimiento encontrado.`);
+  writeCache('player_photos', photos);
+  console.log(`[refresh] ${withYear} de ${players.length} jugadores con año de nacimiento, ${withPhoto} con foto libre encontrada.`);
 }
 
 // No existe filtro por año de draft en la API: hay que traer el historial
