@@ -61,6 +61,17 @@ function renderToolbar(selected) {
   document.getElementById('stat-select').addEventListener('change', (e) => renderTable(e.target.value));
 }
 
+// Valor formateado de la estadistica elegida en el desplegable, igual que
+// saldria en su columna normal de la tabla.
+function statCellValue(row, statKey) {
+  if (statKey === 'val') return computeValoracion(row).toFixed(1);
+  if (statKey === 'fg_pct' || statKey === 'fg3_pct') {
+    return row[statKey] != null ? (row[statKey] * 100).toFixed(1) + '%' : '-';
+  }
+  if (statKey === 'min') return row.min ?? '-';
+  return formatStat(row[statKey]);
+}
+
 function renderTable(statKey) {
   const container = document.getElementById('stats-container');
   const sorted = [...allLeaders]
@@ -71,6 +82,8 @@ function renderTable(statKey) {
     container.innerHTML = '<p class="state-msg">Todavía no hay estadísticas de esta temporada.</p>';
     return;
   }
+
+  const statLabel = STAT_OPTIONS.find((o) => o.value === statKey)?.label || statKey;
 
   const rows = sorted.map((p, i) => `
     <tr>
@@ -83,6 +96,7 @@ function renderTable(statKey) {
       </td>
       <td>${p.games_played ?? '-'}</td>
       <td>${p.min ?? '-'}</td>
+      <td style="font-weight:700;color:var(--accent)">${statCellValue(p, statKey)}</td>
       <td>${formatStat(p.pts)}</td>
       <td>${formatStat(p.reb)}</td>
       <td>${formatStat(p.ast)}</td>
@@ -99,7 +113,9 @@ function renderTable(statKey) {
       <table class="stats-table">
         <thead>
           <tr>
-            <th>#</th><th style="text-align:left">Jugador</th><th>PJ</th><th>MIN</th><th>PTS</th><th>REB</th>
+            <th>#</th><th style="text-align:left">Jugador</th><th>PJ</th><th>MIN</th>
+            <th style="color:var(--accent)">${statLabel}</th>
+            <th>PTS</th><th>REB</th>
             <th>AST</th><th>ROB</th><th>TAP</th><th>%TC</th><th>%3P</th><th>VAL</th>
           </tr>
         </thead>
