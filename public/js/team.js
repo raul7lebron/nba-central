@@ -27,12 +27,12 @@ async function showTeamNews(team) {
 
     body.innerHTML = `<div class="news-list">${news.map((item) => `
       <article style="display:contents">
-        <a class="news-item" href="${item.link}" target="_blank" rel="noopener noreferrer">
-          ${item.image ? `<img class="news-thumb" src="${item.image}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
+        <a class="news-item" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">
+          ${item.image ? `<img class="news-thumb" src="${escapeAttr(item.image)}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">` : ''}
           <div class="news-body">
             <span class="news-source">${item.source}</span>
-            <div class="news-title">${item.title}</div>
-            <div class="news-summary">${item.summary || ''}</div>
+            <div class="news-title">${escapeAttr(item.title)}</div>
+            <div class="news-summary">${escapeAttr(item.summary || '')}</div>
             <div class="news-date">${formatDate(item.pubDate)}</div>
           </div>
         </a>
