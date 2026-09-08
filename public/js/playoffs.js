@@ -33,14 +33,14 @@ function renderSeries(s) {
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(s.teamA.abbreviation, 26)}
-          <span style="font-weight:${winnerIsA ? 700 : 500};color:${winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${s.teamA.full_name}</span>
+          <span style="font-weight:${winnerIsA ? 700 : 500};color:${winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${s.teamA.abbreviation}</span>
         </div>
         <span style="font-weight:800;font-size:1.1rem">${s.winsA}</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(s.teamB.abbreviation, 26)}
-          <span style="font-weight:${!winnerIsA ? 700 : 500};color:${!winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${s.teamB.full_name}</span>
+          <span style="font-weight:${!winnerIsA ? 700 : 500};color:${!winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${s.teamB.abbreviation}</span>
         </div>
         <span style="font-weight:800;font-size:1.1rem">${s.winsB}</span>
       </div>

@@ -57,7 +57,7 @@ function renderHero(team, teamId) {
   heroEl.innerHTML = `
     <div class="team-logo-wrap">${logoImgOrBadge(team.abbreviation, 84)}</div>
     <div style="flex:1">
-      <h1>${team.full_name}</h1>
+      <h1>${team.abbreviation}</h1>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
         <span class="pill"><span class="conf-tag" style="background:${confVar}"></span>${team.conference}ern Conference · ${team.division}</span>
         ${historyPill}
