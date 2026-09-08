@@ -98,9 +98,12 @@ async function getFactsFromEntity(entityId) {
   const yearMatch = typeof time === 'string' && time.match(/^[+-](\d{4,})-\d{2}-\d{2}/);
   const birthYear = yearMatch ? parseInt(yearMatch[1], 10) : null;
 
+  // width=250: nunca se muestra a más de 120px en el sitio (ficha de
+  // jugador), así que 250 ya deja margen de sobra para pantallas retina sin
+  // pedirle a Wikimedia una imagen 4 veces más grande de la que hace falta.
   const fileName = claims.P18?.[0]?.mainsnak?.datavalue?.value;
   const photoUrl = typeof fileName === 'string' && fileName
-    ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=500`
+    ? `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(fileName)}?width=250`
     : null;
 
   const awards = {
