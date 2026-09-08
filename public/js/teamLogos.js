@@ -67,7 +67,7 @@ function badgeHTML(abbreviation, size) {
 // Algunos equipos muestran una sigla distinta a la real de balldontlie/ESPN
 // (esa real sigue haciendo falta tal cual para buscar logo, color e
 // insignia). Los Jazz de Utah se muestran como "UJ" en vez de "UTA".
-const DISPLAY_ABBR_OVERRIDES = { UTA: 'UJ' };
+const DISPLAY_ABBR_OVERRIDES = { UTA: 'UTJ' };
 
 function displayAbbr(abbreviation) {
   return DISPLAY_ABBR_OVERRIDES[abbreviation] || abbreviation;
