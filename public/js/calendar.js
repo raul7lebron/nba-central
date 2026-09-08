@@ -97,14 +97,14 @@ function renderGameCard(g) {
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(g.visitor_team.abbreviation, 22)}
-          <span class="player-meta">${g.visitor_team.abbreviation}</span>
+          <span class="player-meta">${displayAbbr(g.visitor_team.abbreviation)}</span>
         </div>
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[0] : ''}</span>
       </div>
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(g.home_team.abbreviation, 22)}
-          <span class="player-meta">${g.home_team.abbreviation}</span>
+          <span class="player-meta">${displayAbbr(g.home_team.abbreviation)}</span>
         </div>
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[1] : ''}</span>
       </div>

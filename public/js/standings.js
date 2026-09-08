@@ -36,7 +36,7 @@ function renderConferenceTable(title, rows) {
       <td>${r.rank}</td>
       <td style="text-align:left;display:flex;align-items:center;gap:10px;padding-left:4px">
         ${logoImgOrBadge(r.team.abbreviation, 24)}
-        <a href="/team.html?id=${r.team.id}" style="color:inherit;text-decoration:none;font-weight:600">${r.team.abbreviation}</a>
+        <a href="/team.html?id=${r.team.id}" style="color:inherit;text-decoration:none;font-weight:600">${displayAbbr(r.team.abbreviation)}</a>
       </td>
       <td>${r.wins}</td>
       <td>${r.losses}</td>

@@ -24,7 +24,7 @@ async function buildYearPicker() {
 
 function renderPick(p) {
   const teamBadge = p.currentTeam
-    ? `${logoImgOrBadge(p.currentTeam.abbreviation, 22)}<span class="player-meta">${p.currentTeam.abbreviation}</span>`
+    ? `${logoImgOrBadge(p.currentTeam.abbreviation, 22)}<span class="player-meta">${displayAbbr(p.currentTeam.abbreviation)}</span>`
     : '<span class="player-meta">—</span>';
 
   const rating = p.isActive ? p.rating2k : p.peakRating2k;

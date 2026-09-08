@@ -61,5 +61,14 @@ function logoImgOrBadge(abbreviation, size) {
 }
 
 function badgeHTML(abbreviation, size) {
-  return `<div class="team-badge" style="background:${teamColor(abbreviation)};width:${size}px;height:${size}px;font-size:${Math.round(size * 0.32)}px">${abbreviation}</div>`;
+  return `<div class="team-badge" style="background:${teamColor(abbreviation)};width:${size}px;height:${size}px;font-size:${Math.round(size * 0.32)}px">${displayAbbr(abbreviation)}</div>`;
+}
+
+// Algunos equipos muestran una sigla distinta a la real de balldontlie/ESPN
+// (esa real sigue haciendo falta tal cual para buscar logo, color e
+// insignia). Los Jazz de Utah se muestran como "UJ" en vez de "UTA".
+const DISPLAY_ABBR_OVERRIDES = { UTA: 'UJ' };
+
+function displayAbbr(abbreviation) {
+  return DISPLAY_ABBR_OVERRIDES[abbreviation] || abbreviation;
 }

@@ -14,7 +14,7 @@ async function loadTeams() {
     container.innerHTML = teams.map((team) => `
       <a class="team-card" href="/team.html?id=${team.id}">
         <div class="team-logo-wrap">${logoImgOrBadge(team.abbreviation, 68)}</div>
-        <div class="team-name">${team.abbreviation}</div>
+        <div class="team-name">${displayAbbr(team.abbreviation)}</div>
         <div class="team-conf">
           <span class="conf-tag" style="background:${team.conference === 'East' ? 'var(--east)' : 'var(--west)'}"></span>
           ${team.conference} · ${team.division}
