@@ -100,7 +100,11 @@ async function getTeamSalaries(abbreviation, season) {
         }))
         .sort((a, b) => a.season - b.season);
 
-      const currentSeasonRow = allSeasons.find((s) => s.season === season) || allSeasons[0];
+      // Si HoopsHype no lista la temporada pedida (contrato ya vencido y sin
+      // renovacion publicada todavia, etc.), es mejor mostrar el salario mas
+      // RECIENTE que tengamos que el mas antiguo: allSeasons esta ordenado
+      // ascendente, asi que el ultimo elemento es el mas reciente.
+      const currentSeasonRow = allSeasons.find((s) => s.season === season) || allSeasons[allSeasons.length - 1];
       if (!currentSeasonRow) return null;
 
       return {
