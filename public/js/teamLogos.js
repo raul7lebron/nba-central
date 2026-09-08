@@ -11,7 +11,7 @@ const TEAM_LOGO_SLUGS = {
 // Los 30 equipos tienen logo personalizado servido localmente en vez del
 // oficial de ESPN.
 const TEAM_LOGO_OVERRIDES = {
-  MIN: '/img/logo-min.webp',
+  MIN: '/img/logo-min.png',
   MIL: '/img/logo-mil.png',
   ORL: '/img/logo-orl.png',
   MEM: '/img/logo-mem.png',
