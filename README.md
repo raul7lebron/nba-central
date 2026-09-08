@@ -291,7 +291,14 @@ los propios programas de afiliados; no lo quites.
   `og:url` autorreferenciados; `team.html` los genera por JavaScript con el
   id del equipo en cuanto lo conoce. Evita contenido duplicado por
   variantes www/no-www o parámetros de consulta.
-- **Rendimiento**: los logos de equipo cargan con `loading="lazy"` y
+- **Rendimiento**: los logos de equipo personalizados (`public/img/logo-*.webp`,
+  `public/js/teamLogos.js`) se sirven en WebP a 220×220 (suficiente para el
+  mayor tamaño real en pantalla, 84px, con margen de sobra para pantallas
+  retina) en vez del PNG a 500×500 con el que se subieron originalmente —
+  bajan de ~460 KB a ~25 KB de media cada uno (~13 MB a ~0.8 MB en total).
+  Si sustituyes alguno por una imagen nueva, pásala por el mismo proceso
+  (redimensionar a 220×220 y exportar a WebP calidad ~0.9) en vez de subir
+  el PNG grande tal cual. Además cargan con `loading="lazy"` y
   `width`/`height` fijos para evitar saltos de layout (Core Web Vitals);
   las imágenes de noticias/mercado llevan `alt` con el titular real del
   artículo. Los assets estáticos (css/js/imágenes) se sirven con caché de
