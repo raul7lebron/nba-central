@@ -137,7 +137,16 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
 .nav-toggle:hover { color: var(--text); border-color: var(--accent); }
 
-@media (max-width: 700px) {
+/* El menu horizontal (10 secciones + buscador) deja de caber entero a
+   partir de ~1330px de ancho; por debajo de eso, sin el menu hamburguesa,
+   se desbordaba con una barra de scroll oculta (scrollbar-width:none) y sin
+   ninguna pista visual — Draft/Mercado/Tienda parecian haber desaparecido,
+   o se veian cortados a mitad de palabra ("Tienda" como "Tie"). El corte
+   se fija en 1400px para dejar margen sobre esa medida real. Este punto de
+   corte es independiente del de abajo (700px, ajustes de tablas/paginas
+   para pantallas de movil pequeñas): no deben fusionarse en una sola query.
+*/
+@media (max-width: 1400px) {
   .nav-toggle { display: flex; }
 
   nav.site-nav {
@@ -162,7 +171,9 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
   /* con el menu plegado, el buscador vuelve a quedar junto al icono hamburguesa */
   .nav-toggle ~ .nav-search { margin-left: 0; }
+}
 
+@media (max-width: 700px) {
   /* clasificacion: menos espacio entre bloques para que quepa mas sin scroll */
   body.standings-page main { padding-top: 24px; }
   body.standings-page .page-head { margin-bottom: 16px; }

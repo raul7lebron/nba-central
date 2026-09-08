@@ -1,5 +1,10 @@
 function closeModal() {
   document.getElementById('modal-root').innerHTML = '';
+  document.removeEventListener('keydown', closeModalOnEscape);
+}
+
+function closeModalOnEscape(e) {
+  if (e.key === 'Escape') closeModal();
 }
 
 function formatMoney(amount) {
@@ -82,8 +87,8 @@ function openModal(innerHTML) {
   const root = document.getElementById('modal-root');
   root.innerHTML = `
     <div class="modal-backdrop" id="modal-backdrop">
-      <div class="modal-box">
-        <button class="modal-close" id="modal-close-btn">&times;</button>
+      <div class="modal-box" role="dialog" aria-modal="true">
+        <button class="modal-close" id="modal-close-btn" aria-label="Cerrar">&times;</button>
         ${innerHTML}
       </div>
     </div>
@@ -92,6 +97,7 @@ function openModal(innerHTML) {
   document.getElementById('modal-backdrop').addEventListener('click', (e) => {
     if (e.target.id === 'modal-backdrop') closeModal();
   });
+  document.addEventListener('keydown', closeModalOnEscape);
 }
 
 const CONTRACT_OPTION_LABELS = {
