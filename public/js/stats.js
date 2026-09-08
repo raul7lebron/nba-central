@@ -90,7 +90,7 @@ function renderTable(statKey) {
       <td style="font-weight:700;color:var(--text-faint)">${i + 1}</td>
       <td style="text-align:left">
         <a href="${playerUrl(p)}" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:inherit;white-space:nowrap">
-          ${p.team ? logoImgOrBadge(p.team.abbreviation, 22) : ''}
+          ${p.team ? `<span class="player-meta" style="font-weight:700">${displayAbbr(p.team.abbreviation)}</span>` : ''}
           <span style="font-weight:600">${p.first_name} ${p.last_name}</span>
         </a>
       </td>

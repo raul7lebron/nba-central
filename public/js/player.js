@@ -67,7 +67,7 @@ function renderAwardPills(awards) {
 function renderPlayerHero(player) {
   const heroEl = document.getElementById('player-hero');
   const teamLine = player.currentTeam
-    ? `<a class="pill" href="/team.html?id=${player.currentTeam.id}">${logoImgOrBadge(player.currentTeam.abbreviation, 18)} ${player.currentTeam.full_name}</a>`
+    ? `<a class="pill" href="/team.html?id=${player.currentTeam.id}">${logoImgOrBadge(player.currentTeam.abbreviation, 18)} ${displayAbbr(player.currentTeam.abbreviation)}</a>`
     : '<span class="pill">Sin equipo actual</span>';
 
   const draftPill = player.draft_year

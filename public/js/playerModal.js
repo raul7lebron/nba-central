@@ -53,7 +53,7 @@ function renderStatsTable(history) {
   }
   const rows = history.map((row) => `
     <tr>
-      <td>${row.team ? logoImgOrBadge(row.team.abbreviation, 22) : '—'}</td>
+      <td style="font-weight:600">${row.team ? displayAbbr(row.team.abbreviation) : '—'}</td>
       <td>${row.season}-${String(row.season + 1).slice(2)}</td>
       <td>${row.games_played ?? '-'}</td>
       <td>${row.min ?? '-'}</td>
