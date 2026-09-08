@@ -7,6 +7,13 @@ const slots = {
   b: { player: null, history: [], season: null }
 };
 
+// Igual que en search.js: si dos busquedas del mismo hueco se solapan (el
+// usuario escribe rapido) y las respuestas llegan desordenadas por la red,
+// sin esta guarda una respuesta antigua podria pisar a una mas reciente.
+// Cada hueco (a/b) lleva su propio contador porque son busquedas
+// independientes entre si.
+const searchTokens = { a: 0, b: 0 };
+
 function parseMinutes(min) {
   if (!min) return null;
   const [m, s] = String(min).split(':').map(Number);
@@ -34,6 +41,7 @@ function renderSearchBox(slotKey) {
     clearTimeout(debounceTimer);
     const q = input.value.trim();
     if (q.length < 2) {
+      searchTokens[slotKey]++;
       results.innerHTML = '';
       return;
     }
@@ -42,10 +50,12 @@ function renderSearchBox(slotKey) {
 }
 
 async function runSearch(slotKey, q, resultsEl) {
+  const token = ++searchTokens[slotKey];
   resultsEl.innerHTML = '<div class="search-result-empty">Buscando...</div>';
   try {
     const res = await fetch(`/api/players/search?q=${encodeURIComponent(q)}`);
     const players = await res.json();
+    if (token !== searchTokens[slotKey]) return;
 
     if (!players.length) {
       resultsEl.innerHTML = '<div class="search-result-empty">Sin resultados</div>';

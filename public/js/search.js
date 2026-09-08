@@ -45,6 +45,7 @@ function injectPlayerSearch() {
     panel.hidden = true;
     input.value = '';
     results.innerHTML = '';
+    searchToken++;
   }
 
   toggle.addEventListener('click', () => {
@@ -60,11 +61,18 @@ function injectPlayerSearch() {
     if (e.key === 'Escape') closePanel();
   });
 
+  // Si dos busquedas se solapan (el usuario escribe rapido y las respuestas
+  // llegan desordenadas por la red), sin esta guarda una respuesta antigua
+  // podria pisar a una mas reciente y dejar en pantalla resultados de una
+  // busqueda anterior. searchToken guarda cual es la busqueda mas reciente;
+  // cada respuesta solo se pinta si sigue siendolo cuando llega.
   let debounceTimer;
+  let searchToken = 0;
   input.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     const q = input.value.trim();
     if (q.length < 2) {
+      searchToken++;
       results.innerHTML = '';
       return;
     }
@@ -72,10 +80,12 @@ function injectPlayerSearch() {
   });
 
   async function runSearch(q) {
+    const token = ++searchToken;
     results.innerHTML = '<div class="search-result-empty">Buscando...</div>';
     try {
       const res = await fetch(`/api/players/search?q=${encodeURIComponent(q)}`);
       const players = await res.json();
+      if (token !== searchToken) return;
 
       if (!players.length) {
         results.innerHTML = '<div class="search-result-empty">Sin resultados</div>';
