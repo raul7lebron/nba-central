@@ -73,3 +73,11 @@ function buildShopGrid() {
     </div>
   `).join('');
 }
+
+// Se llama aqui mismo (en vez de en un <script> aparte en store.html) porque
+// este archivo carga con defer: para cuando se ejecuta, el DOM ya esta listo
+// y #shop-container ya existe. Un <script> inline sin defer se ejecuta antes
+// (en su posicion en el HTML, no al final de la carga), asi que llamaba a
+// buildShopGrid() antes de que este archivo se hubiera cargado — la tienda
+// se quedaba vacia sin ningun error visible para quien la visitaba.
+document.getElementById('shop-container').innerHTML = buildShopGrid();
