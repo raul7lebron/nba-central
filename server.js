@@ -9,6 +9,7 @@ const {
   getPlayerStatsHistory,
   getPlayerCareerStatsHistory,
   getGamesForSeason,
+  getGamesForDate,
   currentSeasonYear
 } = require('./src/balldontlie');
 const { refreshAll, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshSeasonLeaders, refreshDraftArchive } = require('./src/refreshAll');
@@ -466,6 +467,44 @@ app.get('/api/games', async (req, res) => {
     const games = await getOrFetchSeasonGames(season);
     const sorted = [...games].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     res.json({ season, games: sorted });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// balldontlie fecha los partidos con el dia en horario de EE.UU. (Eastern),
+// no con el dia de calendario del servidor/visitante: un partido de las 22h
+// hora de Los Angeles cae ya en "hoy" para balldontlie aunque en España sea
+// de madrugada del dia siguiente. Calculamos "hoy" en esa misma zona para
+// pedir la fecha correcta.
+function nbaTodayISO() {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit'
+  }).formatToParts(new Date());
+  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]));
+  return `${map.year}-${map.month}-${map.day}`;
+}
+
+// Marcador en directo: a diferencia de /api/games (que lee del cache de
+// temporada, refrescado una vez al dia), esto pide la fecha de hoy
+// directamente a balldontlie para tener el marcador real de partidos en
+// curso. Cache en memoria de 20s para no golpear el limite de peticiones
+// por minuto del plan gratuito si varios visitantes cargan la home a la vez.
+let liveGamesCache = { date: null, games: null, fetchedAt: 0 };
+const LIVE_GAMES_CACHE_TTL_MS = 20000;
+
+app.get('/api/games/live', async (req, res) => {
+  try {
+    const date = nbaTodayISO();
+    const now = Date.now();
+    if (liveGamesCache.date === date && now - liveGamesCache.fetchedAt < LIVE_GAMES_CACHE_TTL_MS) {
+      return res.json({ date, games: liveGamesCache.games });
+    }
+
+    const games = await getGamesForDate(date);
+    const sorted = [...games].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    liveGamesCache = { date, games: sorted, fetchedAt: now };
+    res.json({ date, games: sorted });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

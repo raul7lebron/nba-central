@@ -175,6 +175,14 @@ async function getGamesForSeason(season) {
   return fetchAllPages(`/games?seasons[]=${season}&per_page=100`, 20);
 }
 
+// Partidos de una fecha concreta (YYYY-MM-DD), sin pasar por el cache de
+// temporada completa: para el marcador en directo hace falta el marcador
+// tal cual esta ahora mismo, no lo que habia cuando se refresco la temporada
+// (una vez al dia).
+async function getGamesForDate(dateStr) {
+  return fetchAllPages(`/games?dates[]=${dateStr}&per_page=100`, 2);
+}
+
 // No existe filtro por año de draft en la API. Para construir el archivo de
 // drafts hay que traer el historial COMPLETO de jugadores de cada equipo
 // (no solo /active) y quedarnos con los que tengan draft_year.
@@ -189,6 +197,7 @@ module.exports = {
   getPlayerCareerStatsHistory,
   getSeasonAveragesForPlayer,
   getGamesForSeason,
+  getGamesForDate,
   getFullPlayerHistoryForTeam,
   currentSeasonYear
 };

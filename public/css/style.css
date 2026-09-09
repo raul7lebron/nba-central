@@ -539,6 +539,88 @@ h1 {
   color: var(--text-dim);
 }
 
+/* ---------- Marcador en directo (portada) ---------- */
+
+.scoreboard-wrap {
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.scoreboard-strip {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 2px;
+}
+
+.scoreboard-strip::-webkit-scrollbar { display: none; }
+
+.scoreboard-card {
+  flex-shrink: 0;
+  width: 168px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px;
+}
+
+.scoreboard-team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 0;
+  color: var(--text-dim);
+}
+
+.scoreboard-team.is-winner { color: var(--text); }
+
+.scoreboard-team-abbr {
+  font-weight: 700;
+  font-size: 0.82rem;
+  flex: 1;
+}
+
+.scoreboard-score {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.scoreboard-status {
+  display: block;
+  margin-top: 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-faint);
+  text-align: center;
+}
+
+.scoreboard-status.is-live {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  color: var(--accent);
+}
+
+.scoreboard-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: scoreboard-pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes scoreboard-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 /* ---------- Roster ---------- */
 
 .roster-grid {
