@@ -4,15 +4,15 @@
 // (refreshSeasonLeaders, a diario); aqui solo se ordena/filtra/recorta.
 
 const STAT_OPTIONS = [
-  { value: 'val', label: t('stat_val') },
-  { value: 'pts', label: t('stat_pts') },
-  { value: 'reb', label: t('stat_reb') },
-  { value: 'ast', label: t('stat_ast') },
-  { value: 'stl', label: t('stat_stl') },
-  { value: 'blk', label: t('stat_blk') },
-  { value: 'fg_pct', label: t('stat_fg_pct') },
-  { value: 'fg3_pct', label: t('stat_fg3_pct') },
-  { value: 'min', label: t('stat_min_per_game') }
+  { value: 'val', label: t('stat_val'), thKey: 'th_val' },
+  { value: 'pts', label: t('stat_pts'), thKey: 'th_pts' },
+  { value: 'reb', label: t('stat_reb'), thKey: 'th_reb' },
+  { value: 'ast', label: t('stat_ast'), thKey: 'th_ast' },
+  { value: 'stl', label: t('stat_stl'), thKey: 'th_stl' },
+  { value: 'blk', label: t('stat_blk'), thKey: 'th_blk' },
+  { value: 'fg_pct', label: t('stat_fg_pct'), thKey: 'th_fg_pct' },
+  { value: 'fg3_pct', label: t('stat_fg3_pct'), thKey: 'th_fg3_pct' },
+  { value: 'min', label: t('stat_min_per_game'), thKey: 'th_min' }
 ];
 
 let allLeaders = [];
@@ -83,7 +83,8 @@ function renderTable(statKey) {
     return;
   }
 
-  const statLabel = STAT_OPTIONS.find((o) => o.value === statKey)?.label || statKey;
+  const statOption = STAT_OPTIONS.find((o) => o.value === statKey);
+  const statLabel = statOption ? t(statOption.thKey) : statKey;
 
   const rows = sorted.map((p, i) => `
     <tr>
