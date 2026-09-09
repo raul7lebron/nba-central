@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const compression = require('compression');
 const path = require('path');
+const fs = require('fs');
 
 const { readCache, writeCache } = require('./src/cache');
 const {
@@ -41,7 +42,92 @@ const PORT = process.env.PORT || 3000;
 // red, sobre todo notable en movil. Las imagenes/webp ya van comprimidas,
 // compression las deja pasar tal cual.
 app.use(compression());
-app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h' }));
+
+function escapeAttr(text) {
+  return (text || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+}
+
+function formatNewsDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('es-ES', {
+    day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+  });
+}
+
+function renderNewsItemHtml(item) {
+  const imgHtml = item.image
+    ? `<img class="news-thumb" src="${escapeAttr(item.image)}" alt="${escapeAttr(item.title)}" loading="lazy" onerror="this.remove()">`
+    : '';
+  return `
+    <a class="news-item" href="${escapeAttr(item.link)}" target="_blank" rel="noopener noreferrer">
+      ${imgHtml}
+      <div class="news-body">
+        <span class="news-source">${item.source}</span>
+        <div class="news-title">${escapeAttr(item.title)}</div>
+        <div class="news-summary">${escapeAttr(item.summary || '')}</div>
+        <div class="news-date">${formatNewsDate(item.pubDate)}</div>
+      </div>
+    </a>
+  `;
+}
+
+// Mismo formato que injectNewsJsonLd en public/js/news.js: cuando el
+// cliente ejecuta, busca este script por id y lo sustituye por el suyo (no
+// se duplica).
+function buildNewsJsonLd(news) {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: news.slice(0, 20).map((item, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'NewsArticle',
+        headline: item.title,
+        image: item.image || undefined,
+        datePublished: item.pubDate || undefined,
+        url: item.link,
+        publisher: { '@type': 'Organization', name: item.source }
+      }
+    }))
+  });
+}
+
+const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
+
+// index.html se servia siempre igual (estatico), con un "Cargando
+// noticias..." en el HTML crudo: cualquier buscador que no ejecute JS (o
+// que le dé menos peso a lo que solo aparece tras ejecutarlo) veia una
+// portada practicamente vacia, a pesar de ser contenido real y ya
+// disponible en el servidor. Aqui se rellena el mismo hueco que
+// public/js/news.js rellena en el cliente, con las noticias ya cacheadas,
+// antes de mandar la pagina. El cliente sigue haciendo su fetch normal y
+// vuelve a pintar encima: no hace falta ningun cambio en news.js.
+function renderIndexHtml() {
+  const template = fs.readFileSync(indexHtmlPath, 'utf-8');
+  const news = readCache('news', []);
+
+  const newsHtml = news.length
+    ? news.map(renderNewsItemHtml).join('')
+    : '<p class="state-msg">Todavía no hay noticias cacheadas. Vuelve en unos minutos.</p>';
+  const jsonLdHtml = news.length
+    ? `<script type="application/ld+json" id="news-jsonld">${buildNewsJsonLd(news)}</script>`
+    : '';
+
+  return template.replace(
+    /<div id="news-container" class="news-list">[\s\S]*?<\/div>/,
+    `<div id="news-container" class="news-list">${newsHtml}</div>${jsonLdHtml}`
+  );
+}
+
+app.get(['/', '/index.html'], (req, res) => {
+  res.set('Cache-Control', 'public, max-age=120');
+  res.send(renderIndexHtml());
+});
+
+app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', index: false }));
 // Limite pequeño a proposito: el unico body que se envia es el de las picks
 // de la quiniela (un puñado de ids de partido/equipo), no hace falta mas.
 app.use(express.json({ limit: '20kb' }));
