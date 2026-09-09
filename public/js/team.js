@@ -55,7 +55,7 @@ function renderHero(team, teamId) {
     : '';
 
   heroEl.innerHTML = `
-    <div class="team-logo-wrap">${logoImgOrBadge(team.abbreviation, 84)}</div>
+    <div class="team-logo-wrap">${logoImgOrBadge(team.abbreviation, 84, true)}</div>
     <div style="flex:1">
       <h1>${displayAbbr(team.abbreviation)}</h1>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">

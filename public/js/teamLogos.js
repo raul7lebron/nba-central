@@ -50,13 +50,17 @@ function teamLogoUrl(abbreviation) {
 }
 
 // Si el logo no carga, se sustituye por la insignia de color con las iniciales.
-// width/height explicitos + loading lazy: evitan saltos de layout (CLS) y
-// difieren la carga de logos fuera de pantalla, algo que Google mide como
-// señal de rendimiento (Core Web Vitals).
-function logoImgOrBadge(abbreviation, size) {
+// width/height explicitos evitan saltos de layout (CLS). Por defecto
+// "loading=lazy" difiere los logos fuera de pantalla (listas, tablas...);
+// eager=true lo salta para el logo grande de la cabecera de equipo, que
+// esta siempre visible nada mas cargar la pagina y no se beneficia de
+// diferirlo (al reves: cargarlo lo antes posible ayuda al LCP).
+function logoImgOrBadge(abbreviation, size, eager) {
   const url = teamLogoUrl(abbreviation);
   if (!url) return badgeHTML(abbreviation, size);
-  return `<img src="${url}" alt="Logo ${abbreviation}" class="team-logo-img" width="${size}" height="${size}" loading="lazy" decoding="async" style="width:${size}px;height:${size}px"
+  const loadingAttr = eager ? '' : ' loading="lazy"';
+  const priorityAttr = eager ? ' fetchpriority="high"' : '';
+  return `<img src="${url}" alt="Logo ${abbreviation}" class="team-logo-img" width="${size}" height="${size}"${loadingAttr} decoding="async"${priorityAttr} style="width:${size}px;height:${size}px"
             onerror="this.outerHTML=badgeHTML('${abbreviation}', ${size})">`;
 }
 

@@ -97,6 +97,11 @@ function buildNewsJsonLd(news) {
 }
 
 const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
+// Leido una vez al arrancar: es solo la plantilla (el HTML fijo alrededor
+// del hueco que se rellena en cada peticion), no cambia mientras el
+// proceso este vivo. Releerlo del disco en cada peticion era una syscall
+// de sobra en la ruta mas visitada del sitio.
+const indexHtmlTemplate = fs.readFileSync(indexHtmlPath, 'utf-8');
 
 // index.html se servia siempre igual (estatico), con un "Cargando
 // noticias..." en el HTML crudo: cualquier buscador que no ejecute JS (o
@@ -107,7 +112,7 @@ const indexHtmlPath = path.join(__dirname, 'public', 'index.html');
 // antes de mandar la pagina. El cliente sigue haciendo su fetch normal y
 // vuelve a pintar encima: no hace falta ningun cambio en news.js.
 function renderIndexHtml() {
-  const template = fs.readFileSync(indexHtmlPath, 'utf-8');
+  const template = indexHtmlTemplate;
   const news = readCache('news', []);
 
   const newsHtml = news.length
@@ -134,9 +139,10 @@ app.get(['/', '/index.html'], (req, res) => {
 // vistazo que esta pagina enlaza a las 30 plantillas. teams.js sigue
 // pintando encima con los logos/colores (esos si son solo de cliente).
 const teamsHtmlPath = path.join(__dirname, 'public', 'teams.html');
+const teamsHtmlTemplate = fs.readFileSync(teamsHtmlPath, 'utf-8');
 
 function renderTeamsHtml() {
-  const template = fs.readFileSync(teamsHtmlPath, 'utf-8');
+  const template = teamsHtmlTemplate;
   const teams = [...readCache('teams', [])].sort((a, b) => a.full_name.localeCompare(b.full_name));
 
   const cardsHtml = teams.map((t) => `
@@ -173,6 +179,7 @@ app.get('/teams.html', (req, res) => {
 // Se rellena titulo/meta/canonical/<h1> con los datos ya cacheados antes de
 // mandar la pagina; team.js sigue pintando encima sin cambios.
 const teamHtmlPath = path.join(__dirname, 'public', 'team.html');
+const teamHtmlTemplate = fs.readFileSync(teamHtmlPath, 'utf-8');
 
 function renderTeamHeroHtml(team, info) {
   const historyPill = info && info.founded
@@ -191,7 +198,7 @@ function renderTeamHeroHtml(team, info) {
 }
 
 function renderTeamHtml(team) {
-  const template = fs.readFileSync(teamHtmlPath, 'utf-8');
+  const template = teamHtmlTemplate;
   const info = getTeamInfo(team.abbreviation);
   const title = `${team.full_name} - Plantilla, salarios y valoración 2K | El Rompearos`;
   const description = `Plantilla actual de ${team.full_name}: estadísticas NBA, salarios y valoración NBA 2K de cada jugador de baloncesto. ${team.conference}ern Conference, división ${team.division}.`;
@@ -222,6 +229,10 @@ app.get('/team.html', (req, res) => {
   res.send(renderTeamHtml(team));
 });
 
+// Los logos/escudo cambian muy de vez en cuando (alguna sustitucion
+// puntual), no en cada despliegue como el JS/CSS: cache mas largo para que
+// un visitante que vuelve no los vuelva a descargar.
+app.use('/img', express.static(path.join(__dirname, 'public', 'img'), { maxAge: '1d' }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', index: false }));
 // Limite pequeño a proposito: el unico body que se envia es el de las picks
 // de la quiniela (un puñado de ids de partido/equipo), no hace falta mas.
@@ -236,6 +247,7 @@ app.get('/health', (req, res) => {
 // palabra clave. El slug es cosmetico, solo se usa el id del final; player.js
 // lo extrae con una expresion regular y pide los datos por id.
 const playerHtmlPath = path.join(__dirname, 'public', 'player.html');
+const playerHtmlTemplate = fs.readFileSync(playerHtmlPath, 'utf-8');
 
 // La ficha de jugador se cargaba entera por JS: el HTML crudo no tenia ni
 // un <h1> ni el nombre del jugador en ningun sitio, asi que un buscador que
@@ -267,7 +279,7 @@ function renderPlayerHeroHtml(player) {
 }
 
 function renderPlayerHtml(player) {
-  const template = fs.readFileSync(playerHtmlPath, 'utf-8');
+  const template = playerHtmlTemplate;
   const teamPart = player.currentTeam ? ` (${player.currentTeam.full_name})` : '';
   const title = `${player.first_name} ${player.last_name}${teamPart} - Estadísticas y contrato NBA | El Rompearos`;
   const description = player.isActive

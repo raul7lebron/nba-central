@@ -86,9 +86,12 @@ function renderPlayerHero(player) {
 
   // Foto libre de Wikimedia Commons, vía Wikidata (ver src/birthYear.js). No
   // todos los jugadores tienen una; si no hay o falla al cargar, se omite
-  // en vez de mostrar un hueco roto.
+  // en vez de mostrar un hueco roto. Sin loading="lazy": es la imagen
+  // principal de la pagina, siempre visible nada mas cargar (candidata a
+  // LCP) — diferirla solo la haria mas lenta, al reves de lo que "lazy"
+  // deberia conseguir.
   const photoHtml = player.photoUrl
-    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="120" height="120" loading="lazy" onerror="this.remove()">`
+    ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="120" height="120" fetchpriority="high" onerror="this.remove()">`
     : '';
 
   heroEl.innerHTML = `
