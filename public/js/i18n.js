@@ -548,13 +548,13 @@ function applyTranslations() {
   }
 }
 
-// Se inserta el ultimo (via setTimeout): navToggle.js y search.js inyectan
-// sus propios botones en el header de forma sincrona nada mas cargar, y
-// asi el selector siempre queda despues de ellos (a la derecha del todo)
-// sin depender del orden exacto de las etiquetas <script>.
+// Se inserta el ultimo (via setTimeout) dentro de nav.site-nav (no en el
+// header): asi viaja con el menu colapsado en movil (dentro del desplegable
+// de la hamburguesa) en vez de ocupar espacio fijo junto al logo, que es lo
+// que obligaba a ocultar "El Rompearos" en pantallas pequeñas.
 function injectLangSwitcher() {
-  const header = document.querySelector('header.site-header');
-  if (!header || document.getElementById('lang-switcher')) return;
+  const nav = document.querySelector('nav.site-nav');
+  if (!nav || document.getElementById('lang-switcher')) return;
 
   const select = document.createElement('select');
   select.id = 'lang-switcher';
@@ -565,7 +565,7 @@ function injectLangSwitcher() {
   ).join('');
   select.addEventListener('change', () => setLang(select.value));
 
-  header.appendChild(select);
+  nav.appendChild(select);
 }
 
 applyTranslations();

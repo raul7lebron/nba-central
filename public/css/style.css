@@ -231,6 +231,11 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
 /* ---------- Selector de idioma ---------- */
 
+/* Vive dentro de nav.site-nav (ultimo elemento, inyectado por i18n.js):
+   en ordenador queda inline al final de la barra horizontal de enlaces; en
+   movil, dentro del desplegable de la hamburguesa junto a los demas
+   enlaces, en vez de competir por espacio con "El Rompearos" en la
+   cabecera fija. */
 .lang-switcher {
   height: 36px;
   margin-left: 10px;
@@ -251,9 +256,12 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 .lang-switcher:focus { outline: none; border-color: var(--accent); }
 
 @media (max-width: 1700px) {
-  /* con el menu plegado, el selector de idioma pasa a ir junto al resto de
-     iconos de la cabecera (hamburguesa + buscador), no dentro del menu */
-  .lang-switcher { margin-left: 6px; }
+  /* menu plegado en columna: el selector pasa a ser un item mas, con su
+     propia altura de fila en vez de pegado al borde de un enlace vecino */
+  .lang-switcher {
+    align-self: flex-start;
+    margin: 6px 14px 0;
+  }
 }
 
 .search-panel {
@@ -961,17 +969,13 @@ footer.site-footer a:hover { color: var(--accent); }
   .team-hero { flex-direction: column; text-align: center; }
 }
 
-/* El nombre "El Rompearos" junto al hamburguesa, la lupa y el selector de
-   idioma (4 elementos en vez de los 2 originales) ya no cabe en una fila
-   a partir de ~480px de ancho: se salia por el borde derecho, dejando el
-   selector de idioma invisible e inutilizable en el movil (medido con
-   scrollWidth vs clientWidth de header.site-header, igual que el punto de
-   corte del menu). Por debajo de esa medida se deja solo el escudo, como
-   la mayoria de cabeceras moviles: el logo ya enlaza a Inicio igual.
-*/
-@media (max-width: 480px) {
-  header.site-header { gap: 10px; }
-  .brand-text { display: none; }
+/* Por debajo de ~340px el hueco de 28px entre marca/hamburguesa/buscador
+   (pensado para pantallas de escritorio) desborda por un margen pequeño
+   (24px de sobra medidos con scrollWidth vs clientWidth a 320px), aun con
+   "El Rompearos" siempre visible. Se achica el gap y el padding lateral en
+   vez de ocultar la marca. */
+@media (max-width: 340px) {
+  header.site-header { gap: 12px; padding: 14px 12px; }
 }
 
 /* ---------- Simulador de traspasos ---------- */
