@@ -41,14 +41,12 @@ function injectCookieBanner() {
   banner.className = 'cookie-banner';
   banner.innerHTML = `
     <p>
-      Usamos cookies propias y de terceros (publicidad) para mantener la web
-      gratuita. Puedes aceptarlas o rechazarlas; si las rechazas, seguirás
-      viendo la web con normalidad pero sin anuncios personalizados.
-      <a href="/cookies.html">Más información</a>.
+      ${t('cookie_banner_text')}
+      <a href="/cookies.html">${t('cookie_more_info')}</a>.
     </p>
     <div class="cookie-banner-actions">
-      <button id="cookie-reject" class="pill">Rechazar</button>
-      <button id="cookie-accept" class="pill" style="border-color:var(--accent);color:var(--accent)">Aceptar</button>
+      <button id="cookie-reject" class="pill">${t('cookie_reject')}</button>
+      <button id="cookie-accept" class="pill" style="border-color:var(--accent);color:var(--accent)">${t('cookie_accept')}</button>
     </div>
   `;
   document.body.appendChild(banner);

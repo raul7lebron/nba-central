@@ -229,6 +229,36 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 .search-toggle:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
 .search-toggle svg { display: block; }
 
+/* ---------- Selector de idioma ---------- */
+
+.lang-switcher {
+  height: 36px;
+  margin-left: 10px;
+  padding: 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.lang-switcher:hover { color: var(--text); border-color: var(--accent); }
+.lang-switcher:focus { outline: none; border-color: var(--accent); }
+
+@media (max-width: 1700px) {
+  /* con el menu plegado, el selector de idioma pasa a ir junto al resto de
+     iconos de la cabecera (hamburguesa + buscador), no dentro del menu */
+  .lang-switcher { margin-left: 6px; }
+}
+
+@media (max-width: 420px) {
+  .lang-switcher { padding: 0 4px; font-size: 0.72rem; }
+}
+
 .search-panel {
   position: absolute;
   top: calc(100% + 10px);

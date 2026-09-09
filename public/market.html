@@ -27,25 +27,26 @@
     <span class="brand-text">El <span>Rompearos</span></span>
   </a>
   <nav class="site-nav">
-    <a href="/index.html">Noticias</a>
-    <a href="/teams.html">Equipos</a>
-    <a href="/standings.html">Clasificación</a>
-    <a href="/stats.html">Estadísticas</a>
-    <a href="/compare.html">Comparar</a>
-    <a href="/trade.html">Simulador de traspasos</a>
-    <a href="/quiniela.html">Quiniela</a>
-    <a href="/calendar.html">Calendario</a>
-    <a href="/playoffs.html">Playoffs</a>
-    <a href="/draft.html">Draft</a>
-    <a href="/market.html" class="active">Mercado</a>
-    <a href="/store.html">Tienda</a>
+    <a href="/index.html" data-i18n="nav_news">Noticias</a>
+    <a href="/teams.html" data-i18n="nav_teams">Equipos</a>
+    <a href="/standings.html" data-i18n="nav_standings">Clasificación</a>
+    <a href="/stats.html" data-i18n="nav_stats">Estadísticas</a>
+    <a href="/compare.html" data-i18n="nav_compare">Comparar</a>
+    <a href="/trade.html" data-i18n="nav_trade">Simulador de traspasos</a>
+    <a href="/quiniela.html" data-i18n="nav_quiniela">Quiniela</a>
+    <a href="/calendar.html" data-i18n="nav_calendar">Calendario</a>
+    <a href="/playoffs.html" data-i18n="nav_playoffs">Playoffs</a>
+    <a href="/draft.html" data-i18n="nav_draft">Draft</a>
+    <a href="/market.html" class="active" data-i18n="nav_market">Mercado</a>
+    <a href="/store.html" data-i18n="nav_store">Tienda</a>
   </nav>
 </header>
 
 <main>
   <div class="page-head">
-    <h1 class="visually-hidden">Mercado de fichajes</h1>
+    <h1 class="visually-hidden" data-i18n="market_h1">Mercado de fichajes</h1>
   </div>
+  <p class="lang-notice state-msg" data-i18n="content_spanish_only" hidden></p>
   <div id="market-container" class="news-list">
     <p class="state-msg">Cargando mercado...</p>
   </div>
@@ -56,9 +57,10 @@
   Marca, AS, Mundo Deportivo, Sport y Gigantes del Basket · No es un registro oficial
   de transacciones, es una selección por palabras clave que se actualiza
   cada vez que llegan noticias nuevas.
-  <br><a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a>
+  <br><a href="/legal.html" data-i18n="footer_legal">Aviso Legal</a> · <a href="/privacy.html" data-i18n="footer_privacy">Privacidad</a> · <a href="/cookies.html" data-i18n="footer_cookies">Cookies</a>
 </footer>
 
+<script src="/js/i18n.js" defer></script>
 <script src="/js/navToggle.js" defer></script>
 <script src="/js/teamColors.js" defer></script>
 <script src="/js/teamLogos.js" defer></script>

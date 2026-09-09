@@ -16,14 +16,14 @@ function injectPlayerSearch() {
   wrap.id = 'nav-search';
   wrap.className = 'nav-search';
   wrap.innerHTML = `
-    <button id="search-toggle" class="search-toggle" aria-label="Buscar jugador" title="Buscar jugador">
+    <button id="search-toggle" class="search-toggle" aria-label="${t('search_aria_label')}" title="${t('search_aria_label')}">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="11" cy="11" r="7"></circle>
         <line x1="21" y1="21" x2="16.2" y2="16.2"></line>
       </svg>
     </button>
     <div id="search-panel" class="search-panel" hidden>
-      <input type="text" id="search-input" placeholder="Buscar jugador..." autocomplete="off">
+      <input type="text" id="search-input" placeholder="${t('search_placeholder')}" autocomplete="off">
       <div id="search-results" class="search-results"></div>
     </div>
   `;
@@ -81,14 +81,14 @@ function injectPlayerSearch() {
 
   async function runSearch(q) {
     const token = ++searchToken;
-    results.innerHTML = '<div class="search-result-empty">Buscando...</div>';
+    results.innerHTML = `<div class="search-result-empty">${t('search_searching')}</div>`;
     try {
       const res = await fetch(`/api/players/search?q=${encodeURIComponent(q)}`);
       const players = await res.json();
       if (token !== searchToken) return;
 
       if (!players.length) {
-        results.innerHTML = '<div class="search-result-empty">Sin resultados</div>';
+        results.innerHTML = `<div class="search-result-empty">${t('search_no_results')}</div>`;
         return;
       }
 
@@ -100,7 +100,7 @@ function injectPlayerSearch() {
         </a>
       `).join('');
     } catch (err) {
-      results.innerHTML = '<div class="search-result-empty">No se pudo buscar</div>';
+      results.innerHTML = `<div class="search-result-empty">${t('search_error')}</div>`;
     }
   }
 }
