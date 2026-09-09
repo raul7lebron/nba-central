@@ -4,15 +4,15 @@
 // (refreshSeasonLeaders, a diario); aqui solo se ordena/filtra/recorta.
 
 const STAT_OPTIONS = [
-  { value: 'val', label: 'Valoración' },
-  { value: 'pts', label: 'Puntos' },
-  { value: 'reb', label: 'Rebotes' },
-  { value: 'ast', label: 'Asistencias' },
-  { value: 'stl', label: 'Robos' },
-  { value: 'blk', label: 'Tapones' },
-  { value: 'fg_pct', label: '% Tiro de campo' },
-  { value: 'fg3_pct', label: '% Triples' },
-  { value: 'min', label: 'Minutos por partido' }
+  { value: 'val', label: t('stat_val') },
+  { value: 'pts', label: t('stat_pts') },
+  { value: 'reb', label: t('stat_reb') },
+  { value: 'ast', label: t('stat_ast') },
+  { value: 'stl', label: t('stat_stl') },
+  { value: 'blk', label: t('stat_blk') },
+  { value: 'fg_pct', label: t('stat_fg_pct') },
+  { value: 'fg3_pct', label: t('stat_fg3_pct') },
+  { value: 'min', label: t('stat_min_per_game') }
 ];
 
 let allLeaders = [];
@@ -36,7 +36,7 @@ function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('es-ES', { day: '2-digit', month: 'short' });
+  return d.toLocaleDateString(getLocale(), { day: '2-digit', month: 'short' });
 }
 
 function renderToolbar(selected) {
@@ -47,15 +47,15 @@ function renderToolbar(selected) {
   const seasonLabel = seasonMeta.season != null
     ? `${seasonMeta.season}-${String(seasonMeta.season + 1).slice(2)}`
     : '';
-  const updatedLabel = seasonMeta.lastRefresh ? ` · actualizado ${formatDate(seasonMeta.lastRefresh)}` : '';
+  const updatedLabel = seasonMeta.lastRefresh ? ` · ${t('stats_updated')} ${formatDate(seasonMeta.lastRefresh)}` : '';
 
   wrap.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
       <label class="pill" style="cursor:pointer">
-        Ordenar por
+        ${t('stats_sort_label')}
         <select id="stat-select" style="background:transparent;border:none;color:var(--accent);font-weight:700;font-family:inherit;cursor:pointer;margin-left:4px">${options}</select>
       </label>
-      <span class="player-meta">Temporada ${seasonLabel} · Top 50${updatedLabel}</span>
+      <span class="player-meta">${t('stats_season_prefix')} ${seasonLabel} · Top 50${updatedLabel}</span>
     </div>
   `;
   document.getElementById('stat-select').addEventListener('change', (e) => renderTable(e.target.value));
@@ -79,7 +79,7 @@ function renderTable(statKey) {
     .slice(0, 50);
 
   if (!sorted.length) {
-    container.innerHTML = '<p class="state-msg">Todavía no hay estadísticas de esta temporada.</p>';
+    container.innerHTML = `<p class="state-msg">${t('stats_no_current_season')}</p>`;
     return;
   }
 
@@ -113,10 +113,10 @@ function renderTable(statKey) {
       <table class="stats-table">
         <thead>
           <tr>
-            <th>#</th><th style="text-align:left">Jugador</th><th>PJ</th><th>MIN</th>
+            <th>#</th><th style="text-align:left">${t('th_player')}</th><th>${t('th_gp')}</th><th>${t('th_min')}</th>
             <th style="color:var(--accent)">${statLabel}</th>
-            <th>PTS</th><th>REB</th>
-            <th>AST</th><th>ROB</th><th>TAP</th><th>%TC</th><th>%3P</th><th>VAL</th>
+            <th>${t('th_pts')}</th><th>${t('th_reb')}</th>
+            <th>${t('th_ast')}</th><th>${t('th_stl')}</th><th>${t('th_blk')}</th><th>${t('th_fg_pct')}</th><th>${t('th_fg3_pct')}</th><th>${t('th_val')}</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -136,13 +136,13 @@ async function loadStats() {
     renderToolbar('val');
 
     if (!allLeaders.length) {
-      container.innerHTML = '<p class="state-msg">Todavía no hay estadísticas de la temporada en curso (puede que aún no haya empezado o el servidor no las haya refrescado todavía).</p>';
+      container.innerHTML = `<p class="state-msg">${t('stats_no_leaders_yet')}</p>`;
       return;
     }
 
     renderTable('val');
   } catch (err) {
-    container.innerHTML = '<p class="error-msg">No se pudieron cargar las estadísticas.</p>';
+    container.innerHTML = `<p class="error-msg">${t('stats_error')}</p>`;
   }
 }
 

@@ -96,7 +96,7 @@ function injectPlayerSearch() {
         <a class="search-result-item" href="${playerUrl(p)}">
           ${p.currentTeam ? logoImgOrBadge(p.currentTeam.abbreviation, 20) : '<span class="team-badge" style="width:20px;height:20px;font-size:0.6rem">?</span>'}
           <span>${p.first_name} ${p.last_name}</span>
-          <span class="search-result-tag">${p.isActive ? 'Activo' : 'Retirado'}</span>
+          <span class="search-result-tag">${p.isActive ? t('common_active') : t('common_retired')}</span>
         </a>
       `).join('');
     } catch (err) {

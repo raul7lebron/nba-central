@@ -5,7 +5,7 @@ async function loadTeams() {
     const teams = await res.json();
 
     if (!teams.length) {
-      container.innerHTML = '<p class="state-msg">Todavía no hay equipos cacheados. Vuelve en unos minutos.</p>';
+      container.innerHTML = `<p class="state-msg">${t('teams_empty')}</p>`;
       return;
     }
 
@@ -22,7 +22,7 @@ async function loadTeams() {
       </a>
     `).join('');
   } catch (err) {
-    container.innerHTML = '<p class="error-msg">No se pudieron cargar los equipos.</p>';
+    container.innerHTML = `<p class="error-msg">${t('teams_error')}</p>`;
   }
 }
 

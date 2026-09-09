@@ -33,7 +33,7 @@ function loadAdSenseScript() {
 function renderAdSlot(slotKey, label) {
   const slotId = ADSENSE_CONFIG.slots[slotKey];
   if (!adsEnabled() || !slotId) {
-    return `<div class="ad-slot ad-slot-placeholder">${label || 'Espacio publicitario'}</div>`;
+    return `<div class="ad-slot ad-slot-placeholder">${label || t('ads_placeholder')}</div>`;
   }
   return `
     <div class="ad-slot">
@@ -54,7 +54,7 @@ function injectAdSidebar() {
   const el = document.createElement('div');
   el.id = 'ad-sidebar';
   el.className = 'ad-sidebar';
-  el.innerHTML = renderAdSlot('sidebar', 'Publicidad');
+  el.innerHTML = renderAdSlot('sidebar', t('ads_sidebar_label'));
   document.body.appendChild(el);
   activateAdSlots();
 }

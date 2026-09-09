@@ -47,7 +47,8 @@ function futurePicksForTeam(team) {
   for (let i = 1; i <= FUTURE_DRAFT_YEARS_AHEAD; i++) {
     const year = currentSeason + i;
     for (const round of [1, 2]) {
-      picks.push({ id: `pick-${team.id}-${year}-${round}`, label: `${round === 1 ? '1ª' : '2ª'} ronda ${year}` });
+      const roundLabel = round === 1 ? t('trade_pick_round1') : t('trade_pick_round2');
+      picks.push({ id: `pick-${team.id}-${year}-${round}`, label: `${roundLabel} ${year}` });
     }
   }
   return picks;
@@ -235,7 +236,7 @@ function renderTeamPicker(slot) {
 
   return `
     <select class="pill trade-team-select" data-slot="${slot.id}" style="width:100%;justify-content:center;cursor:pointer">
-      <option value="">Elige un equipo…</option>
+      <option value="">${t('trade_choose_team')}</option>
       ${options}
     </select>
   `;
@@ -249,7 +250,7 @@ function renderDestinationSelect(slot, assetId) {
 
   return `
     <select class="pill trade-dest-select" data-slot="${slot.id}" data-asset="${assetId}">
-      <option value="">¿A quién va?</option>
+      <option value="">${t('trade_ask_destination')}</option>
       ${destOptions}
     </select>
   `;
@@ -265,9 +266,9 @@ function renderRosterRow(slot, p) {
         <input type="checkbox" class="trade-player-check" data-slot="${slot.id}" data-asset="${p.id}" ${checked ? 'checked' : ''}>
         <span class="trade-player-info">
           <span class="player-name">${p.first_name} ${p.last_name}</span>
-          <span class="player-meta">${p.position || 'N/D'}${p.jersey_number ? ' · #' + p.jersey_number : ''}</span>
+          <span class="player-meta">${p.position || t('common_no_data')}${p.jersey_number ? ' · #' + p.jersey_number : ''}</span>
         </span>
-        <span class="trade-player-salary">${p.salary ? formatMoney(p.salary) : 'Sin datos'}</span>
+        <span class="trade-player-salary">${p.salary ? formatMoney(p.salary) : t('trade_no_salary_data')}</span>
       </label>
       ${showDestination ? renderDestinationSelect(slot, p.id) : ''}
     </div>
@@ -284,7 +285,7 @@ function renderPickRow(slot, pk) {
         <input type="checkbox" class="trade-player-check" data-slot="${slot.id}" data-asset="${pk.id}" ${checked ? 'checked' : ''}>
         <span class="trade-player-info">
           <span class="player-name">${pk.label}</span>
-          <span class="player-meta">Elección de draft</span>
+          <span class="player-meta">${t('trade_draft_pick_label')}</span>
         </span>
       </label>
       ${showDestination ? renderDestinationSelect(slot, pk.id) : ''}
@@ -294,13 +295,13 @@ function renderPickRow(slot, pk) {
 
 function renderTeamSlot(slot) {
   const canRemove = slots.length > MIN_TRADE_TEAMS;
-  const removeBtn = canRemove ? `<button class="pill trade-remove-btn" data-slot="${slot.id}" type="button">Quitar</button>` : '';
+  const removeBtn = canRemove ? `<button class="pill trade-remove-btn" data-slot="${slot.id}" type="button">${t('trade_remove')}</button>` : '';
 
   if (!slot.team) {
     return `
       <div class="trade-team-card trade-team-card-empty">
         ${removeBtn}
-        <p class="state-msg">Sin equipo</p>
+        <p class="state-msg">${t('trade_no_team')}</p>
         ${renderTeamPicker(slot)}
       </div>
     `;
@@ -308,19 +309,19 @@ function renderTeamSlot(slot) {
 
   const capLabel = slot.salarySummary && slot.salarySummary.hasData
     ? (slot.salarySummary.capSpace >= 0
-      ? `${formatMoney(slot.salarySummary.capSpace)} de margen`
-      : `${formatMoney(Math.abs(slot.salarySummary.capSpace))} por encima del tope`)
-    : 'sin datos de nómina';
+      ? `${formatMoney(slot.salarySummary.capSpace)} ${t('common_cap_room')}`
+      : `${formatMoney(Math.abs(slot.salarySummary.capSpace))} ${t('common_over_cap')}`)
+    : t('trade_no_payroll_data');
 
   const rosterHtml = slot.rosterLoading
-    ? '<p class="state-msg">Cargando plantilla...</p>'
+    ? `<p class="state-msg">${t('trade_roster_loading')}</p>`
     : (slot.roster.length
       ? `<div class="trade-roster-list">${slot.roster.map((p) => renderRosterRow(slot, p)).join('')}</div>`
-      : '<p class="state-msg">Sin jugadores cacheados.</p>');
+      : `<p class="state-msg">${t('trade_no_players_cached')}</p>`);
 
   const picksHtml = slot.picks.length
     ? `
-      <div class="trade-section-label">Elecciones de draft futuras</div>
+      <div class="trade-section-label">${t('trade_section_future_picks')}</div>
       <div class="trade-roster-list trade-picks-list">${slot.picks.map((pk) => renderPickRow(slot, pk)).join('')}</div>
     `
     : '';
@@ -336,7 +337,7 @@ function renderTeamSlot(slot) {
         </div>
       </div>
       ${renderTeamPicker(slot)}
-      <div class="trade-section-label">Plantilla</div>
+      <div class="trade-section-label">${t('trade_section_squad')}</div>
       ${rosterHtml}
       ${picksHtml}
     </div>
@@ -365,7 +366,7 @@ function renderMovementsSummary() {
       ${movements.map((m) => `
         <div class="trade-movement">
           <span class="player-name">${m.name}</span>
-          <span class="player-meta">${displayAbbr(m.from.abbreviation)} → ${m.to ? displayAbbr(m.to.abbreviation) : '¿?'}</span>
+          <span class="player-meta">${displayAbbr(m.from.abbreviation)} → ${m.to ? displayAbbr(m.to.abbreviation) : t('trade_unknown_destination')}</span>
         </div>
       `).join('')}
     </div>
@@ -379,33 +380,33 @@ function renderTeamResult(slot) {
     return `
       <div class="trade-result-card">
         <div class="trade-result-head">${logoImgOrBadge(slot.team.abbreviation, 24)}<span class="team-name">${displayAbbr(slot.team.abbreviation)}</span></div>
-        <p class="player-meta">Sin cambios en este traspaso.</p>
+        <p class="player-meta">${t('trade_no_changes')}</p>
       </div>
     `;
   }
 
   const verdictHtml = !r.hasPayrollData
-    ? '<span class="pill trade-verdict-unknown">Sin datos de nómina</span>'
+    ? `<span class="pill trade-verdict-unknown">${t('trade_verdict_no_data')}</span>`
     : (r.legal
-      ? '<span class="pill trade-verdict-ok">Cuadra en salario</span>'
-      : '<span class="pill trade-verdict-fail">No cuadra en salario</span>');
+      ? `<span class="pill trade-verdict-ok">${t('trade_verdict_ok')}</span>`
+      : `<span class="pill trade-verdict-fail">${t('trade_verdict_fail')}</span>`);
 
   return `
     <div class="trade-result-card">
       <div class="trade-result-head">${logoImgOrBadge(slot.team.abbreviation, 24)}<span class="team-name">${displayAbbr(slot.team.abbreviation)}</span>${verdictHtml}</div>
       <div class="trade-result-rows">
-        <div><span class="player-meta">Sale</span><b>${formatMoney(r.outgoingSalary)}</b></div>
-        <div><span class="player-meta">Entra</span><b>${formatMoney(r.incomingSalary)}</b></div>
+        <div><span class="player-meta">${t('trade_out_label')}</span><b>${formatMoney(r.outgoingSalary)}</b></div>
+        <div><span class="player-meta">${t('trade_in_label')}</span><b>${formatMoney(r.incomingSalary)}</b></div>
         ${r.hasPayrollData ? `
-          <div><span class="player-meta">Margen permitido</span><b>${formatMoney(r.maxIncoming)}</b></div>
-          <div><span class="player-meta">Nómina resultante</span><b>${formatMoney(r.newPayroll)}</b></div>
+          <div><span class="player-meta">${t('trade_margin_allowed')}</span><b>${formatMoney(r.maxIncoming)}</b></div>
+          <div><span class="player-meta">${t('trade_resulting_payroll')}</span><b>${formatMoney(r.newPayroll)}</b></div>
         ` : ''}
       </div>
-      ${r.hasUnknownSalary ? '<p class="player-meta">Incluye algún jugador sin salario conocido (contado como 0$).</p>' : ''}
+      ${r.hasUnknownSalary ? `<p class="player-meta">${t('trade_unknown_salary_note')}</p>` : ''}
       ${(r.outgoingPicks.length || r.incomingPicks.length) ? `
         <div class="trade-result-picks">
-          ${r.outgoingPicks.map((pk) => `<div class="player-meta">Cede ${pk.label}</div>`).join('')}
-          ${r.incomingPicks.map((ip) => `<div class="player-meta">Recibe ${ip.pick.label} de ${displayAbbr(ip.from.abbreviation)}</div>`).join('')}
+          ${r.outgoingPicks.map((pk) => `<div class="player-meta">${t('trade_gives')} ${pk.label}</div>`).join('')}
+          ${r.incomingPicks.map((ip) => `<div class="player-meta">${t('trade_receives')} ${ip.pick.label} ${t('trade_from_word')} ${displayAbbr(ip.from.abbreviation)}</div>`).join('')}
         </div>
       ` : ''}
     </div>
@@ -418,20 +419,20 @@ function renderSummary() {
   const anyActivity = slots.some((s) => s.outgoing.size > 0);
 
   if (teamsChosen.length < MIN_TRADE_TEAMS || !anyActivity) {
-    wrap.innerHTML = '<p class="state-msg">Elige los equipos y marca qué jugadores salen de cada plantilla para simular el traspaso.</p>';
+    wrap.innerHTML = `<p class="state-msg">${t('trade_pick_teams_prompt')}</p>`;
     return;
   }
 
   const unresolved = unresolvedDestinationsCount();
   const unresolvedWarning = unresolved > 0
-    ? `<p class="error-msg">Falta asignar el destino de ${unresolved} jugador${unresolved > 1 ? 'es' : ''}.</p>`
+    ? `<p class="error-msg">${t(unresolved > 1 ? 'trade_missing_destination_plural' : 'trade_missing_destination_singular', { n: unresolved })}</p>`
     : '';
 
   wrap.innerHTML = `
-    <h2 style="font-size:1.1rem;margin:24px 0 8px">Movimientos</h2>
+    <h2 style="font-size:1.1rem;margin:24px 0 8px">${t('trade_movements_title')}</h2>
     ${renderMovementsSummary()}
     ${unresolvedWarning}
-    <h2 style="font-size:1.1rem;margin:24px 0 8px">¿Cuadra el traspaso?</h2>
+    <h2 style="font-size:1.1rem;margin:24px 0 8px">${t('trade_results_title')}</h2>
     <div class="trade-results-grid">
       ${slots.map((s) => renderTeamResult(s)).join('')}
     </div>
@@ -470,7 +471,7 @@ async function initTrade() {
     allTeams = (await teamsRes.json()).slice().sort((a, b) => a.full_name.localeCompare(b.full_name));
     currentSeason = (await seasonsRes.json()).current;
   } catch (err) {
-    document.getElementById('trade-teams').innerHTML = '<p class="error-msg">No se pudieron cargar los equipos.</p>';
+    document.getElementById('trade-teams').innerHTML = `<p class="error-msg">${t('trade_teams_error')}</p>`;
     return;
   }
 

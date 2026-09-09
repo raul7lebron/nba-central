@@ -50,20 +50,20 @@
 
   <div class="quiniela-identity">
     <label class="pill">
-      Tu apodo
-      <input type="text" id="quiniela-nickname" placeholder="Elige un apodo" maxlength="24">
+      <span data-i18n="quiniela_nickname_label">Tu apodo</span>
+      <input type="text" id="quiniela-nickname" placeholder="Elige un apodo" data-i18n-placeholder="quiniela_nickname_placeholder" maxlength="24">
     </label>
-    <p class="player-meta">El apodo y tus picks se guardan en este navegador, sin contraseña. Si borras los datos del sitio, empiezas de cero.</p>
+    <p class="player-meta" data-i18n="quiniela_privacy_note">El apodo y tus picks se guardan en este navegador, sin contraseña. Si borras los datos del sitio, empiezas de cero.</p>
   </div>
 
   <div class="quiniela-week-nav">
-    <button id="week-prev" class="pill" type="button">← Semana anterior</button>
+    <button id="week-prev" class="pill" type="button" data-i18n="quiniela_week_prev">← Semana anterior</button>
     <span id="week-label" class="pill"></span>
-    <button id="week-next" class="pill" type="button">Semana siguiente →</button>
+    <button id="week-next" class="pill" type="button" data-i18n="quiniela_week_next">Semana siguiente →</button>
   </div>
 
   <div id="quiniela-games">
-    <p class="state-msg">Cargando partidos...</p>
+    <p class="state-msg" data-i18n="quiniela_games_loading">Cargando partidos...</p>
   </div>
 
   <div class="quiniela-status-row">

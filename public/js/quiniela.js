@@ -77,14 +77,14 @@ function formatWeekLabel(games) {
   if (!games.length) return '';
   const first = new Date(games[0].datetime);
   const last = new Date(games[games.length - 1].datetime);
-  const fmt = (d) => d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  const fmt = (d) => d.toLocaleDateString(getLocale(), { day: 'numeric', month: 'short' });
   return `${fmt(first)} – ${fmt(last)}`;
 }
 
 function formatGameTime(datetime) {
   const d = new Date(datetime);
-  return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }) +
-    ', ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleDateString(getLocale(), { weekday: 'short', day: 'numeric', month: 'short' }) +
+    ', ' + d.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
 }
 
 function isLocked(g) {
@@ -120,8 +120,8 @@ function pickButtonHtml(g, team, opponentScore, myScore) {
 function renderGameCard(g) {
   const locked = isLocked(g);
   const statusLabel = g.status_state === 'final'
-    ? 'Final'
-    : (locked ? 'En juego / por confirmar' : formatGameTime(g.datetime));
+    ? t('quiniela_final')
+    : (locked ? t('quiniela_in_progress') : formatGameTime(g.datetime));
 
   return `
     <div class="quiniela-game">
@@ -138,7 +138,7 @@ function renderGameCard(g) {
 function renderGames() {
   const container = document.getElementById('quiniela-games');
   if (!weekGames.length) {
-    container.innerHTML = '<p class="state-msg">No hay partidos programados esta semana. Prueba otra semana.</p>';
+    container.innerHTML = `<p class="state-msg">${t('quiniela_no_games_week')}</p>`;
     return;
   }
   container.innerHTML = `<div class="quiniela-games-grid">${weekGames.map(renderGameCard).join('')}</div>`;
@@ -164,7 +164,7 @@ function renderMyScore() {
     return;
   }
   const correct = decidedGames.filter((g) => winnerOf(g) === myPicks[g.id]).length;
-  el.textContent = `Tu resultado esta semana: ${correct} de ${decidedGames.length} acertados.`;
+  el.textContent = t('quiniela_my_score', { correct, total: decidedGames.length });
 }
 
 function updateSaveStatus(text) {
@@ -173,7 +173,7 @@ function updateSaveStatus(text) {
 
 function schedulePicksSave() {
   clearTimeout(saveTimer);
-  updateSaveStatus('Guardando...');
+  updateSaveStatus(t('quiniela_saving'));
   saveTimer = setTimeout(async () => {
     try {
       const res = await fetch('/api/quiniela/picks', {
@@ -182,10 +182,10 @@ function schedulePicksSave() {
         body: JSON.stringify({ clientId, nickname, season: currentSeason, week: currentWeek, picks: myPicks })
       });
       if (!res.ok) throw new Error('bad status');
-      updateSaveStatus('Guardado ✓');
+      updateSaveStatus(t('quiniela_saved'));
       loadLeaderboard();
     } catch (err) {
-      updateSaveStatus('No se pudo guardar. Se reintentará con la próxima elección.');
+      updateSaveStatus(t('quiniela_save_error'));
     }
   }, 500);
 }
@@ -202,7 +202,7 @@ function renderWeekNav() {
 }
 
 async function loadWeek(week) {
-  document.getElementById('quiniela-games').innerHTML = '<p class="state-msg">Cargando partidos...</p>';
+  document.getElementById('quiniela-games').innerHTML = `<p class="state-msg">${t('quiniela_games_loading')}</p>`;
   try {
     const params = new URLSearchParams();
     if (week) params.set('week', week);
@@ -219,7 +219,7 @@ async function loadWeek(week) {
     renderMyScore();
     loadLeaderboard();
   } catch (err) {
-    document.getElementById('quiniela-games').innerHTML = '<p class="error-msg">No se pudieron cargar los partidos.</p>';
+    document.getElementById('quiniela-games').innerHTML = `<p class="error-msg">${t('quiniela_games_error')}</p>`;
   }
 }
 
@@ -231,7 +231,7 @@ function renderLeaderboardTable(entries, emptyMsg) {
     return `
       <tr ${isMe ? 'style="color:var(--accent);font-weight:700"' : ''}>
         <td>${i + 1}</td>
-        <td style="text-align:left">${e.nickname ? escapeAttr(e.nickname) : 'Jugador anónimo'}${isMe ? ' (tú)' : ''}</td>
+        <td style="text-align:left">${e.nickname ? escapeAttr(e.nickname) : t('quiniela_anonymous')}${isMe ? t('quiniela_you_suffix') : ''}</td>
         <td>${e.correct}</td>
         <td>${e.decided}</td>
         <td>${pct}%</td>
@@ -242,7 +242,7 @@ function renderLeaderboardTable(entries, emptyMsg) {
   return `
     <div class="table-scroll">
       <table class="stats-table">
-        <thead><tr><th>#</th><th style="text-align:left">Apodo</th><th>Aciertos</th><th>Decididos</th><th>%</th></tr></thead>
+        <thead><tr><th>#</th><th style="text-align:left">${t('quiniela_th_nickname')}</th><th>${t('quiniela_th_correct')}</th><th>${t('quiniela_th_decided')}</th><th>%</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
@@ -255,13 +255,13 @@ async function loadLeaderboard() {
     const res = await fetch(`/api/quiniela/leaderboard?season=${currentSeason}&week=${currentWeek}`);
     const data = await res.json();
     wrap.innerHTML = `
-      <h2 style="font-size:1.1rem;margin:24px 0 8px">Clasificación de esta semana</h2>
-      ${renderLeaderboardTable(data.weekLeaderboard, 'Todavía nadie ha acertado ningún partido decidido esta semana.')}
-      <h2 style="font-size:1.1rem;margin:24px 0 8px">Clasificación de la temporada</h2>
-      ${renderLeaderboardTable(data.seasonLeaderboard, 'Todavía no hay resultados decididos esta temporada.')}
+      <h2 style="font-size:1.1rem;margin:24px 0 8px">${t('quiniela_week_leaderboard_title')}</h2>
+      ${renderLeaderboardTable(data.weekLeaderboard, t('quiniela_week_leaderboard_empty'))}
+      <h2 style="font-size:1.1rem;margin:24px 0 8px">${t('quiniela_season_leaderboard_title')}</h2>
+      ${renderLeaderboardTable(data.seasonLeaderboard, t('quiniela_season_leaderboard_empty'))}
     `;
   } catch (err) {
-    wrap.innerHTML = '<p class="error-msg">No se pudo cargar la clasificación.</p>';
+    wrap.innerHTML = `<p class="error-msg">${t('quiniela_leaderboard_error')}</p>`;
   }
 }
 

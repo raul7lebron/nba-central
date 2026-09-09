@@ -53,8 +53,8 @@ function renderAwardPills(awards) {
   const items = [];
   if (awards.mvp > 0) items.push(`🏆 ${awards.mvp > 1 ? awards.mvp + '× ' : ''}MVP`);
   if (awards.allStar > 0) items.push(`⭐ ${awards.allStar}× All-Star`);
-  if (awards.allDefensive > 0) items.push(`🛡️ ${awards.allDefensive}× Quinteto defensivo`);
-  if (awards.rookieOfYear > 0) items.push('🌱 Rookie del año');
+  if (awards.allDefensive > 0) items.push(`🛡️ ${awards.allDefensive}× ${t('player_award_all_defensive')}`);
+  if (awards.rookieOfYear > 0) items.push(`🌱 ${t('player_award_rookie')}`);
   if (!items.length) return '';
 
   return `
@@ -68,20 +68,20 @@ function renderPlayerHero(player) {
   const heroEl = document.getElementById('player-hero');
   const teamLine = player.currentTeam
     ? `<a class="pill" href="/team.html?id=${player.currentTeam.id}">${logoImgOrBadge(player.currentTeam.abbreviation, 18)} ${displayAbbr(player.currentTeam.abbreviation)}</a>`
-    : '<span class="pill">Sin equipo actual</span>';
+    : `<span class="pill">${t('player_no_current_team')}</span>`;
 
   const draftPill = player.draft_year
-    ? `<span class="pill">Draft ${player.draft_year} · Ronda ${player.draft_round} · Pick nº${player.draft_number}</span>`
-    : '<span class="pill">No drafteado</span>';
+    ? `<span class="pill">Draft ${player.draft_year} · ${t('player_draft_round_word')} ${player.draft_round} · ${t('player_draft_pick_word')}${player.draft_number}</span>`
+    : `<span class="pill">${t('common_undrafted')}</span>`;
 
   const ratingPill = player.isActive && player.rating2k
     ? `<span class="pill">2K: <span style="color:${rating2kColor(player.rating2k)};font-weight:700">${player.rating2k}</span></span>`
     : (!player.isActive && player.peakRating2k
-      ? `<span class="pill">Mejor 2K de su carrera: <span style="color:${rating2kColor(player.peakRating2k)};font-weight:700">${player.peakRating2k}</span></span>`
+      ? `<span class="pill">${t('player_2k_career_best')} <span style="color:${rating2kColor(player.peakRating2k)};font-weight:700">${player.peakRating2k}</span></span>`
       : '');
 
   const salaryPill = player.isActive && player.salary
-    ? `<span class="pill">Salario ${formatMoney(player.salary)} (temporada actual)</span>`
+    ? `<span class="pill">${t('player_salary_label')} ${formatMoney(player.salary)} (${t('player_current_season')})</span>`
     : '';
 
   // Foto libre de Wikimedia Commons, vía Wikidata (ver src/birthYear.js). No
@@ -95,7 +95,7 @@ function renderPlayerHero(player) {
     ${photoHtml}
     <div style="flex:1">
       <h1>${player.first_name} ${player.last_name}</h1>
-      <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.birthYear ? ' · ' + player.birthYear : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>
+      <div class="player-meta">${player.position || t('common_no_data')} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.birthYear ? ' · ' + player.birthYear : ''}${player.isActive ? '' : ' · ' + t('player_retired_inactive')}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
         ${teamLine}
         ${draftPill}
@@ -115,8 +115,8 @@ function updateBreadcrumb(player) {
   if (!nav) return;
 
   const crumbs = [
-    { name: 'Inicio', url: 'https://www.elrompearos.com/', href: '/index.html' },
-    { name: 'Equipos', url: 'https://www.elrompearos.com/teams.html', href: '/teams.html' }
+    { name: t('breadcrumb_home'), url: 'https://www.elrompearos.com/', href: '/index.html' },
+    { name: t('nav_teams'), url: 'https://www.elrompearos.com/teams.html', href: '/teams.html' }
   ];
   if (player.currentTeam) {
     crumbs.push({
@@ -147,14 +147,14 @@ function updateBreadcrumb(player) {
 function renderPlayerContract(player) {
   const el = document.getElementById('player-contract');
   if (!player.contract || !player.contract.length) return;
-  el.innerHTML = `<h2>Contrato</h2>${renderContractTable(player.contract, player.salary)}`;
+  el.innerHTML = `<h2>${t('player_contract_title')}</h2>${renderContractTable(player.contract, player.salary)}`;
 }
 
 async function renderPlayerStats(player) {
   const el = document.getElementById('player-stats');
   el.innerHTML = `
-    <h2>${player.isActive ? 'Estadísticas por temporada' : 'Estadísticas de toda su carrera'}</h2>
-    <div id="player-stats-body"><p class="state-msg">Cargando estadísticas...</p></div>
+    <h2>${player.isActive ? t('player_stats_season_title') : t('player_stats_career_title')}</h2>
+    <div id="player-stats-body"><p class="state-msg">${t('player_stats_loading')}</p></div>
   `;
   const body = document.getElementById('player-stats-body');
 
@@ -171,21 +171,21 @@ async function renderPlayerStats(player) {
     const data = await res.json();
     body.innerHTML = renderStatsTable(data.history);
   } catch (err) {
-    body.innerHTML = '<p class="error-msg">No se pudieron cargar las estadísticas.</p>';
+    body.innerHTML = `<p class="error-msg">${t('player_stats_error')}</p>`;
   }
 }
 
 async function loadPlayer() {
   const playerId = getPlayerIdFromUrl();
   if (!playerId) {
-    document.getElementById('player-hero').innerHTML = '<h1>Jugador no especificado</h1>';
+    document.getElementById('player-hero').innerHTML = `<h1>${t('player_not_specified')}</h1>`;
     return;
   }
 
   try {
     const res = await fetch(`/api/players/${playerId}`);
     if (res.status === 404) {
-      document.getElementById('player-hero').innerHTML = '<h1>Jugador no encontrado</h1>';
+      document.getElementById('player-hero').innerHTML = `<h1>${t('player_not_found')}</h1>`;
       return;
     }
     const player = await res.json();
@@ -199,7 +199,7 @@ async function loadPlayer() {
     document.getElementById('player-ad-slot').innerHTML = renderAdSlot('teamFooter');
     activateAdSlots();
   } catch (err) {
-    document.getElementById('player-hero').innerHTML = '<p class="error-msg">No se pudo cargar el jugador.</p>';
+    document.getElementById('player-hero').innerHTML = `<p class="error-msg">${t('player_load_error')}</p>`;
   }
 }
 

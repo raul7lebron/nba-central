@@ -66,7 +66,7 @@ function buildShopGrid() {
             <span class="shop-tile-retailer">${item.retailer}</span>
             <span class="shop-tile-title">${item.title}</span>
             <span class="shop-tile-desc">${item.desc}</span>
-            <span class="shop-tile-cta">Ver producto →</span>
+            <span class="shop-tile-cta">${t('common_view_product')}</span>
           </a>
         `).join('')}
       </div>
