@@ -128,6 +128,61 @@ app.get(['/', '/index.html'], (req, res) => {
   res.send(renderIndexHtml());
 });
 
+// Igual que player.html: team.html se servia siempre con el mismo HTML
+// generico ("Cargando equipo...", sin <h1>) para las 30 plantillas del
+// sitio, porque todo el contenido lo pintaba team.js tras pedir /api/teams/:id.
+// Se rellena titulo/meta/canonical/<h1> con los datos ya cacheados antes de
+// mandar la pagina; team.js sigue pintando encima sin cambios.
+const teamHtmlPath = path.join(__dirname, 'public', 'team.html');
+
+function renderTeamHeroHtml(team, info) {
+  const historyPill = info && info.founded
+    ? `<span class="pill">🏆 ${info.titles} título${info.titles === 1 ? '' : 's'} · fundado en ${info.founded}</span>`
+    : '';
+  return `
+    <div style="flex:1">
+      <h1>${escapeAttr(team.abbreviation)}</h1>
+      <div class="player-meta">${escapeAttr(team.full_name)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
+        <span class="pill">${escapeAttr(team.conference)}ern Conference · ${escapeAttr(team.division)}</span>
+        ${historyPill}
+      </div>
+    </div>
+  `;
+}
+
+function renderTeamHtml(team) {
+  const template = fs.readFileSync(teamHtmlPath, 'utf-8');
+  const info = getTeamInfo(team.abbreviation);
+  const title = `${team.full_name} - Plantilla, salarios y valoración 2K | El Rompearos`;
+  const description = `Plantilla actual de ${team.full_name}: estadísticas NBA, salarios y valoración NBA 2K de cada jugador de baloncesto. ${team.conference}ern Conference, división ${team.division}.`;
+  const canonicalUrl = `${SITE_URL}/team.html?id=${team.id}`;
+
+  return template
+    .replace(/<title id="page-title">[\s\S]*?<\/title>/, `<title id="page-title">${escapeAttr(title)}</title>`)
+    .replace(/<meta id="meta-description"[^>]*>/, `<meta id="meta-description" name="description" content="${escapeAttr(description)}">`)
+    .replace(/<meta id="og-title"[^>]*>/, `<meta id="og-title" property="og:title" content="${escapeAttr(title)}">`)
+    .replace(/<meta id="og-description"[^>]*>/, `<meta id="og-description" property="og:description" content="${escapeAttr(description)}">`)
+    .replace('</head>', `<link rel="canonical" href="${canonicalUrl}"><meta property="og:url" content="${canonicalUrl}"></head>`)
+    .replace(
+      /<div id="team-hero" class="team-hero">[\s\S]*?<\/div>/,
+      `<div id="team-hero" class="team-hero">${renderTeamHeroHtml(team, info)}</div>`
+    );
+}
+
+app.get('/team.html', (req, res) => {
+  const teams = readCache('teams', []);
+  const team = teams.find((t) => String(t.id) === String(req.query.id));
+
+  if (!team) {
+    res.sendFile(teamHtmlPath);
+    return;
+  }
+
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(renderTeamHtml(team));
+});
+
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', index: false }));
 // Limite pequeño a proposito: el unico body que se envia es el de las picks
 // de la quiniela (un puñado de ids de partido/equipo), no hace falta mas.
@@ -141,8 +196,70 @@ app.get('/health', (req, res) => {
 // un parametro de consulta: mejor para SEO porque la propia URL lleva la
 // palabra clave. El slug es cosmetico, solo se usa el id del final; player.js
 // lo extrae con una expresion regular y pide los datos por id.
+const playerHtmlPath = path.join(__dirname, 'public', 'player.html');
+
+// La ficha de jugador se cargaba entera por JS: el HTML crudo no tenia ni
+// un <h1> ni el nombre del jugador en ningun sitio, asi que un buscador que
+// no ejecute ese JS veia una pagina practicamente vacia con el mismo titulo
+// generico en los miles de fichas del sitio. Aqui se rellenan titulo,
+// meta-descripcion, canonical y el <h1> con los datos ya cacheados (misma
+// fuente que /api/players/:id, sin llamadas de red), igual que ya se hace
+// con las noticias de portada. El cliente sigue pidiendo y pintando encima
+// con player.js, sin cambios ahi.
+function renderPlayerHeroHtml(player) {
+  const teamText = player.currentTeam
+    ? `<a class="pill" href="/team.html?id=${player.currentTeam.id}">${escapeAttr(player.currentTeam.abbreviation)}</a>`
+    : '<span class="pill">Sin equipo actual</span>';
+  const metaLine = [
+    player.position || 'N/D',
+    player.height || '',
+    player.weight ? `${player.weight} lb` : '',
+    player.birthYear || '',
+    player.isActive ? '' : 'Retirado/inactivo'
+  ].filter(Boolean).join(' · ');
+
+  return `
+    <div style="flex:1">
+      <h1>${escapeAttr(player.first_name)} ${escapeAttr(player.last_name)}</h1>
+      <div class="player-meta">${escapeAttr(metaLine)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${teamText}</div>
+    </div>
+  `;
+}
+
+function renderPlayerHtml(player) {
+  const template = fs.readFileSync(playerHtmlPath, 'utf-8');
+  const teamPart = player.currentTeam ? ` (${player.currentTeam.full_name})` : '';
+  const title = `${player.first_name} ${player.last_name}${teamPart} - Estadísticas y contrato NBA | El Rompearos`;
+  const description = player.isActive
+    ? `Estadísticas NBA, contrato y valoración 2K de ${player.first_name} ${player.last_name}, jugador de baloncesto de ${player.currentTeam ? player.currentTeam.full_name : 'la NBA'}.`
+    : `Estadísticas de toda la carrera NBA de ${player.first_name} ${player.last_name}.`;
+  const canonicalUrl = `${SITE_URL}/jugador/${playerSlug(player)}`;
+
+  return template
+    .replace(/<title id="page-title">[\s\S]*?<\/title>/, `<title id="page-title">${escapeAttr(title)}</title>`)
+    .replace(/<meta id="meta-description"[^>]*>/, `<meta id="meta-description" name="description" content="${escapeAttr(description)}">`)
+    .replace(/<meta id="og-title"[^>]*>/, `<meta id="og-title" property="og:title" content="${escapeAttr(title)}">`)
+    .replace(/<meta id="og-description"[^>]*>/, `<meta id="og-description" property="og:description" content="${escapeAttr(description)}">`)
+    .replace('</head>', `<link rel="canonical" href="${canonicalUrl}"><meta property="og:url" content="${canonicalUrl}"></head>`)
+    .replace(
+      /<div id="player-hero" class="team-hero player-hero">[\s\S]*?<\/div>/,
+      `<div id="player-hero" class="team-hero player-hero">${renderPlayerHeroHtml(player)}</div>`
+    );
+}
+
 app.get('/jugador/:slug', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'player.html'));
+  const match = req.params.slug.match(/(\d+)$/);
+  const playerId = match ? match[1] : null;
+  const player = playerId && getAllKnownPlayers().find((p) => String(p.id) === playerId);
+
+  if (!player) {
+    res.sendFile(playerHtmlPath);
+    return;
+  }
+
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(renderPlayerHtml(enrichPlayer(player, buildPlayerEnrichmentMaps())));
 });
 
 // Sitemap dinamico: incluye las paginas fijas + una entrada por cada uno de
