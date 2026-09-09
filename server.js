@@ -62,7 +62,7 @@ const SITE_URL = process.env.SITE_URL || 'https://www.elrompearos.com';
 
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
-    '/index.html', '/teams.html', '/standings.html', '/stats.html', '/compare.html', '/calendar.html',
+    '/index.html', '/teams.html', '/standings.html', '/stats.html', '/compare.html', '/trade.html', '/calendar.html',
     '/playoffs.html', '/draft.html', '/market.html', '/store.html'
   ];
   const teams = readCache('teams', []);

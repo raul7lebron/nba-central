@@ -929,3 +929,146 @@ footer.site-footer a:hover { color: var(--accent); }
   main { padding: 28px 16px 60px; }
   .team-hero { flex-direction: column; text-align: center; }
 }
+
+/* ---------- Simulador de traspasos ---------- */
+
+.trade-teams {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+
+.trade-team-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 18px;
+  position: relative;
+}
+
+.trade-team-card-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 140px;
+}
+
+.trade-remove-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 0.65rem;
+  padding: 3px 9px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.trade-team-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.trade-team-header .team-name { font-size: 1rem; }
+
+.trade-team-select {
+  width: 100%;
+  margin-bottom: 12px;
+  font-family: inherit;
+  appearance: none;
+  text-align: center;
+}
+
+.trade-roster-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.trade-player-row {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  padding: 8px 10px;
+}
+
+.trade-player-row.is-outgoing {
+  border-color: var(--accent);
+  background: var(--accent-dim);
+}
+
+.trade-player-row label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.trade-player-check { flex-shrink: 0; width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+.trade-player-info { flex: 1; min-width: 0; }
+.trade-player-salary { font-size: 0.8rem; font-weight: 700; color: var(--text-dim); white-space: nowrap; }
+.trade-player-row.is-outgoing .trade-player-salary { color: var(--accent); }
+
+.trade-dest-select {
+  width: 100%;
+  margin-top: 8px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.trade-controls { display: flex; gap: 10px; margin-top: 18px; }
+.trade-controls .pill { cursor: pointer; font-family: inherit; }
+.trade-controls .pill:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.trade-movements { display: flex; flex-direction: column; gap: 8px; }
+.trade-movement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+}
+
+.trade-results-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.trade-result-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+}
+
+.trade-result-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.trade-result-head .team-name { font-size: 0.92rem; flex: 1; }
+
+.trade-result-rows { display: flex; flex-direction: column; gap: 4px; }
+.trade-result-rows > div { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; }
+
+.trade-verdict-ok { color: var(--positive); border-color: var(--positive); }
+.trade-verdict-fail { color: var(--negative); border-color: var(--negative); }
+.trade-verdict-unknown { color: var(--text-faint); }
+
+.trade-disclaimer {
+  margin-top: 24px;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  max-width: 720px;
+}
+
+@media (max-width: 700px) {
+  .trade-roster-list { max-height: 280px; }
+}
