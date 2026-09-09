@@ -13,7 +13,15 @@ const MIN_TRADE_TEAMS = 2;
 const SALARY_MATCH_LOW_THRESHOLD = 6_533_000;
 const SALARY_MATCH_MID_THRESHOLD = 19_600_000;
 
+// Cuantos drafts futuros se ofrecen como ficha para incluir en un traspaso.
+// No hay ninguna fuente de datos de derechos de elecciones ya traspasadas
+// (protecciones, swaps, picks ya cedidos en traspasos anteriores): se
+// generan siempre las elecciones propias de 1ª y 2ª ronda del equipo, como
+// simplificacion.
+const FUTURE_DRAFT_YEARS_AHEAD = 5;
+
 let allTeams = [];
+let currentSeason = null;
 let nextSlotId = 1;
 let slots = [];
 
@@ -22,11 +30,34 @@ function emptySlot() {
     id: nextSlotId++,
     team: null,
     roster: [],
+    picks: [],
     rosterLoading: false,
     salarySummary: null,
     outgoing: new Set(),
-    destinations: new Map() // playerId -> slotId, solo se usa con 3+ equipos
+    destinations: new Map() // assetId (id de jugador o de eleccion) -> slotId, solo se usa con 3+ equipos
   };
+}
+
+// Elecciones de draft de los proximos años (1ª y 2ª ronda) que el equipo
+// puede ofrecer en el traspaso. Son solo una ficha de referencia: no
+// afectan al calculo de salario ni modelan protecciones o swaps de picks.
+function futurePicksForTeam(team) {
+  if (!currentSeason) return [];
+  const picks = [];
+  for (let i = 1; i <= FUTURE_DRAFT_YEARS_AHEAD; i++) {
+    const year = currentSeason + i;
+    for (const round of [1, 2]) {
+      picks.push({ id: `pick-${team.id}-${year}-${round}`, label: `${round === 1 ? '1ª' : '2ª'} ronda ${year}` });
+    }
+  }
+  return picks;
+}
+
+// Los ids de jugador son numericos; los de eleccion son texto
+// ("pick-<equipo>-<año>-<ronda>"). Los atributos data-* del DOM llegan
+// siempre como string, asi que hay que distinguirlos al leerlos de vuelta.
+function parseAssetId(raw) {
+  return /^\d+$/.test(raw) ? Number(raw) : raw;
 }
 
 function teamsInUse(exceptSlotId) {
@@ -44,6 +75,7 @@ async function selectTeam(slotId, teamId) {
   const team = allTeams.find((t) => String(t.id) === String(teamId)) || null;
   slot.team = team;
   slot.roster = [];
+  slot.picks = team ? futurePicksForTeam(team) : [];
   slot.outgoing = new Set();
   slot.salarySummary = null;
   slot.rosterLoading = Boolean(team);
@@ -73,29 +105,29 @@ async function selectTeam(slotId, teamId) {
   }
 }
 
-function toggleOutgoing(slotId, playerId) {
+function toggleOutgoing(slotId, assetId) {
   const slot = slots.find((s) => s.id === slotId);
-  if (slot.outgoing.has(playerId)) {
-    slot.outgoing.delete(playerId);
-    slot.destinations.delete(playerId);
+  if (slot.outgoing.has(assetId)) {
+    slot.outgoing.delete(assetId);
+    slot.destinations.delete(assetId);
   } else {
-    slot.outgoing.add(playerId);
+    slot.outgoing.add(assetId);
     // Con solo 2 equipos el destino es siempre "el otro"; con 3+ hay que
     // elegirlo a mano, asi que se deja sin asignar por defecto.
     if (slots.length === MIN_TRADE_TEAMS) {
       const dest = otherSlots(slotId)[0];
-      if (dest) slot.destinations.set(playerId, dest.id);
+      if (dest) slot.destinations.set(assetId, dest.id);
     }
   }
   render();
 }
 
-function setDestination(slotId, playerId, destSlotId) {
+function setDestination(slotId, assetId, destSlotId) {
   const slot = slots.find((s) => s.id === slotId);
   if (destSlotId) {
-    slot.destinations.set(playerId, Number(destSlotId));
+    slot.destinations.set(assetId, Number(destSlotId));
   } else {
-    slot.destinations.delete(playerId);
+    slot.destinations.delete(assetId);
   }
   render();
 }
@@ -144,21 +176,29 @@ function maxIncomingSalary(capSpaceBeforeTrade, outgoingSalary) {
 
 function computeSlotResult(slot) {
   const outgoingPlayers = slot.roster.filter((p) => slot.outgoing.has(p.id));
+  const outgoingPicks = slot.picks.filter((pk) => slot.outgoing.has(pk.id));
 
   const incomingPlayers = [];
+  const incomingPicks = [];
   for (const other of otherSlots(slot.id)) {
+    const destOf = (assetId) => (slots.length === MIN_TRADE_TEAMS ? otherSlots(other.id)[0]?.id : other.destinations.get(assetId));
     for (const p of other.roster) {
       if (!other.outgoing.has(p.id)) continue;
-      const dest = slots.length === MIN_TRADE_TEAMS ? otherSlots(other.id)[0]?.id : other.destinations.get(p.id);
-      if (dest === slot.id) incomingPlayers.push({ player: p, from: other.team });
+      if (destOf(p.id) === slot.id) incomingPlayers.push({ player: p, from: other.team });
+    }
+    for (const pk of other.picks) {
+      if (!other.outgoing.has(pk.id)) continue;
+      if (destOf(pk.id) === slot.id) incomingPicks.push({ pick: pk, from: other.team });
     }
   }
 
+  // Las elecciones de draft no tienen salario: no cuentan para el
+  // emparejamiento salarial, solo para el resumen de movimientos.
   const outgoingSalary = outgoingPlayers.reduce((sum, p) => sum + (p.salary || 0), 0);
   const incomingSalary = incomingPlayers.reduce((sum, ip) => sum + (ip.player.salary || 0), 0);
   const hasUnknownSalary = outgoingPlayers.some((p) => p.salary == null) || incomingPlayers.some((ip) => ip.player.salary == null);
 
-  const hasActivity = outgoingPlayers.length > 0 || incomingPlayers.length > 0;
+  const hasActivity = outgoingPlayers.length > 0 || incomingPlayers.length > 0 || outgoingPicks.length > 0 || incomingPicks.length > 0;
   const hasPayrollData = Boolean(slot.salarySummary && slot.salarySummary.hasData);
 
   let legal = null;
@@ -170,7 +210,7 @@ function computeSlotResult(slot) {
     newPayroll = slot.salarySummary.totalPayroll - outgoingSalary + incomingSalary;
   }
 
-  return { outgoingPlayers, incomingPlayers, outgoingSalary, incomingSalary, hasUnknownSalary, hasActivity, hasPayrollData, legal, maxIncoming, newPayroll };
+  return { outgoingPlayers, incomingPlayers, outgoingPicks, incomingPicks, outgoingSalary, incomingSalary, hasUnknownSalary, hasActivity, hasPayrollData, legal, maxIncoming, newPayroll };
 }
 
 function unresolvedDestinationsCount() {
@@ -201,30 +241,53 @@ function renderTeamPicker(slot) {
   `;
 }
 
+function renderDestinationSelect(slot, assetId) {
+  const destOptions = otherSlots(slot.id)
+    .filter((s) => s.team)
+    .map((s) => `<option value="${s.id}" ${slot.destinations.get(assetId) === s.id ? 'selected' : ''}>${displayAbbr(s.team.abbreviation)}</option>`)
+    .join('');
+
+  return `
+    <select class="pill trade-dest-select" data-slot="${slot.id}" data-asset="${assetId}">
+      <option value="">¿A quién va?</option>
+      ${destOptions}
+    </select>
+  `;
+}
+
 function renderRosterRow(slot, p) {
   const checked = slot.outgoing.has(p.id);
   const showDestination = checked && slots.length > MIN_TRADE_TEAMS;
-  const destOptions = otherSlots(slot.id)
-    .filter((s) => s.team)
-    .map((s) => `<option value="${s.id}" ${slot.destinations.get(p.id) === s.id ? 'selected' : ''}>${displayAbbr(s.team.abbreviation)}</option>`)
-    .join('');
 
   return `
     <div class="trade-player-row ${checked ? 'is-outgoing' : ''}">
       <label>
-        <input type="checkbox" class="trade-player-check" data-slot="${slot.id}" data-player="${p.id}" ${checked ? 'checked' : ''}>
+        <input type="checkbox" class="trade-player-check" data-slot="${slot.id}" data-asset="${p.id}" ${checked ? 'checked' : ''}>
         <span class="trade-player-info">
           <span class="player-name">${p.first_name} ${p.last_name}</span>
           <span class="player-meta">${p.position || 'N/D'}${p.jersey_number ? ' · #' + p.jersey_number : ''}</span>
         </span>
         <span class="trade-player-salary">${p.salary ? formatMoney(p.salary) : 'Sin datos'}</span>
       </label>
-      ${showDestination ? `
-        <select class="pill trade-dest-select" data-slot="${slot.id}" data-player="${p.id}">
-          <option value="">¿A quién va?</option>
-          ${destOptions}
-        </select>
-      ` : ''}
+      ${showDestination ? renderDestinationSelect(slot, p.id) : ''}
+    </div>
+  `;
+}
+
+function renderPickRow(slot, pk) {
+  const checked = slot.outgoing.has(pk.id);
+  const showDestination = checked && slots.length > MIN_TRADE_TEAMS;
+
+  return `
+    <div class="trade-player-row ${checked ? 'is-outgoing' : ''}">
+      <label>
+        <input type="checkbox" class="trade-player-check" data-slot="${slot.id}" data-asset="${pk.id}" ${checked ? 'checked' : ''}>
+        <span class="trade-player-info">
+          <span class="player-name">${pk.label}</span>
+          <span class="player-meta">Elección de draft</span>
+        </span>
+      </label>
+      ${showDestination ? renderDestinationSelect(slot, pk.id) : ''}
     </div>
   `;
 }
@@ -255,6 +318,13 @@ function renderTeamSlot(slot) {
       ? `<div class="trade-roster-list">${slot.roster.map((p) => renderRosterRow(slot, p)).join('')}</div>`
       : '<p class="state-msg">Sin jugadores cacheados.</p>');
 
+  const picksHtml = slot.picks.length
+    ? `
+      <div class="trade-section-label">Elecciones de draft futuras</div>
+      <div class="trade-roster-list trade-picks-list">${slot.picks.map((pk) => renderPickRow(slot, pk)).join('')}</div>
+    `
+    : '';
+
   return `
     <div class="trade-team-card">
       ${removeBtn}
@@ -266,7 +336,9 @@ function renderTeamSlot(slot) {
         </div>
       </div>
       ${renderTeamPicker(slot)}
+      <div class="trade-section-label">Plantilla</div>
       ${rosterHtml}
+      ${picksHtml}
     </div>
   `;
 }
@@ -275,11 +347,15 @@ function renderMovementsSummary() {
   const movements = [];
   for (const slot of slots) {
     if (!slot.team) continue;
-    for (const p of slot.roster) {
-      if (!slot.outgoing.has(p.id)) continue;
-      const destId = slots.length === MIN_TRADE_TEAMS ? otherSlots(slot.id)[0]?.id : slot.destinations.get(p.id);
+    const assets = [
+      ...slot.roster.map((p) => ({ id: p.id, name: `${p.first_name} ${p.last_name}` })),
+      ...slot.picks.map((pk) => ({ id: pk.id, name: pk.label }))
+    ];
+    for (const a of assets) {
+      if (!slot.outgoing.has(a.id)) continue;
+      const destId = slots.length === MIN_TRADE_TEAMS ? otherSlots(slot.id)[0]?.id : slot.destinations.get(a.id);
       const destSlot = slots.find((s) => s.id === destId);
-      movements.push({ player: p, from: slot.team, to: destSlot ? destSlot.team : null });
+      movements.push({ name: a.name, from: slot.team, to: destSlot ? destSlot.team : null });
     }
   }
   if (!movements.length) return '';
@@ -288,7 +364,7 @@ function renderMovementsSummary() {
     <div class="trade-movements">
       ${movements.map((m) => `
         <div class="trade-movement">
-          <span class="player-name">${m.player.first_name} ${m.player.last_name}</span>
+          <span class="player-name">${m.name}</span>
           <span class="player-meta">${displayAbbr(m.from.abbreviation)} → ${m.to ? displayAbbr(m.to.abbreviation) : '¿?'}</span>
         </div>
       `).join('')}
@@ -326,6 +402,12 @@ function renderTeamResult(slot) {
         ` : ''}
       </div>
       ${r.hasUnknownSalary ? '<p class="player-meta">Incluye algún jugador sin salario conocido (contado como 0$).</p>' : ''}
+      ${(r.outgoingPicks.length || r.incomingPicks.length) ? `
+        <div class="trade-result-picks">
+          ${r.outgoingPicks.map((pk) => `<div class="player-meta">Cede ${pk.label}</div>`).join('')}
+          ${r.incomingPicks.map((ip) => `<div class="player-meta">Recibe ${ip.pick.label} de ${displayAbbr(ip.from.abbreviation)}</div>`).join('')}
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -361,10 +443,10 @@ function attachSlotHandlers() {
     sel.addEventListener('change', (e) => selectTeam(Number(e.target.dataset.slot), e.target.value));
   });
   document.querySelectorAll('.trade-player-check').forEach((cb) => {
-    cb.addEventListener('change', (e) => toggleOutgoing(Number(e.target.dataset.slot), Number(e.target.dataset.player)));
+    cb.addEventListener('change', (e) => toggleOutgoing(Number(e.target.dataset.slot), parseAssetId(e.target.dataset.asset)));
   });
   document.querySelectorAll('.trade-dest-select').forEach((sel) => {
-    sel.addEventListener('change', (e) => setDestination(Number(e.target.dataset.slot), Number(e.target.dataset.player), e.target.value));
+    sel.addEventListener('change', (e) => setDestination(Number(e.target.dataset.slot), parseAssetId(e.target.dataset.asset), e.target.value));
   });
   document.querySelectorAll('.trade-remove-btn').forEach((btn) => {
     btn.addEventListener('click', (e) => removeTeamSlot(Number(e.target.dataset.slot)));
@@ -384,8 +466,9 @@ function render() {
 
 async function initTrade() {
   try {
-    const res = await fetch('/api/teams');
-    allTeams = (await res.json()).slice().sort((a, b) => a.full_name.localeCompare(b.full_name));
+    const [teamsRes, seasonsRes] = await Promise.all([fetch('/api/teams'), fetch('/api/seasons')]);
+    allTeams = (await teamsRes.json()).slice().sort((a, b) => a.full_name.localeCompare(b.full_name));
+    currentSeason = (await seasonsRes.json()).current;
   } catch (err) {
     document.getElementById('trade-teams').innerHTML = '<p class="error-msg">No se pudieron cargar los equipos.</p>';
     return;

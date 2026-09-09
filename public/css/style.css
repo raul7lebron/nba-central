@@ -983,6 +983,17 @@ footer.site-footer a:hover { color: var(--accent); }
   text-align: center;
 }
 
+.trade-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--text-faint);
+  margin: 14px 0 6px;
+}
+
+.trade-section-label:first-of-type { margin-top: 0; }
+
 .trade-roster-list {
   display: flex;
   flex-direction: column;
@@ -991,6 +1002,8 @@ footer.site-footer a:hover { color: var(--accent); }
   overflow-y: auto;
   padding-right: 2px;
 }
+
+.trade-picks-list { max-height: 220px; }
 
 .trade-player-row {
   border: 1px solid var(--border);
@@ -1057,6 +1070,16 @@ footer.site-footer a:hover { color: var(--accent); }
 
 .trade-result-rows { display: flex; flex-direction: column; gap: 4px; }
 .trade-result-rows > div { display: flex; justify-content: space-between; gap: 10px; font-size: 0.88rem; }
+
+.trade-result-picks {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.trade-result-picks .player-meta { font-size: 0.8rem; }
 
 .trade-verdict-ok { color: var(--positive); border-color: var(--positive); }
 .trade-verdict-fail { color: var(--negative); border-color: var(--negative); }
