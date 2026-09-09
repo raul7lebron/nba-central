@@ -128,6 +128,45 @@ app.get(['/', '/index.html'], (req, res) => {
   res.send(renderIndexHtml());
 });
 
+// teams.html listaba los 30 equipos solo por JS (raiz vacia hasta que
+// carga /api/teams): se rellenan los 30 enlaces reales en el HTML crudo,
+// mas un ItemList con schema.org para que un buscador entienda de un
+// vistazo que esta pagina enlaza a las 30 plantillas. teams.js sigue
+// pintando encima con los logos/colores (esos si son solo de cliente).
+const teamsHtmlPath = path.join(__dirname, 'public', 'teams.html');
+
+function renderTeamsHtml() {
+  const template = fs.readFileSync(teamsHtmlPath, 'utf-8');
+  const teams = [...readCache('teams', [])].sort((a, b) => a.full_name.localeCompare(b.full_name));
+
+  const cardsHtml = teams.map((t) => `
+    <a class="team-card" href="/team.html?id=${t.id}">
+      <div class="team-name">${escapeAttr(t.full_name)}</div>
+      <div class="team-conf">${escapeAttr(t.conference)}ern Conference · ${escapeAttr(t.division)}</div>
+    </a>
+  `).join('');
+
+  const itemListJson = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: teams.map((t, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: { '@type': 'SportsTeam', name: t.full_name, url: `${SITE_URL}/team.html?id=${t.id}` }
+    }))
+  });
+
+  return template.replace(
+    /<div id="teams-container" class="grid-teams">[\s\S]*?<\/div>/,
+    `<div id="teams-container" class="grid-teams">${cardsHtml}</div><script type="application/ld+json" id="teams-jsonld">${itemListJson}</script>`
+  );
+}
+
+app.get('/teams.html', (req, res) => {
+  res.set('Cache-Control', 'public, max-age=300');
+  res.send(renderTeamsHtml());
+});
+
 // Igual que player.html: team.html se servia siempre con el mismo HTML
 // generico ("Cargando equipo...", sin <h1>) para las 30 plantillas del
 // sitio, porque todo el contenido lo pintaba team.js tras pedir /api/teams/:id.
@@ -175,7 +214,7 @@ app.get('/team.html', (req, res) => {
   const team = teams.find((t) => String(t.id) === String(req.query.id));
 
   if (!team) {
-    res.sendFile(teamHtmlPath);
+    res.status(404).sendFile(teamHtmlPath);
     return;
   }
 
@@ -235,8 +274,7 @@ function renderPlayerHtml(player) {
     ? `Estadísticas NBA, contrato y valoración 2K de ${player.first_name} ${player.last_name}, jugador de baloncesto de ${player.currentTeam ? player.currentTeam.full_name : 'la NBA'}.`
     : `Estadísticas de toda la carrera NBA de ${player.first_name} ${player.last_name}.`;
   const canonicalUrl = `${SITE_URL}/jugador/${playerSlug(player)}`;
-
-  return template
+  let html = template
     .replace(/<title id="page-title">[\s\S]*?<\/title>/, `<title id="page-title">${escapeAttr(title)}</title>`)
     .replace(/<meta id="meta-description"[^>]*>/, `<meta id="meta-description" name="description" content="${escapeAttr(description)}">`)
     .replace(/<meta id="og-title"[^>]*>/, `<meta id="og-title" property="og:title" content="${escapeAttr(title)}">`)
@@ -246,6 +284,15 @@ function renderPlayerHtml(player) {
       /<div id="player-hero" class="team-hero player-hero">[\s\S]*?<\/div>/,
       `<div id="player-hero" class="team-hero player-hero">${renderPlayerHeroHtml(player)}</div>`
     );
+
+  // Foto real del jugador como imagen de vista previa al compartir (en vez
+  // del escudo generico de la web), cuando la tenemos.
+  if (player.photoUrl) {
+    html = html
+      .replace(/<meta property="og:image" content="[^"]*">/, `<meta property="og:image" content="${escapeAttr(player.photoUrl)}">`)
+      .replace(/<meta name="twitter:image" content="[^"]*">/, `<meta name="twitter:image" content="${escapeAttr(player.photoUrl)}">`);
+  }
+  return html;
 }
 
 app.get('/jugador/:slug', (req, res) => {
@@ -254,7 +301,7 @@ app.get('/jugador/:slug', (req, res) => {
   const player = playerId && getAllKnownPlayers().find((p) => String(p.id) === playerId);
 
   if (!player) {
-    res.sendFile(playerHtmlPath);
+    res.status(404).sendFile(playerHtmlPath);
     return;
   }
 
@@ -276,13 +323,11 @@ app.get('/sitemap.xml', (req, res) => {
   const teams = readCache('teams', []);
   const teamUrls = teams.map((t) => `/team.html?id=${t.id}`);
 
-  // Solo jugadores de plantillas activas: son los unicos con ficha completa
-  // (salario, contrato, valoracion 2K). El archivo historico del draft tiene
-  // muchos menos datos y de momento se deja fuera del sitemap.
-  const rosters = readCache('rosters', {});
-  const playerUrls = Object.values(rosters)
-    .flat()
-    .map((p) => `/jugador/${playerSlug(p)}`);
+  // Todos los jugadores conocidos (plantillas activas + archivo historico
+  // del draft), no solo los activos: su ficha ya tiene titulo/h1 propios
+  // renderizados en servidor aunque tengan menos datos (sin salario ni
+  // contrato) que los de plantilla activa.
+  const playerUrls = getAllKnownPlayers().map((p) => `/jugador/${playerSlug(p)}`);
 
   const urls = [...staticPages, ...teamUrls, ...playerUrls];
 
@@ -772,6 +817,15 @@ app.get('/api/players/:id/career-stats', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Cualquier ruta que no haya coincidido con nada anterior (enlace roto,
+// pagina movida, URL escrita a mano): antes devolvia el error generico de
+// Express sin ningun enlace de vuelta al sitio. Sigue siendo un 404 de
+// verdad (no un "soft 404"), solo que con una pagina util en vez de texto
+// plano.
+app.use((req, res) => {
+  res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
 });
 
 app.listen(PORT, async () => {
