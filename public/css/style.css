@@ -229,41 +229,6 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 .search-toggle:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
 .search-toggle svg { display: block; }
 
-/* ---------- Selector de idioma ---------- */
-
-/* Vive dentro de nav.site-nav (ultimo elemento, inyectado por i18n.js):
-   en ordenador queda inline al final de la barra horizontal de enlaces; en
-   movil, dentro del desplegable de la hamburguesa junto a los demas
-   enlaces, en vez de competir por espacio con "El Rompearos" en la
-   cabecera fija. */
-.lang-switcher {
-  height: 36px;
-  margin-left: 10px;
-  padding: 0 6px 0 10px;
-  background: var(--surface-2);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  color: var(--text-dim);
-  font-family: inherit;
-  font-size: 0.8rem;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.lang-switcher:hover { color: var(--text); border-color: var(--accent); }
-.lang-switcher:focus { outline: none; border-color: var(--accent); }
-
-@media (max-width: 1700px) {
-  /* menu plegado en columna: el selector pasa a ser un item mas, con su
-     propia altura de fila en vez de pegado al borde de un enlace vecino */
-  .lang-switcher {
-    align-self: flex-start;
-    margin: 6px 14px 0;
-  }
-}
-
 .search-panel {
   position: absolute;
   top: calc(100% + 10px);
@@ -971,9 +936,8 @@ footer.site-footer a:hover { color: var(--accent); }
 
 /* Por debajo de ~340px el hueco de 28px entre marca/hamburguesa/buscador
    (pensado para pantallas de escritorio) desborda por un margen pequeño
-   (24px de sobra medidos con scrollWidth vs clientWidth a 320px), aun con
-   "El Rompearos" siempre visible. Se achica el gap y el padding lateral en
-   vez de ocultar la marca. */
+   (24px de sobra medidos con scrollWidth vs clientWidth a 320px). Se
+   achica el gap y el padding lateral en vez de ocultar nada. */
 @media (max-width: 340px) {
   header.site-header { gap: 12px; padding: 14px 12px; }
 }

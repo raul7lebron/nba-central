@@ -9,7 +9,7 @@ function closeModalOnEscape(e) {
 
 function formatMoney(amount) {
   if (amount == null) return null;
-  return '$' + (amount / 1_000_000).toLocaleString(getLocale(), { maximumFractionDigits: 1 }) + 'M';
+  return '$' + (amount / 1_000_000).toLocaleString('es-ES', { maximumFractionDigits: 1 }) + 'M';
 }
 
 function rating2kColor(overall) {
@@ -23,7 +23,7 @@ function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleString(getLocale(), {
+  return d.toLocaleString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 }
@@ -49,7 +49,7 @@ function formatStat(value) {
 
 function renderStatsTable(history) {
   if (!history || !history.length) {
-    return `<p class="state-msg">${t('modal_no_season_stats')}</p>`;
+    return '<p class="state-msg">No hay estadísticas de temporadas disponibles para este jugador.</p>';
   }
   const rows = history.map((row) => `
     <tr>
@@ -73,8 +73,8 @@ function renderStatsTable(history) {
       <table class="stats-table">
         <thead>
           <tr>
-            <th>${t('th_team')}</th><th>${t('th_season')}</th><th>${t('th_gp')}</th><th>${t('th_min')}</th><th>${t('th_pts')}</th><th>${t('th_reb')}</th>
-            <th>${t('th_ast')}</th><th>${t('th_stl')}</th><th>${t('th_blk')}</th><th>${t('th_fg_pct')}</th><th>${t('th_fg3_pct')}</th><th>${t('th_val')}</th>
+            <th>Equipo</th><th>Temp.</th><th>PJ</th><th>MIN</th><th>PTS</th><th>REB</th>
+            <th>AST</th><th>ROB</th><th>TAP</th><th>%TC</th><th>%3P</th><th>VAL</th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
@@ -88,7 +88,7 @@ function openModal(innerHTML) {
   root.innerHTML = `
     <div class="modal-backdrop" id="modal-backdrop">
       <div class="modal-box" role="dialog" aria-modal="true">
-        <button class="modal-close" id="modal-close-btn" aria-label="${t('common_close')}">&times;</button>
+        <button class="modal-close" id="modal-close-btn" aria-label="Cerrar">&times;</button>
         ${innerHTML}
       </div>
     </div>
@@ -101,9 +101,9 @@ function openModal(innerHTML) {
 }
 
 const CONTRACT_OPTION_LABELS = {
-  player: t('contract_option_player'),
-  team: t('contract_option_team'),
-  'non-guaranteed': t('contract_option_non_guaranteed')
+  player: 'Opción jugador',
+  team: 'Opción equipo',
+  'non-guaranteed': 'No garantizado'
 };
 
 // Contrato completo (todos los años firmados), no solo el salario de la
@@ -123,11 +123,11 @@ function renderContractTable(contract, currentSalary) {
   return `
     <div class="table-scroll">
       <table class="stats-table contract-table">
-        <thead><tr><th>${t('th_season')}</th><th>${t('th_salary')}</th><th>${t('th_option')}</th></tr></thead>
+        <thead><tr><th>Temporada</th><th>Salario</th><th>Opción</th></tr></thead>
         <tbody>${rows}</tbody>
       </table>
     </div>
-    <p class="player-meta" style="margin-top:6px">${t('contract_source_note')}</p>
+    <p class="player-meta" style="margin-top:6px">Datos de contrato de HoopsHype. Puede haber opciones de jugador/equipo no marcadas en la fuente.</p>
   `;
 }
 

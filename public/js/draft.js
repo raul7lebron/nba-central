@@ -37,7 +37,7 @@ function renderPick(p) {
       <div class="player-jersey">#${p.pick}</div>
       <div style="flex:1">
         <div class="player-name">${p.first_name} ${p.last_name}</div>
-        <div class="player-meta">${p.position || t('common_no_data')} · ${p.college || p.country || t('common_no_data')}</div>
+        <div class="player-meta">${p.position || 'N/D'} · ${p.college || p.country || 'N/D'}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
         ${ratingBadge}
@@ -56,20 +56,20 @@ async function loadDraft() {
     const data = await res.json();
 
     if (!data.rounds || !data.rounds.length) {
-      container.innerHTML = `<p class="state-msg">${t('draft_no_data_year')}</p>`;
+      container.innerHTML = '<p class="state-msg">No hay datos de draft para este año todavía.</p>';
       return;
     }
 
     container.innerHTML = data.rounds.map((round) => `
       <div style="margin-bottom:28px">
-        <h3 style="margin-bottom:12px">${t('player_draft_round_word')} ${round.round}</h3>
+        <h3 style="margin-bottom:12px">Ronda ${round.round}</h3>
         <div class="roster-grid">
           ${round.players.map(renderPick).join('')}
         </div>
       </div>
     `).join('');
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('draft_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudo cargar el draft.</p>';
   }
 }
 

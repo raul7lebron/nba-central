@@ -6,7 +6,7 @@ function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleString(getLocale(), {
+  return d.toLocaleString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 }
@@ -49,7 +49,7 @@ async function loadNews() {
     const news = await res.json();
 
     if (!news.length) {
-      container.innerHTML = `<p class="state-msg">${t('news_empty')}</p>`;
+      container.innerHTML = '<p class="state-msg">Todavía no hay noticias cacheadas. Vuelve en unos minutos.</p>';
       return;
     }
 
@@ -71,7 +71,7 @@ async function loadNews() {
     activateAdSlots();
     injectNewsJsonLd(news);
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('news_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudieron cargar las noticias.</p>';
   }
 }
 

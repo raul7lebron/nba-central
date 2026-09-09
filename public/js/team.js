@@ -9,9 +9,9 @@ function getTeamId() {
 
 async function showTeamNews(team) {
   openModal(`
-    <h2>${t('nav_news')} · ${team.full_name}</h2>
+    <h2>Noticias · ${team.full_name}</h2>
     <div id="team-news-body" style="margin-top:14px">
-      <p class="state-msg">${t('team_news_loading')}</p>
+      <p class="state-msg">Cargando noticias...</p>
     </div>
   `);
 
@@ -21,7 +21,7 @@ async function showTeamNews(team) {
     const news = await res.json();
 
     if (!news.length) {
-      body.innerHTML = `<p class="state-msg">${t('team_news_empty')}</p>`;
+      body.innerHTML = '<p class="state-msg">No hay noticias recientes que mencionen a este equipo.</p>';
       return;
     }
 
@@ -39,21 +39,19 @@ async function showTeamNews(team) {
       </article>
     `).join('')}</div>`;
   } catch (err) {
-    body.innerHTML = `<p class="error-msg">${t('news_error')}</p>`;
+    body.innerHTML = '<p class="error-msg">No se pudieron cargar las noticias.</p>';
   }
 }
 
 function renderHero(team, teamId) {
   const heroEl = document.getElementById('team-hero');
   if (!team) {
-    heroEl.innerHTML = `<h1>${t('team_unnamed')} #${teamId}</h1>`;
+    heroEl.innerHTML = `<h1>Equipo #${teamId}</h1>`;
     return;
   }
   const confVar = team.conference === 'East' ? 'var(--east)' : 'var(--west)';
-  const confLabel = team.conference === 'East' ? t('common_conference_east') : t('common_conference_west');
-  const titleWord = team.titles === 1 ? t('team_title_singular') : t('team_title_plural');
   const historyPill = team.founded
-    ? `<span class="pill">🏆 ${team.titles} ${titleWord} · ${t('team_founded_in')} ${team.founded}</span>`
+    ? `<span class="pill">🏆 ${team.titles} título${team.titles === 1 ? '' : 's'} · fundado en ${team.founded}</span>`
     : '';
 
   heroEl.innerHTML = `
@@ -61,12 +59,12 @@ function renderHero(team, teamId) {
     <div style="flex:1">
       <h1>${displayAbbr(team.abbreviation)}</h1>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">
-        <span class="pill"><span class="conf-tag" style="background:${confVar}"></span>${confLabel} · ${team.division}</span>
+        <span class="pill"><span class="conf-tag" style="background:${confVar}"></span>${team.conference}ern Conference · ${team.division}</span>
         ${historyPill}
-        <span class="pill" id="salary-pill">${t('team_payroll_loading')}</span>
+        <span class="pill" id="salary-pill">Nómina: cargando…</span>
       </div>
     </div>
-    <button class="pill" id="team-news-btn" style="cursor:pointer;border:1px solid var(--accent);color:var(--accent)">📰 ${t('team_news_button')}</button>
+    <button class="pill" id="team-news-btn" style="cursor:pointer;border:1px solid var(--accent);color:var(--accent)">📰 Noticias del equipo</button>
   `;
 
   document.getElementById('team-news-btn').addEventListener('click', () => showTeamNews(team));
@@ -81,8 +79,8 @@ function updateBreadcrumb(team) {
   const nav = document.getElementById('breadcrumb');
   if (!nav) return;
   nav.innerHTML = `
-    <a href="/index.html">${t('breadcrumb_home')}</a> <span class="sep" aria-hidden="true">/</span>
-    <a href="/teams.html">${t('nav_teams')}</a> <span class="sep" aria-hidden="true">/</span>
+    <a href="/index.html">Inicio</a> <span class="sep" aria-hidden="true">/</span>
+    <a href="/teams.html">Equipos</a> <span class="sep" aria-hidden="true">/</span>
     <span aria-current="page">${team.full_name}</span>
   `;
 
@@ -155,15 +153,15 @@ async function loadSalarySummary(teamId) {
     const res = await fetch(`/api/teams/${teamId}/salary-summary`);
     const data = await res.json();
     if (!data.hasData) {
-      pill.textContent = t('team_payroll_no_data');
+      pill.textContent = 'Nómina: sin datos todavía';
       return;
     }
     const capSpaceLabel = data.capSpace >= 0
-      ? `${formatMoney(data.capSpace)} ${t('common_cap_room')}`
-      : `${formatMoney(Math.abs(data.capSpace))} ${t('common_over_cap')}`;
-    pill.textContent = `${t('team_payroll_label')} ${formatMoney(data.totalPayroll)} · ${capSpaceLabel}`;
+      ? `${formatMoney(data.capSpace)} de margen`
+      : `${formatMoney(Math.abs(data.capSpace))} por encima del tope`;
+    pill.textContent = `Nómina ${formatMoney(data.totalPayroll)} · ${capSpaceLabel}`;
   } catch (err) {
-    pill.textContent = t('team_payroll_unavailable');
+    pill.textContent = 'Nómina: no disponible';
   }
 }
 
@@ -172,7 +170,7 @@ async function loadTeam() {
   const container = document.getElementById('roster-container');
 
   if (!teamId) {
-    document.getElementById('team-hero').innerHTML = `<h1>${t('team_not_specified')}</h1>`;
+    document.getElementById('team-hero').innerHTML = '<h1>Equipo no especificado</h1>';
     return;
   }
 
@@ -189,7 +187,7 @@ async function loadTeam() {
     const players = await playersRes.json();
 
     if (!players.length) {
-      container.innerHTML = `<p class="state-msg">${t('team_no_players')}</p>`;
+      container.innerHTML = '<p class="state-msg">No hay jugadores cacheados para este equipo todavía.</p>';
       return;
     }
 
@@ -208,7 +206,7 @@ async function loadTeam() {
         <div class="player-jersey">${p.jersey_number ? '#' + p.jersey_number : '—'}</div>
         <div style="flex:1">
           <div class="player-name">${p.first_name} ${p.last_name}</div>
-          <div class="player-meta">${p.position || t('common_no_data')}${p.height ? ' · ' + p.height : ''}${p.weight ? ' · ' + p.weight + ' lb' : ''}${p.birthYear ? ' · ' + p.birthYear : ''}</div>
+          <div class="player-meta">${p.position || 'N/D'}${p.height ? ' · ' + p.height : ''}${p.weight ? ' · ' + p.weight + ' lb' : ''}${p.birthYear ? ' · ' + p.birthYear : ''}</div>
         </div>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">
           ${p.rating2k ? `<span class="pill" style="padding:2px 8px;font-size:0.7rem;color:${rating2kColor(p.rating2k)};border-color:${rating2kColor(p.rating2k)}66">${p.rating2k}</span>` : ''}
@@ -220,7 +218,7 @@ async function loadTeam() {
     document.getElementById('team-ad-slot').innerHTML = renderAdSlot('teamFooter');
     activateAdSlots();
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('team_roster_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudo cargar la plantilla.</p>';
   }
 }
 

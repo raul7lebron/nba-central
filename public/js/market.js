@@ -6,7 +6,7 @@ function formatDate(iso) {
   if (!iso) return '';
   const d = new Date(iso);
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleString(getLocale(), {
+  return d.toLocaleString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
 }
@@ -48,7 +48,7 @@ async function loadMarket() {
     const items = await res.json();
 
     if (!items.length) {
-      container.innerHTML = `<p class="state-msg">${t('market_no_transactions')}</p>`;
+      container.innerHTML = '<p class="state-msg">Todavía no se ha detectado ningún fichaje o traspaso. El archivo se va llenando solo con cada actualización de noticias.</p>';
       return;
     }
 
@@ -70,7 +70,7 @@ async function loadMarket() {
     activateAdSlots();
     injectNewsJsonLd(items);
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('market_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudo cargar el mercado.</p>';
   }
 }
 

@@ -21,15 +21,15 @@ function parseMinutes(min) {
 }
 
 function draftLabel(player) {
-  if (!player.draft_year) return t('common_undrafted');
-  return `Draft ${player.draft_year} · ${t('player_draft_round_word')} ${player.draft_round} · ${t('player_draft_pick_word')}${player.draft_number}`;
+  if (!player.draft_year) return 'No drafteado';
+  return `Draft ${player.draft_year} · Ronda ${player.draft_round} · Pick nº${player.draft_number}`;
 }
 
 function renderSearchBox(slotKey) {
   const el = document.getElementById(`slot-${slotKey}`);
   el.innerHTML = `
     <div class="compare-search">
-      <input type="text" id="search-${slotKey}" placeholder="${t('search_placeholder')}" autocomplete="off">
+      <input type="text" id="search-${slotKey}" placeholder="Buscar jugador..." autocomplete="off">
       <div class="search-results" id="results-${slotKey}"></div>
     </div>
   `;
@@ -51,14 +51,14 @@ function renderSearchBox(slotKey) {
 
 async function runSearch(slotKey, q, resultsEl) {
   const token = ++searchTokens[slotKey];
-  resultsEl.innerHTML = `<div class="search-result-empty">${t('search_searching')}</div>`;
+  resultsEl.innerHTML = '<div class="search-result-empty">Buscando...</div>';
   try {
     const res = await fetch(`/api/players/search?q=${encodeURIComponent(q)}`);
     const players = await res.json();
     if (token !== searchTokens[slotKey]) return;
 
     if (!players.length) {
-      resultsEl.innerHTML = `<div class="search-result-empty">${t('search_no_results')}</div>`;
+      resultsEl.innerHTML = '<div class="search-result-empty">Sin resultados</div>';
       return;
     }
 
@@ -66,7 +66,7 @@ async function runSearch(slotKey, q, resultsEl) {
       <div class="search-result-item" data-id="${p.id}">
         ${p.currentTeam ? logoImgOrBadge(p.currentTeam.abbreviation, 20) : '<span class="team-badge" style="width:20px;height:20px;font-size:0.6rem">?</span>'}
         <span>${p.first_name} ${p.last_name}</span>
-        <span class="search-result-tag">${p.isActive ? t('common_active') : t('common_retired')}</span>
+        <span class="search-result-tag">${p.isActive ? 'Activo' : 'Retirado'}</span>
       </div>
     `).join('');
 
@@ -75,7 +75,7 @@ async function runSearch(slotKey, q, resultsEl) {
       item.addEventListener('click', () => selectPlayer(slotKey, player));
     });
   } catch (err) {
-    resultsEl.innerHTML = `<div class="search-result-empty">${t('search_error')}</div>`;
+    resultsEl.innerHTML = '<div class="search-result-empty">No se pudo buscar</div>';
   }
 }
 
@@ -91,12 +91,12 @@ function renderPlayerCard(slotKey) {
 
   el.innerHTML = `
     <div class="compare-card">
-      <button class="pill compare-change-btn" id="change-${slotKey}">${t('compare_change')}</button>
+      <button class="pill compare-change-btn" id="change-${slotKey}">Cambiar</button>
       ${photoHtml}
       <h2><a href="${playerUrl(player)}">${player.first_name} ${player.last_name}</a></h2>
-      <p class="player-meta">${player.position || t('common_no_data')} · ${player.height || '—'} · ${player.weight ? player.weight + ' lb' : '—'}</p>
+      <p class="player-meta">${player.position || 'N/D'} · ${player.height || '—'} · ${player.weight ? player.weight + ' lb' : '—'}</p>
       <p class="player-meta">${draftLabel(player)}</p>
-      <div id="season-${slotKey}" style="margin-top:10px"><p class="state-msg">${t('compare_loading_seasons')}</p></div>
+      <div id="season-${slotKey}" style="margin-top:10px"><p class="state-msg">Cargando temporadas...</p></div>
     </div>
   `;
 
@@ -113,7 +113,7 @@ function renderSeasonPicker(slotKey) {
   const { history, season } = slots[slotKey];
 
   if (!history.length) {
-    wrap.innerHTML = `<p class="state-msg">${t('compare_no_stats')}</p>`;
+    wrap.innerHTML = '<p class="state-msg">Sin estadísticas disponibles para este jugador.</p>';
     return;
   }
 
@@ -155,21 +155,21 @@ async function selectPlayer(slotKey, player) {
     renderSeasonPicker(slotKey);
     renderComparison();
   } catch (err) {
-    if (seasonWrap) seasonWrap.innerHTML = `<p class="error-msg">${t('compare_seasons_error')}</p>`;
+    if (seasonWrap) seasonWrap.innerHTML = '<p class="error-msg">No se pudieron cargar las temporadas.</p>';
   }
 }
 
 const COMPARE_ROWS = [
-  { key: 'games_played', label: t('compare_games_played') },
-  { key: 'min', label: t('stat_min_per_game') },
-  { key: 'pts', label: t('stat_pts') },
-  { key: 'reb', label: t('stat_reb') },
-  { key: 'ast', label: t('stat_ast') },
-  { key: 'stl', label: t('stat_stl') },
-  { key: 'blk', label: t('stat_blk') },
-  { key: 'fg_pct', label: t('stat_fg_pct'), isPct: true },
-  { key: 'fg3_pct', label: t('stat_fg3_pct'), isPct: true },
-  { key: 'val', label: t('stat_val'), compute: computeValoracion }
+  { key: 'games_played', label: 'Partidos jugados' },
+  { key: 'min', label: 'Minutos por partido' },
+  { key: 'pts', label: 'Puntos' },
+  { key: 'reb', label: 'Rebotes' },
+  { key: 'ast', label: 'Asistencias' },
+  { key: 'stl', label: 'Robos' },
+  { key: 'blk', label: 'Tapones' },
+  { key: 'fg_pct', label: '% Tiro de campo', isPct: true },
+  { key: 'fg3_pct', label: '% Triples', isPct: true },
+  { key: 'val', label: 'Valoración', compute: computeValoracion }
 ];
 
 function getRow(slotKey) {
@@ -208,14 +208,14 @@ function renderComparison() {
   const wrap = document.getElementById('compare-table-wrap');
 
   if (!slots.a.player || !slots.b.player) {
-    wrap.innerHTML = `<p class="state-msg">${t('compare_pick_two')}</p>`;
+    wrap.innerHTML = '<p class="state-msg">Elige dos jugadores para compararlos.</p>';
     return;
   }
 
   const rowA = getRow('a');
   const rowB = getRow('b');
   if (!rowA || !rowB) {
-    wrap.innerHTML = `<p class="state-msg">${t('compare_pick_season_both')}</p>`;
+    wrap.innerHTML = '<p class="state-msg">Elige, para cada jugador, una temporada con estadísticas.</p>';
     return;
   }
 

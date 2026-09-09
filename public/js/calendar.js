@@ -4,13 +4,13 @@ function seasonLabel(season) {
 
 function formatGameDate(dateStr) {
   const d = new Date(dateStr + 'T12:00:00Z');
-  return d.toLocaleDateString(getLocale(), { weekday: 'long', day: 'numeric', month: 'long' });
+  return d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
 }
 
 function formatGameTime(datetime) {
   if (!datetime) return '';
   const d = new Date(datetime);
-  return d.toLocaleTimeString(getLocale(), { hour: '2-digit', minute: '2-digit' });
+  return d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
 }
 
 let allTeams = [];
@@ -42,7 +42,7 @@ async function buildFilters() {
   wrap.innerHTML = `
     <select id="season-select" class="pill" style="cursor:pointer;font-weight:700">${seasonOptions}</select>
     <select id="team-select" class="pill" style="cursor:pointer">
-      <option value="">${t('common_all_teams')}</option>
+      <option value="">Todos los equipos</option>
       ${teamOptions}
     </select>
   `;
@@ -66,7 +66,7 @@ async function buildFilters() {
 function renderGames(games) {
   const container = document.getElementById('calendar-container');
   if (!games.length) {
-    container.innerHTML = `<p class="state-msg">${t('calendar_no_games_filter')}</p>`;
+    container.innerHTML = '<p class="state-msg">No hay partidos para este filtro.</p>';
     return;
   }
 
@@ -108,7 +108,7 @@ function renderGameCard(g) {
         </div>
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[1] : ''}</span>
       </div>
-      ${!played ? `<div class="player-meta" style="text-align:center">${scoreOrTime || t('calendar_tbd')}</div>` : ''}
+      ${!played ? `<div class="player-meta" style="text-align:center">${scoreOrTime || 'Por confirmar'}</div>` : ''}
     </div>
   `;
 }
@@ -128,7 +128,7 @@ async function loadCalendar() {
 
     renderGames(filtered);
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('calendar_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudo cargar el calendario.</p>';
   }
 }
 

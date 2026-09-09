@@ -53,8 +53,8 @@ function renderConferenceTable(title, rows) {
         <table class="stats-table">
           <thead>
             <tr>
-              <th>#</th><th style="text-align:left;padding-left:4px">${t('th_team')}</th><th>${t('standings_th_w')}</th><th>${t('standings_th_l')}</th>
-              <th>${t('standings_th_pct')}</th><th>${t('standings_th_gb')}</th><th>${t('standings_th_diff')}</th>
+              <th>#</th><th style="text-align:left;padding-left:4px">Equipo</th><th>V</th><th>D</th>
+              <th>%V</th><th>GB</th><th>DIF</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>
@@ -73,14 +73,14 @@ async function loadStandings() {
     const data = await res.json();
 
     if (!data.East?.length && !data.West?.length) {
-      container.innerHTML = `<p class="state-msg">${t('standings_no_games')}</p>`;
+      container.innerHTML = '<p class="state-msg">No hay partidos registrados para esta temporada todavía.</p>';
       return;
     }
 
     container.innerHTML = `
       <div class="standings-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
-        ${renderConferenceTable(t('common_conference_east'), data.East)}
-        ${renderConferenceTable(t('common_conference_west'), data.West)}
+        ${renderConferenceTable('Conferencia Este', data.East)}
+        ${renderConferenceTable('Conferencia Oeste', data.West)}
       </div>
     `;
 
@@ -90,7 +90,7 @@ async function loadStandings() {
       });
     });
   } catch (err) {
-    container.innerHTML = `<p class="error-msg">${t('standings_error')}</p>`;
+    container.innerHTML = '<p class="error-msg">No se pudo cargar la clasificación.</p>';
   }
 }
 
