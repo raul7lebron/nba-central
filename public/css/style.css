@@ -137,16 +137,17 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
 .nav-toggle:hover { color: var(--text); border-color: var(--accent); }
 
-/* El menu horizontal (10 secciones + buscador) deja de caber entero a
-   partir de ~1330px de ancho; por debajo de eso, sin el menu hamburguesa,
-   se desbordaba con una barra de scroll oculta (scrollbar-width:none) y sin
-   ninguna pista visual — Draft/Mercado/Tienda parecian haber desaparecido,
-   o se veian cortados a mitad de palabra ("Tienda" como "Tie"). El corte
-   se fija en 1400px para dejar margen sobre esa medida real. Este punto de
-   corte es independiente del de abajo (700px, ajustes de tablas/paginas
-   para pantallas de movil pequeñas): no deben fusionarse en una sola query.
+/* El menu horizontal (11 secciones + buscador, desde que "Traspasos" pasó a
+   "Simulador de traspasos") deja de caber entero a partir de ~1540px de
+   ancho; por debajo de eso, sin el menu hamburguesa, se desbordaba con una
+   barra de scroll oculta (scrollbar-width:none) y sin ninguna pista visual
+   — Mercado/Tienda parecian haber desaparecido, o se veian cortados a
+   mitad de palabra ("Mercado" como "Merca"). El corte se fija en 1620px
+   para dejar margen sobre esa medida real. Este punto de corte es
+   independiente del de abajo (700px, ajustes de tablas/paginas para
+   pantallas de movil pequeñas): no deben fusionarse en una sola query.
 */
-@media (max-width: 1400px) {
+@media (max-width: 1620px) {
   .nav-toggle { display: flex; }
 
   nav.site-nav {
