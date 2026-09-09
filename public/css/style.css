@@ -234,7 +234,7 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 .lang-switcher {
   height: 36px;
   margin-left: 10px;
-  padding: 0 8px;
+  padding: 0 6px 0 10px;
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -242,6 +242,7 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   font-family: inherit;
   font-size: 0.8rem;
   font-weight: 700;
+  letter-spacing: 0.3px;
   cursor: pointer;
   flex-shrink: 0;
 }
@@ -253,10 +254,6 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   /* con el menu plegado, el selector de idioma pasa a ir junto al resto de
      iconos de la cabecera (hamburguesa + buscador), no dentro del menu */
   .lang-switcher { margin-left: 6px; }
-}
-
-@media (max-width: 420px) {
-  .lang-switcher { padding: 0 4px; font-size: 0.72rem; }
 }
 
 .search-panel {
@@ -962,6 +959,19 @@ footer.site-footer a:hover { color: var(--accent); }
   header.site-header { padding: 14px 18px; }
   main { padding: 28px 16px 60px; }
   .team-hero { flex-direction: column; text-align: center; }
+}
+
+/* El nombre "El Rompearos" junto al hamburguesa, la lupa y el selector de
+   idioma (4 elementos en vez de los 2 originales) ya no cabe en una fila
+   a partir de ~480px de ancho: se salia por el borde derecho, dejando el
+   selector de idioma invisible e inutilizable en el movil (medido con
+   scrollWidth vs clientWidth de header.site-header, igual que el punto de
+   corte del menu). Por debajo de esa medida se deja solo el escudo, como
+   la mayoria de cabeceras moviles: el logo ya enlaza a Inicio igual.
+*/
+@media (max-width: 480px) {
+  header.site-header { gap: 10px; }
+  .brand-text { display: none; }
 }
 
 /* ---------- Simulador de traspasos ---------- */

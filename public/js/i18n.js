@@ -12,6 +12,13 @@
 const LANG_STORAGE_KEY = 'elrompearos_lang';
 const SUPPORTED_LANGS = ['es', 'en', 'pt'];
 const LANG_NAMES = { es: 'Español', en: 'English', pt: 'Português' };
+// El selector muestra el codigo corto (ES/EN/PT), no el nombre completo:
+// con el nombre entero ("English", "Português") el control no cabia junto
+// al resto de iconos de la cabecera en movil (se salia por el borde
+// derecho, invisible e inutilizable). El nombre completo de cada idioma
+// sigue disponible por el title de cada <option>, para quien pase el ratón
+// o use un lector de pantalla que lo anuncie.
+const LANG_CODES = { es: 'ES', en: 'EN', pt: 'PT' };
 
 const TRANSLATIONS = {
   es: {
@@ -554,7 +561,7 @@ function injectLangSwitcher() {
   select.className = 'lang-switcher';
   select.setAttribute('aria-label', 'Idioma / Language / Idioma');
   select.innerHTML = SUPPORTED_LANGS.map((code) =>
-    `<option value="${code}" ${code === currentLang ? 'selected' : ''}>${LANG_NAMES[code]}</option>`
+    `<option value="${code}" title="${LANG_NAMES[code]}" ${code === currentLang ? 'selected' : ''}>${LANG_CODES[code]}</option>`
   ).join('');
   select.addEventListener('change', () => setLang(select.value));
 
