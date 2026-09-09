@@ -137,17 +137,20 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
 .nav-toggle:hover { color: var(--text); border-color: var(--accent); }
 
-/* El menu horizontal (11 secciones + buscador, desde que "Traspasos" pasó a
-   "Simulador de traspasos") deja de caber entero a partir de ~1540px de
-   ancho; por debajo de eso, sin el menu hamburguesa, se desbordaba con una
-   barra de scroll oculta (scrollbar-width:none) y sin ninguna pista visual
-   — Mercado/Tienda parecian haber desaparecido, o se veian cortados a
-   mitad de palabra ("Mercado" como "Merca"). El corte se fija en 1620px
-   para dejar margen sobre esa medida real. Este punto de corte es
-   independiente del de abajo (700px, ajustes de tablas/paginas para
-   pantallas de movil pequeñas): no deben fusionarse en una sola query.
+/* El menu horizontal (12 secciones + buscador, desde que se añadió
+   "Quiniela") deja de caber entero a partir de ~1628px de ancho; por
+   debajo de eso, sin el menu hamburguesa, se desbordaba con una barra de
+   scroll oculta (scrollbar-width:none) y sin ninguna pista visual —
+   Mercado/Tienda parecian haber desaparecido, o se veian cortados a mitad
+   de palabra ("Mercado" como "Merca"). El corte se fija en 1700px para
+   dejar margen sobre esa medida real. Cada vez que se añada o alargue un
+   enlace del menu, hay que volver a medir este punto (con scrollWidth vs
+   clientWidth de nav.site-nav) en vez de asumir que el valor anterior
+   sigue sirviendo. Este punto de corte es independiente del de abajo
+   (700px, ajustes de tablas/paginas para pantallas de movil pequeñas): no
+   deben fusionarse en una sola query.
 */
-@media (max-width: 1620px) {
+@media (max-width: 1700px) {
   .nav-toggle { display: flex; }
 
   nav.site-nav {
@@ -1095,4 +1098,115 @@ footer.site-footer a:hover { color: var(--accent); }
 
 @media (max-width: 700px) {
   .trade-roster-list { max-height: 280px; }
+}
+
+/* ---------- Quiniela semanal ---------- */
+
+.quiniela-identity {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.quiniela-identity .pill {
+  display: inline-flex;
+  gap: 8px;
+  cursor: text;
+}
+
+.quiniela-identity input {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  width: 160px;
+}
+
+.quiniela-identity input:focus { outline: none; border-color: var(--accent); }
+.quiniela-identity .player-meta { margin-top: 8px; }
+
+.quiniela-week-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.quiniela-week-nav .pill { cursor: pointer; font-family: inherit; }
+.quiniela-week-nav .pill:disabled { opacity: 0.4; cursor: not-allowed; }
+#week-label { cursor: default; text-transform: capitalize; }
+
+.quiniela-games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 14px;
+}
+
+.quiniela-game {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+}
+
+.quiniela-game-teams {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.quiniela-vs { color: var(--text-faint); font-size: 0.75rem; font-weight: 700; }
+
+.quiniela-pick-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-2);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 6px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.quiniela-pick-btn:hover:not(:disabled) { border-color: var(--accent); }
+.quiniela-pick-btn:disabled { cursor: default; }
+
+.quiniela-pick-btn.is-picked { border-color: var(--accent); background: var(--accent-dim); }
+.quiniela-pick-btn.is-winner { border-color: var(--positive); }
+.quiniela-pick-btn.is-picked.is-winner { background: rgba(62, 207, 110, 0.15); }
+.quiniela-pick-btn.is-wrong { border-color: var(--negative); background: rgba(255, 92, 92, 0.12); }
+.quiniela-pick-btn.is-locked:not(.is-picked):not(.is-winner) { opacity: 0.6; }
+
+.quiniela-score { font-weight: 800; font-size: 0.95rem; }
+
+.quiniela-game-meta {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 0.72rem;
+  color: var(--text-faint);
+  text-transform: capitalize;
+}
+
+.quiniela-status-row {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+@media (max-width: 560px) {
+  .quiniela-games-grid { gap: 10px; }
+  .quiniela-week-nav { flex-wrap: wrap; }
 }
