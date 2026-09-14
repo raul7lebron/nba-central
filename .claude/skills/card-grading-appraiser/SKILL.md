@@ -1,6 +1,6 @@
 ---
 name: card-grading-appraiser
-description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para dos cosas — (1) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), y (2) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, o mencione "gradeado", "grading", "centrado", "esquinas", "condición de la carta". También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
+description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para tres cosas — (1) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), (2) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca, y (3) buscar en eBay la media de precio de venta reciente (ventas completadas de los últimos 7 días) de esa misma carta con esa nota, como referencia de mercado. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, cuánto vale o a qué precio se vende. También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
 ---
 
 # Card Grading Appraiser
@@ -151,7 +151,21 @@ Da:
 - La nota final BGS estimada
 - Indica si calificaría para "Black Label" (BGS 10 en las 4 categorías — extremadamente raro)
 
-### 10. Presenta el informe final
+### 10. Busca la media de precio de venta reciente en eBay
+
+Objetivo: dar una referencia de mercado real, no solo una nota — la media de precio de **venta** (no de listado/precio pedido) en eBay para esa misma carta con la nota estimada (PSA X o BGS X.X, la que corresponda), limitada a **ventas completadas en los últimos 7 días**.
+
+Hazlo así:
+
+- Usa las herramientas de búsqueda/navegación web disponibles para localizar anuncios de eBay marcados como **vendidos/completados** ("Sold", "Completed listings") de esa carta exacta (mismo personaje/jugador, set, año y número) con la nota exacta que estimaste. No mezcles PSA y BGS en la misma media — son escalas y mercados distintos con precios que no son directamente comparables.
+- Una forma práctica de buscar es con la URL de búsqueda avanzada de eBay filtrada a vendidos, por ejemplo `https://www.ebay.com/sch/i.html?_nkw=<carta+set+año+PSA+9>&LH_Sold=1&LH_Complete=1`, o mediante una búsqueda web del tipo `site:ebay.com "<carta>" "PSA 9" sold`. Si la página no carga bien con la herramienta de fetch (eBay usa mucho JavaScript), apóyate en los fragmentos que devuelva la búsqueda web, que a menudo ya incluyen el precio.
+- De cada resultado, anota el precio de venta y la fecha en que se vendió. **Descarta cualquier venta fuera de los últimos 7 días** contados desde hoy — no amplíes la ventana sin decírselo al usuario.
+- Calcula la media (y de paso el rango mín-máx) solo con las ventas dentro de esa ventana. Indica cuántas ventas encontraste y en qué fechas, para que el usuario pueda verificarlo.
+- **Si encuentras menos de 3 ventas en los últimos 7 días**, dilo explícitamente en vez de dar una media poco fiable con 1-2 datos — ofrece como alternativa clara y aparte (nunca mezclada con la media semanal) la media de una ventana más amplia (ej. últimos 30 días) si la calculas, dejando claro que es un periodo distinto.
+- **No inventes ni estimes precios de memoria.** Si no tienes forma de navegar o buscar en la web en este entorno, o la búsqueda no devuelve ventas verificables, dilo tal cual ("no he podido consultar precios reales de eBay ahora mismo") en vez de dar una cifra aproximada como si fuera un dato real.
+- Los precios de eBay suelen excluir el envío; si los datos que encuentras lo indican por separado, acláralo en vez de mezclar precio de artículo y envío sin avisar.
+
+### 11. Presenta el informe final
 
 Formato recomendado (ajústalo si el usuario pide algo más breve). El veredicto de autenticidad va siempre primero:
 
@@ -172,7 +186,10 @@ SUPERFICIE — [resumen]
 Factor limitante principal: [...]
 Qué haría falta para subir de nota: [...]
 
-⚠️ Estimación visual, no gradeado oficial ni autenticación formal. La nota real de PSA/Beckett puede variar, y PSA/BGS rechazan y no gradean cartas que detectan como no auténticas en su propio proceso.
+💰 Precio medio de venta en eBay (últimos 7 días, misma nota): $XX.XX (basado en N ventas, [fecha]-[fecha])
+   [o bien: "Datos insuficientes/no disponibles para dar una media fiable de los últimos 7 días" si no encontraste al menos 3 ventas verificables]
+
+⚠️ Estimación visual, no gradeado oficial ni autenticación formal. La nota real de PSA/Beckett puede variar, y PSA/BGS rechazan y no gradean cartas que detectan como no auténticas en su propio proceso. El precio de eBay es orientativo, basado en ventas recientes encontradas por búsqueda web, no en un feed de datos en tiempo real.
 ```
 
 Si el veredicto de autenticidad es 🔴, puedes omitir o abreviar mucho la parte de grading (no tiene sentido detallar el "estado de conservación" de algo que probablemente no es la carta original) y centra la respuesta en explicar las señales encontradas.
@@ -187,3 +204,4 @@ Si el usuario sube varias cartas y pregunta cuál merece la pena enviar a gradea
 - No confundas los modos ni apliques señales de un juego a otro (ej. la prueba de la luz de Magic/Pokémon/Yu-Gi-Oh! no tiene el mismo significado en una carta deportiva de cartón grueso normal) — si dudas del modo correcto, pregunta antes de dar un veredicto de autenticidad.
 - Nunca prometas que la carta "sacará" una nota exacta en el envío real, ni que "pasará" o "no pasará" la autenticación real — usa siempre lenguaje de estimación/rango y probabilidad.
 - Esta skill es para proteger al usuario (comprador, vendedor o coleccionista) de un posible engaño — no la uses nunca para ayudar a alguien a mejorar o perfeccionar una falsificación existente ni a evadir la detección de un servicio de gradeo real; si el contexto de la conversación apunta claramente a eso, no continúes con esa parte de la petición.
+- El precio medio de eBay depende de poder buscar/navegar por la web en el entorno donde se ejecuta esta skill: si esa capacidad no está disponible, o la búsqueda no devuelve ventas verificables de los últimos 7 días, dilo explícitamente en el informe en vez de rellenar la cifra con un precio "típico" de memoria — un precio inventado con apariencia de dato real es peor que no darlo.
