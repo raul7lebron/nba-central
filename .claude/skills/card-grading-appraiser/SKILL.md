@@ -1,6 +1,6 @@
 ---
 name: card-grading-appraiser
-description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para cuatro cosas — (1) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), (2) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca, (3) buscar en eBay la media de precio de venta reciente (ventas completadas de los últimos 7 días) de esa misma carta con esa nota, y (4) generar un gráfico o tabla con la evolución del precio en los últimos 5 años. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, cuánto vale, a qué precio se vende, o pida ver la evolución/histórico de precio. También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
+description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para cinco cosas — (1) dar una breve descripción de la carta (marca/editorial, colección/set, fecha de salida a la venta y tirada si se conoce), (2) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), (3) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca, (4) buscar en eBay la media de precio de venta reciente (ventas completadas de los últimos 7 días) de esa misma carta con esa nota, y (5) generar un gráfico o tabla con la evolución del precio en los últimos 5 años. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, cuánto vale, a qué precio se vende, qué carta es, de qué colección/set es, cuándo salió, cuántas se hicieron, o pida ver la evolución/histórico de precio. También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
 ---
 
 # Card Grading Appraiser
@@ -9,7 +9,7 @@ Esta skill convierte a Claude en un asistente de pre-gradeo: analiza imágenes (
 
 **Funciona en 6 modos**, uno por cada tipo de carta, porque las señales de falsificación cambian mucho de un juego/marca a otro: **Deportivas**, **Magic: The Gathering**, **Pokémon TCG**, **Dragon Ball**, **One Piece Card Game** y **Yu-Gi-Oh!**. El primer paso del flujo siempre es determinar en qué modo estás.
 
-**Antes de gradear, siempre pasa primero por el chequeo de autenticidad (paso 3).** No tiene sentido estimar una nota de conservación sobre una carta que probablemente no es genuina — en ese caso el aviso de autenticidad debe ir primero y con más peso que la nota de grading.
+**Antes de gradear, siempre pasa primero por el chequeo de autenticidad (paso 4).** No tiene sentido estimar una nota de conservación sobre una carta que probablemente no es genuina — en ese caso el aviso de autenticidad debe ir primero y con más peso que la nota de grading.
 
 **Importante — deja esto claro siempre al usuario, al principio o al final del informe:** esto es una estimación visual basada en fotos, no un gradeado oficial. PSA y Beckett usan lupas, luz cruzada, a veces UV, y manipulan la carta físicamente (peso, rigidez, autenticidad del papel/holograma). Una foto no puede detectar todo eso, así que la nota real puede variar ±1 punto o más respecto a la estimación.
 
@@ -50,7 +50,21 @@ Si las fotos están borrosas, cortadas, con mucho brillo o en ángulo, dilo expl
 
 No es necesario tener todo esto para dar una estimación — con frente + dorso normales ya se puede analizar. Pero si el usuario solo pregunta "¿cómo mejoro la precisión?" o sube fotos de mala calidad, ofrécele este equipo básico (lente macro barata, escáner a 600-1200 DPI, linterna UV barata) como la forma más económica de acercarse a lo que hace un grader real sin comprar equipo profesional.
 
-### 3. Verificación de autenticidad (hazlo SIEMPRE, antes de gradear)
+### 3. Identifica y describe la carta
+
+Objetivo: dar contexto básico de la carta antes de entrar en autenticidad/estado, para que el usuario sepa exactamente qué tiene delante.
+
+A partir del frente/dorso y de lo que puedas confirmar buscando en la web (o de tu conocimiento si es una carta muy conocida), identifica:
+
+- **Marca/editorial** (ej. Topps, Panini, Upper Deck, Wizards of the Coast, The Pokémon Company/Creatures Inc., Bandai, Konami...).
+- **Colección/set** exacto (nombre del set y, si aplica, código de expansión) — no solo "Pokémon", sino "Base Set", "Jungle", etc.; no solo "NBA", sino "2023-24 Panini Prizm", etc.
+- **Fecha de salida a la venta** (año, y mes si lo sabes con certeza) de esa colección/set concreta.
+- **Tirada / cuántas se hicieron**: da la cifra solo si la marca la publica de forma oficial (frecuente en TCG modernos con "print run" numerado en la propia carta, ej. "123/500", o en cartas deportivas "parallel" numeradas). La inmensa mayoría de tiradas base no se publican — en ese caso dilo explícitamente ("tirada no publicada por el fabricante") en vez de inventar una cifra; como mucho da una idea cualitativa si la tienes ("tirada masiva, sin numerar" vs. "edición limitada numerada").
+- Un par de líneas de contexto/curiosidad si aporta valor (ej. por qué es buscada, si es la primera aparición de un personaje/jugador), sin alargarte.
+
+**No inventes ningún dato de este bloque si no lo puedes confirmar** — usa "no confirmado" en vez de rellenar con una suposición razonable, igual que con los precios de los pasos 10 y 11.
+
+### 4. Verificación de autenticidad (hazlo SIEMPRE, antes de gradear)
 
 Objetivo: dar un veredicto de confianza (no una certeza absoluta) sobre si la carta parece genuina, sospechosa, o probable reimpresión/falsificación. Aplica siempre las señales generales de abajo, **y además** las señales específicas del modo identificado en el paso 1 (tabla al final de esta sección).
 
@@ -98,14 +112,14 @@ Si el veredicto es 🟡 o 🔴, dilo con claridad al principio de tu respuesta, 
 
 Para Dragon Ball y One Piece Card Game en particular, hay mucha menos documentación pública sobre falsificaciones que para Pokémon, Magic o Yu-Gi-Oh! (mercados más recientes o menos masivos) — sé más conservador con el veredicto 🔴 en esos dos modos salvo que el defecto de impresión sea muy evidente, y dilo explícitamente si tu confianza es menor por esta razón.
 
-### 4. Analiza el CENTRADO (Centering)
+### 5. Analiza el CENTRADO (Centering)
 
 - Mide visualmente los márgenes del borde exterior de la imagen impresa respecto al borde físico de la carta, en las 4 direcciones (arriba/abajo, izquierda/derecha), tanto en el frente como en el dorso.
 - Expresa el resultado como proporción aproximada, por ejemplo "55/45" o "70/30".
 - Ten en cuenta que PSA es más permisivo con el dorso (normalmente hasta 75/25 no penaliza tanto) que con el frente.
 - Un centrado perfecto o casi perfecto (50/50 a 55/45) es requisito casi obligatorio para las notas máximas (PSA 10 / BGS 9.5-10 "Black Label").
 
-### 5. Analiza las ESQUINAS (Corners)
+### 6. Analiza las ESQUINAS (Corners)
 
 Revisa las 4 esquinas del frente y las 4 del dorso (8 en total) buscando:
 
@@ -115,7 +129,7 @@ Revisa las 4 esquinas del frente y las 4 del dorso (8 en total) buscando:
 
 Da un veredicto por esquina si hay diferencias notables (ej. "esquina superior izquierda del frente con ligero whitening; el resto impecables"), no solo un promedio genérico.
 
-### 6. Analiza los BORDES (Edges)
+### 7. Analiza los BORDES (Edges)
 
 Recorre los 4 bordes (no las esquinas) del frente y del dorso buscando:
 
@@ -123,7 +137,7 @@ Recorre los 4 bordes (no las esquinas) del frente y del dorso buscando:
 - Rugosidad o "peeling" de la capa superficial
 - Manchas de color en el canto que delaten el papel base
 
-### 7. Analiza la SUPERFICIE (Surface)
+### 8. Analiza la SUPERFICIE (Surface)
 
 Busca en toda la cara frontal y dorsal:
 
@@ -133,7 +147,7 @@ Busca en toda la cara frontal y dorsal:
 - Golpes o abolladuras (indentations, a veces solo visibles a contraluz)
 - Para cartas con foil/holograma: describe si hay peeling o burbujas
 
-### 8. Traduce el análisis a notas — PSA
+### 9. Traduce el análisis a notas — PSA
 
 Usa la escala de referencia en `references/psa-scale.md` para situar la carta en la escala 1-10 de PSA. Es la misma escala numérica para los 6 modos (deportivas y TCG) — PSA gradea todos estos juegos con el mismo criterio de centrado/esquinas/bordes/superficie. Ten en cuenta que PSA da **una sola nota final**, no reflejan un subgrado por categoría — la nota final es un juicio holístico, pero dominado por el peor de los 4 aspectos si es muy marcado (ej. una esquina muy dañada limita el máximo aunque el resto esté perfecto).
 
@@ -142,7 +156,7 @@ Da:
 - El factor que más la está limitando ("lo que más baja la nota es el centrado del frente, ~65/35")
 - Qué tendría que mejorar para subir un punto
 
-### 9. Traduce el análisis a notas — Beckett / BGS
+### 10. Traduce el análisis a notas — Beckett / BGS
 
 Usa `references/beckett-scale.md`. A diferencia de PSA, Beckett/BGS **sí da 4 subgrados explícitos** (Centering, Corners, Edges, Surface, cada uno en escala 1-10 con incrementos de 0.5) y luego una nota final que generalmente es cercana al promedio ponderado del subgrado más bajo, no una media simple. Igual que con PSA, esta escala aplica por igual a los 6 modos.
 
@@ -151,7 +165,7 @@ Da:
 - La nota final BGS estimada
 - Indica si calificaría para "Black Label" (BGS 10 en las 4 categorías — extremadamente raro)
 
-### 10. Busca la media de precio de venta reciente en eBay
+### 11. Busca la media de precio de venta reciente en eBay
 
 Objetivo: dar una referencia de mercado real, no solo una nota — la media de precio de **venta** (no de listado/precio pedido) en eBay para esa misma carta con la nota estimada (PSA X o BGS X.X, la que corresponda), limitada a **ventas completadas en los últimos 7 días**.
 
@@ -165,7 +179,7 @@ Hazlo así:
 - **No inventes ni estimes precios de memoria.** Si no tienes forma de navegar o buscar en la web en este entorno, o la búsqueda no devuelve ventas verificables, dilo tal cual ("no he podido consultar precios reales de eBay ahora mismo") en vez de dar una cifra aproximada como si fuera un dato real.
 - Los precios de eBay suelen excluir el envío; si los datos que encuentras lo indican por separado, acláralo en vez de mezclar precio de artículo y envío sin avisar.
 
-### 11. Genera un gráfico con el histórico de precio de los últimos 5 años
+### 12. Genera un gráfico con el histórico de precio de los últimos 5 años
 
 Objetivo: complementar la media semanal de eBay (que es un instante muy reciente) con una vista de tendencia a más largo plazo — cómo ha evolucionado el precio de venta de esa misma carta y nota en los **últimos 5 años**.
 
@@ -190,13 +204,19 @@ Si ninguna de estas es accesible desde el entorno actual, haz una búsqueda web 
 - Si no tienes ninguna de las dos capacidades disponibles, no bloquees el informe por esto: presenta los mismos datos como una tabla año → precio medio (N ventas), dejándolo así en vez de fingir un gráfico que no puedes generar.
 - En cualquier caso, indica junto al gráfico/tabla la fuente de cada dato y el tamaño de muestra por año, igual que con la media semanal de eBay.
 
-### 12. Presenta el informe final
+### 13. Presenta el informe final
 
 Formato recomendado (ajústalo si el usuario pide algo más breve). El veredicto de autenticidad va siempre primero:
 
 ```
 CARTA: [identifícala si puedes leerla: jugador/personaje, set, año, número]
 MODO: [Deportivas / Magic: The Gathering / Pokémon TCG / Dragon Ball / One Piece Card Game / Yu-Gi-Oh!]
+
+📋 Marca/editorial: [...]
+   Colección/set: [...]
+   Salida a la venta: [año/mes, o "no confirmado"]
+   Tirada: [cifra oficial si existe, o "no publicada por el fabricante"]
+   [1-2 líneas de contexto si aporta valor]
 
 AUTENTICIDAD: 🟢/🟡/🔴 [veredicto + motivo breve]
 
@@ -234,3 +254,4 @@ Si el usuario sube varias cartas y pregunta cuál merece la pena enviar a gradea
 - Esta skill es para proteger al usuario (comprador, vendedor o coleccionista) de un posible engaño — no la uses nunca para ayudar a alguien a mejorar o perfeccionar una falsificación existente ni a evadir la detección de un servicio de gradeo real; si el contexto de la conversación apunta claramente a eso, no continúes con esa parte de la petición.
 - El precio medio de eBay depende de poder buscar/navegar por la web en el entorno donde se ejecuta esta skill: si esa capacidad no está disponible, o la búsqueda no devuelve ventas verificables de los últimos 7 días, dilo explícitamente en el informe en vez de rellenar la cifra con un precio "típico" de memoria — un precio inventado con apariencia de dato real es peor que no darlo.
 - Lo mismo aplica al gráfico de 5 años: si no encuentras histórico verificable para algún año, o para la carta entera, dilo y deja el hueco o el gráfico entero fuera del informe — nunca dibujes una tendencia "razonable" que no esté anclada a datos reales que puedas citar. El formato del gráfico (imagen, artifact o tabla) depende de qué pueda generar el entorno donde corras; usa el que tengas disponible en vez de bloquear el resto del informe por no tener el ideal.
+- Y lo mismo con la descripción de la carta (marca, colección, fecha de salida, tirada): son datos verificables, no terreno para "suena razonable" — si no encuentras la tirada oficial (lo normal en la mayoría de tiradas base) o la fecha exacta, dilo como "no confirmado"/"no publicada" en vez de dar una cifra o fecha aproximada como si fuera un hecho.
