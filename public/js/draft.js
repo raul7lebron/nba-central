@@ -32,11 +32,14 @@ function renderPick(p) {
     ? `<span class="pill" style="padding:2px 8px;font-size:0.7rem;color:${rating2kColor(rating)};border-color:${rating2kColor(rating)}66">${rating}</span>`
     : '';
 
+  const flag = countryFlag(p.country);
+  const flagHtml = flag ? `<span style="font-size:0.85em;margin-left:5px" title="${p.country}">${flag}</span>` : '';
+
   return `
     <a class="player-card" href="${playerUrl(p)}">
       <div class="player-jersey">#${p.pick}</div>
       <div style="flex:1">
-        <div class="player-name">${p.first_name} ${p.last_name}</div>
+        <div class="player-name">${p.first_name} ${p.last_name}${flagHtml}</div>
         <div class="player-meta">${p.position || 'N/D'} · ${p.college || p.country || 'N/D'}</div>
       </div>
       <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">

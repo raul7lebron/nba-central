@@ -21,6 +21,7 @@ const { normalizeName: normalize2kName, getPeakRatingByName } = require('./src/r
 const { computeStandings } = require('./src/standings');
 const { computePlayoffBracket } = require('./src/playoffs');
 const { isoWeekKey, buildResultsByGame, groupGamesByWeek, scoreWeeks } = require('./src/quiniela');
+const { countryFlag } = require('./src/countryFlags');
 
 const EARLIEST_SEASON = 1980;
 
@@ -269,9 +270,14 @@ function renderPlayerHeroHtml(player) {
     player.isActive ? '' : 'Retirado/inactivo'
   ].filter(Boolean).join(' · ');
 
+  const flag = countryFlag(player.country);
+  const flagHtml = flag
+    ? `<span style="font-size:0.55em;vertical-align:middle;margin-left:6px" title="${escapeAttr(player.country)}">${flag}</span>`
+    : '';
+
   return `
     <div style="flex:1">
-      <h1>${escapeAttr(player.first_name)} ${escapeAttr(player.last_name)}</h1>
+      <h1>${escapeAttr(player.first_name)} ${escapeAttr(player.last_name)}${flagHtml}</h1>
       <div class="player-meta">${escapeAttr(metaLine)}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">${teamText}</div>
     </div>

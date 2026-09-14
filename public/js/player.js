@@ -94,10 +94,15 @@ function renderPlayerHero(player) {
     ? `<img class="player-photo" src="${player.photoUrl}" alt="${player.first_name} ${player.last_name}" width="120" height="120" fetchpriority="high" onerror="this.remove()">`
     : '';
 
+  const flag = countryFlag(player.country);
+  const flagHtml = flag
+    ? `<span style="font-size:0.55em;vertical-align:middle;margin-left:6px" title="${player.country}">${flag}</span>`
+    : '';
+
   heroEl.innerHTML = `
     ${photoHtml}
     <div style="flex:1">
-      <h1>${player.first_name} ${player.last_name}</h1>
+      <h1>${player.first_name} ${player.last_name}${flagHtml}</h1>
       <div class="player-meta">${player.position || 'N/D'} · ${player.height || ''} · ${player.weight ? player.weight + ' lb' : ''}${player.birthYear ? ' · ' + player.birthYear : ''}${player.isActive ? '' : ' · Retirado/inactivo'}</div>
       <div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
         ${teamLine}
