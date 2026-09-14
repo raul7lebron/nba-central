@@ -1,6 +1,6 @@
 ---
 name: card-grading-appraiser
-description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para tres cosas — (1) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), (2) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca, y (3) buscar en eBay la media de precio de venta reciente (ventas completadas de los últimos 7 días) de esa misma carta con esa nota, como referencia de mercado. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, cuánto vale o a qué precio se vende. También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
+description: Analiza fotos o escaneos de cartas coleccionables — deportivas, Magic: The Gathering, Pokémon TCG, Dragon Ball, One Piece Card Game y Yu-Gi-Oh! — para cuatro cosas — (1) estimar su grado de conservación siguiendo los criterios usados por PSA y Beckett/BGS (centrado, esquinas, bordes y superficie), (2) detectar señales visuales de que la carta pueda ser falsa/reimpresa/alterada, aplicando además las señales específicas de falsificación de cada juego/marca, (3) buscar en eBay la media de precio de venta reciente (ventas completadas de los últimos 7 días) de esa misma carta con esa nota, y (4) generar un gráfico o tabla con la evolución del precio en los últimos 5 años. Usa esta skill siempre que el usuario suba imágenes de una carta y pida "gradearla", "valorarla", "puntuarla", pregunte en qué estado está, cuánto podría sacar en PSA/BGS, cuánto vale, a qué precio se vende, o pida ver la evolución/histórico de precio. También úsala cuando pregunte si una carta "es falsa", "es auténtica", "es original", "es una reimpresión/bootleg/custom", quiera verificar antes de comprar/vender, o compare el estado de varias cartas para decidir cuál gradear — sea una carta deportiva o de Magic, Pokémon, Dragon Ball, One Piece o Yu-Gi-Oh!.
 ---
 
 # Card Grading Appraiser
@@ -165,7 +165,32 @@ Hazlo así:
 - **No inventes ni estimes precios de memoria.** Si no tienes forma de navegar o buscar en la web en este entorno, o la búsqueda no devuelve ventas verificables, dilo tal cual ("no he podido consultar precios reales de eBay ahora mismo") en vez de dar una cifra aproximada como si fuera un dato real.
 - Los precios de eBay suelen excluir el envío; si los datos que encuentras lo indican por separado, acláralo en vez de mezclar precio de artículo y envío sin avisar.
 
-### 11. Presenta el informe final
+### 11. Genera un gráfico con el histórico de precio de los últimos 5 años
+
+Objetivo: complementar la media semanal de eBay (que es un instante muy reciente) con una vista de tendencia a más largo plazo — cómo ha evolucionado el precio de venta de esa misma carta y nota en los **últimos 5 años**.
+
+**Sobre las fuentes — importante**: el buscador/filtro de "vendidos" de eBay normalmente solo expone del orden de los últimos 90 días de histórico, así que no sirve para reconstruir 5 años. Para el histórico largo, busca en agregadores especializados en precios de cartas gradeadas, que sí guardan histórico plurianual — usa el que puedas consultar desde el entorno actual:
+
+- **PSA Auction Prices Realized** (psacard.com, herramienta "APR") — cubre específicamente cartas gradeadas por PSA.
+- **CardLadder** (cardladder.com) — índices de precio histórico por carta/nota.
+- **PriceCharting.com** — histórico de precio con gráfico propio, cubre deportivas y varios TCG.
+- **130point.com** — buscador de ventas históricas de eBay más allá de la ventana normal de 90 días.
+- Casas de subastas con archivo público (Goldin, PWCC, Heritage Auctions) si la carta es de gama alta y ha pasado por subasta.
+
+Si ninguna de estas es accesible desde el entorno actual, haz una búsqueda web general del tipo `<carta> <nota> histórico precio` / `price history` y usa los puntos de dato concretos (con año) que encuentres citados en foros, artículos o esas mismas webs indexados por el buscador.
+
+**Cómo construir la serie**
+- Reúne un precio medio (o el dato puntual más representativo si no hay media) por cada uno de los últimos 5 años naturales, para la carta y nota exactas — no mezcles notas distintas en la misma serie.
+- Si para algún año no encuentras ningún dato fiable, márcalo explícitamente como "sin datos" en ese punto en vez de interpolar o inventar un valor — una serie con huecos reales es más honesta que una línea continua inventada.
+- **No inventes la tendencia de memoria.** Si no puedes navegar/buscar en la web en este entorno, o no encuentras histórico plurianual verificable para esa carta en concreto (es habitual en cartas de bajo valor o ediciones muy recientes con menos de 5 años en el mercado), dilo explícitamente y omite el gráfico en vez de dibujar una tendencia plausible pero ficticia.
+
+**Cómo dibujar el gráfico**
+- Si el entorno donde corres permite ejecutar código o generar imágenes (ej. un script de Python con matplotlib), genera un gráfico de líneas simple: eje X = año, eje Y = precio medio de venta, y guárdalo/muéstralo como imagen.
+- Si el entorno permite publicar un Artifact interactivo, consulta primero la skill **dataviz** para el estilo (paleta, ejes, tooltips) y publica el gráfico como una pequeña página HTML/SVG en vez de una imagen estática.
+- Si no tienes ninguna de las dos capacidades disponibles, no bloquees el informe por esto: presenta los mismos datos como una tabla año → precio medio (N ventas), dejándolo así en vez de fingir un gráfico que no puedes generar.
+- En cualquier caso, indica junto al gráfico/tabla la fuente de cada dato y el tamaño de muestra por año, igual que con la media semanal de eBay.
+
+### 12. Presenta el informe final
 
 Formato recomendado (ajústalo si el usuario pide algo más breve). El veredicto de autenticidad va siempre primero:
 
@@ -189,7 +214,10 @@ Qué haría falta para subir de nota: [...]
 💰 Precio medio de venta en eBay (últimos 7 días, misma nota): $XX.XX (basado en N ventas, [fecha]-[fecha])
    [o bien: "Datos insuficientes/no disponibles para dar una media fiable de los últimos 7 días" si no encontraste al menos 3 ventas verificables]
 
-⚠️ Estimación visual, no gradeado oficial ni autenticación formal. La nota real de PSA/Beckett puede variar, y PSA/BGS rechazan y no gradean cartas que detectan como no auténticas en su propio proceso. El precio de eBay es orientativo, basado en ventas recientes encontradas por búsqueda web, no en un feed de datos en tiempo real.
+📈 Histórico de precio (últimos 5 años, misma nota): [gráfico/tabla año → precio medio, con fuente y N por año]
+   [o bien: "Sin histórico plurianual verificable para esta carta" si no encontraste datos fiables]
+
+⚠️ Estimación visual, no gradeado oficial ni autenticación formal. La nota real de PSA/Beckett puede variar, y PSA/BGS rechazan y no gradean cartas que detectan como no auténticas en su propio proceso. Los precios (semanal e histórico) son orientativos, basados en búsquedas reales, no en un feed de datos en tiempo real.
 ```
 
 Si el veredicto de autenticidad es 🔴, puedes omitir o abreviar mucho la parte de grading (no tiene sentido detallar el "estado de conservación" de algo que probablemente no es la carta original) y centra la respuesta en explicar las señales encontradas.
@@ -205,3 +233,4 @@ Si el usuario sube varias cartas y pregunta cuál merece la pena enviar a gradea
 - Nunca prometas que la carta "sacará" una nota exacta en el envío real, ni que "pasará" o "no pasará" la autenticación real — usa siempre lenguaje de estimación/rango y probabilidad.
 - Esta skill es para proteger al usuario (comprador, vendedor o coleccionista) de un posible engaño — no la uses nunca para ayudar a alguien a mejorar o perfeccionar una falsificación existente ni a evadir la detección de un servicio de gradeo real; si el contexto de la conversación apunta claramente a eso, no continúes con esa parte de la petición.
 - El precio medio de eBay depende de poder buscar/navegar por la web en el entorno donde se ejecuta esta skill: si esa capacidad no está disponible, o la búsqueda no devuelve ventas verificables de los últimos 7 días, dilo explícitamente en el informe en vez de rellenar la cifra con un precio "típico" de memoria — un precio inventado con apariencia de dato real es peor que no darlo.
+- Lo mismo aplica al gráfico de 5 años: si no encuentras histórico verificable para algún año, o para la carta entera, dilo y deja el hueco o el gráfico entero fuera del informe — nunca dibujes una tendencia "razonable" que no esté anclada a datos reales que puedas citar. El formato del gráfico (imagen, artifact o tabla) depende de qué pueda generar el entorno donde corras; usa el que tengas disponible en vez de bloquear el resto del informe por no tener el ideal.
