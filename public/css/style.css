@@ -787,6 +787,30 @@ table.stats-table {
    pedía scroll horizontal para nada. Cabe entera sin scroll. */
 table.stats-table.contract-table { min-width: unset; }
 
+/* La tabla de cookies (política de cookies) tiene texto largo tipo frase
+   en la columna "Finalidad", no valores cortos como el resto de tablas de
+   estadisticas: con el white-space:nowrap heredado se cortaba a mitad de
+   palabra ("...de forma anó") en vez de saltar de línea, y pedía scroll
+   horizontal para leer una frase. Aquí el texto debe envolver. */
+table.stats-table.legal-table { min-width: unset; }
+table.stats-table.legal-table th, table.stats-table.legal-table td { white-space: normal; }
+
+/* Mismo problema en clasificación: la tabla de cada conferencia solo tiene
+   7 columnas estrechas (#, Equipo, V, D, %V, GB, DIF), muchas menos que
+   las de estadisticas/jugador que necesitan los 700px. Con ese min-width
+   heredado, las dos tablas (Este/Oeste) una junto a otra en escritorio
+   (grid de standings.js) desbordaban su columna en CUALQUIER ancho de
+   pantalla, porque el <main> nunca supera 1180px y dos tablas de 700px no
+   caben juntas ahi — la ultima columna (DIF) quedaba cortada sin ninguna
+   barra de scroll visible, pareciendo un dato que faltaba. 480px es
+   suficiente para sus 7 columnas y cabe de sobra en cada mitad del grid.
+   Con min-width 701px a proposito: por debajo de eso ya manda el "unset"
+   del bloque movil (@media max-width:700px mas arriba en este archivo),
+   que necesita poder encoger la tabla del todo en pantallas pequeñas. */
+@media (min-width: 701px) {
+  body.standings-page table.stats-table { min-width: 480px; }
+}
+
 table.stats-table th, table.stats-table td {
   border-bottom: 1px solid var(--border);
   padding: 9px 10px;
