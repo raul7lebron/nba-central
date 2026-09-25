@@ -10,6 +10,7 @@ const {
   getPlayerCareerStatsHistory,
   getGamesForSeason,
   getGamesForDate,
+  getStatsForGame,
   currentSeasonYear
 } = require('./src/balldontlie');
 const { refreshAll, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshSeasonLeaders, refreshDraftArchive } = require('./src/refreshAll');
@@ -347,7 +348,13 @@ app.get('/sitemap.xml', (req, res) => {
   // contrato) que los de plantilla activa.
   const playerUrls = getAllKnownPlayers().map((p) => `/jugador/${playerSlug(p)}`);
 
-  const urls = [...staticPages, ...teamUrls, ...playerUrls];
+  // Solo los partidos de la temporada en curso: las de temporadas pasadas
+  // sumarian miles de URLs mas por temporada para un beneficio marginal
+  // bajo (ya son accesibles via el calendario, solo no estan en el mapa).
+  const currentSeasonGames = readCache(`games_${currentSeasonYear()}`, []);
+  const gameUrls = currentSeasonGames.map((g) => `/partido/${gameSlug(g)}?season=${g.season}`);
+
+  const urls = [...staticPages, ...teamUrls, ...playerUrls, ...gameUrls];
 
   const lastmod = (readCache('meta', {}).lastFullRefresh || new Date().toISOString()).slice(0, 10);
 
@@ -357,6 +364,46 @@ ${urls.map((u) => `  <url><loc>${SITE_URL}${u}</loc><lastmod>${lastmod}</lastmod
 </urlset>`;
 
   res.type('application/xml').send(xml);
+});
+
+function escapeXml(text) {
+  return (text || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function rssPubDate(iso) {
+  const d = iso ? new Date(iso) : new Date();
+  return isNaN(d.getTime()) ? new Date().toUTCString() : d.toUTCString();
+}
+
+// Feed RSS propio de las noticias agregadas (no de cada medio por
+// separado): mismo patron que el sitemap, generado al vuelo a partir del
+// cache de noticias ya existente, sin llamadas de red nuevas.
+app.get('/rss.xml', (req, res) => {
+  const news = readCache('news', []);
+
+  const items = news.slice(0, 30).map((item) => `
+    <item>
+      <title><![CDATA[${item.title}]]></title>
+      <link>${escapeXml(item.link)}</link>
+      <guid isPermaLink="true">${escapeXml(item.link)}</guid>
+      <description><![CDATA[${item.summary || ''}]]></description>
+      <pubDate>${rssPubDate(item.pubDate)}</pubDate>
+      <source url="${escapeXml(item.link)}">${escapeXml(item.source)}</source>
+    </item>`).join('');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>El Rompearos - Noticias NBA en español</title>
+    <link>${SITE_URL}/</link>
+    <description>Últimas noticias de baloncesto NBA en español, agregadas de Marca, AS, Mundo Deportivo, Sport y Gigantes del Basket.</description>
+    <language>es</language>
+    <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>${items}
+  </channel>
+</rss>`;
+
+  res.set('Cache-Control', 'public, max-age=300');
+  res.type('application/rss+xml').send(xml);
 });
 
 // Mapas reutilizados para enriquecer cualquier jugador (draft, busqueda...)
@@ -649,6 +696,135 @@ app.get('/api/games', async (req, res) => {
     res.json({ season, games: sorted });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// Box score (estadisticas por jugador) de un partido concreto, para su
+// pagina de detalle. El partido en si sale del cache de temporada ya
+// existente (busqueda por id, sin llamada nueva); el box score solo se
+// cachea para siempre si el partido ya termino (uno en curso puede seguir
+// cambiando).
+app.get('/api/games/:id/boxscore', async (req, res) => {
+  const gameId = req.params.id;
+  const season = parseInt(req.query.season, 10) || currentSeasonYear();
+  if (season < EARLIEST_SEASON || season > currentSeasonYear()) {
+    return res.status(400).json({ error: 'Temporada fuera de rango' });
+  }
+
+  try {
+    const games = await getOrFetchSeasonGames(season);
+    const game = games.find((g) => String(g.id) === gameId);
+    if (!game) return res.status(404).json({ error: 'Partido no encontrado' });
+
+    const cacheKey = `game_stats_${gameId}`;
+    const isFinal = game.status_state === 'final';
+    let boxScore = isFinal ? readCache(cacheKey) : null;
+    if (!boxScore) {
+      boxScore = await getStatsForGame(gameId);
+      if (isFinal) writeCache(cacheKey, boxScore);
+    }
+
+    res.json({ game, boxScore });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+function gameSlug(game) {
+  return `${game.visitor_team.abbreviation.toLowerCase()}-vs-${game.home_team.abbreviation.toLowerCase()}-${game.id}`;
+}
+
+const gameHtmlPath = path.join(__dirname, 'public', 'game.html');
+const gameHtmlTemplate = fs.readFileSync(gameHtmlPath, 'utf-8');
+
+// Igual que player.html/team.html: se rellena titulo/meta/canonical/<h1>
+// y el SportsEvent de schema.org con el partido ya cacheado (el mismo que
+// usa /api/games/:id/boxscore) antes de mandar la pagina, para que un
+// buscador vea el resultado real sin depender de que ejecute el JS que
+// pinta el box score. game.js sigue pintando encima sin cambios.
+function renderGameHeroHtml(game) {
+  const played = game.status_state === 'final';
+  const statusLine = played
+    ? 'Final'
+    : new Date(game.datetime).toLocaleString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' });
+  const scoreLine = played ? `${game.visitor_team_score} - ${game.home_team_score}` : '';
+
+  return `
+    <h1 class="visually-hidden">${escapeAttr(game.visitor_team.full_name)} ${escapeAttr(scoreLine)} ${escapeAttr(game.home_team.full_name)}</h1>
+    <div style="flex:1;text-align:center">
+      <div class="player-meta" style="text-transform:capitalize;margin-bottom:10px">${escapeAttr(statusLine)}</div>
+      <div style="font-weight:700;font-size:1.1rem">
+        ${escapeAttr(game.visitor_team.full_name)} ${played ? `<span style="color:var(--accent)">${game.visitor_team_score}</span>` : ''}
+        @
+        ${escapeAttr(game.home_team.full_name)} ${played ? `<span style="color:var(--accent)">${game.home_team_score}</span>` : ''}
+      </div>
+    </div>
+  `;
+}
+
+function renderGameHtml(game) {
+  const played = game.status_state === 'final';
+  const matchup = `${game.visitor_team.full_name} vs ${game.home_team.full_name}`;
+  const title = played
+    ? `${game.visitor_team_score}-${game.home_team_score}: ${matchup} - Resultado y estadísticas | El Rompearos`
+    : `${matchup} - Partido NBA | El Rompearos`;
+  const description = played
+    ? `Resultado final: ${game.visitor_team.full_name} ${game.visitor_team_score} - ${game.home_team_score} ${game.home_team.full_name}. Estadísticas por jugador del partido.`
+    : `${matchup}, partido de la NBA programado para el ${game.date}.`;
+  const canonicalUrl = `${SITE_URL}/partido/${gameSlug(game)}?season=${game.season}`;
+
+  const jsonLd = JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'SportsEvent',
+    name: matchup,
+    startDate: game.datetime,
+    eventStatus: played ? 'https://schema.org/EventCompleted' : 'https://schema.org/EventScheduled',
+    homeTeam: { '@type': 'SportsTeam', name: game.home_team.full_name },
+    awayTeam: { '@type': 'SportsTeam', name: game.visitor_team.full_name },
+    ...(played ? {
+      winner: {
+        '@type': 'SportsTeam',
+        name: game.home_team_score > game.visitor_team_score ? game.home_team.full_name : game.visitor_team.full_name
+      }
+    } : {})
+  });
+
+  return gameHtmlTemplate
+    .replace(/<title id="page-title">[\s\S]*?<\/title>/, `<title id="page-title">${escapeAttr(title)}</title>`)
+    .replace(/<meta id="meta-description"[^>]*>/, `<meta id="meta-description" name="description" content="${escapeAttr(description)}">`)
+    .replace(/<meta id="og-title"[^>]*>/, `<meta id="og-title" property="og:title" content="${escapeAttr(title)}">`)
+    .replace(/<meta id="og-description"[^>]*>/, `<meta id="og-description" property="og:description" content="${escapeAttr(description)}">`)
+    .replace(
+      '</head>',
+      `<link rel="canonical" href="${canonicalUrl}"><meta property="og:url" content="${canonicalUrl}"><script type="application/ld+json" id="game-jsonld">${jsonLd}</script></head>`
+    )
+    .replace(
+      /<div id="game-hero" class="team-hero">[\s\S]*?<\/div>/,
+      `<div id="game-hero" class="team-hero">${renderGameHeroHtml(game)}</div>`
+    );
+}
+
+app.get('/partido/:slug', async (req, res) => {
+  const match = req.params.slug.match(/(\d+)$/);
+  const gameId = match ? match[1] : null;
+  const season = parseInt(req.query.season, 10) || currentSeasonYear();
+
+  if (!gameId || season < EARLIEST_SEASON || season > currentSeasonYear()) {
+    res.sendFile(gameHtmlPath);
+    return;
+  }
+
+  try {
+    const games = await getOrFetchSeasonGames(season);
+    const game = games.find((g) => String(g.id) === gameId);
+    if (!game) {
+      res.status(404).sendFile(gameHtmlPath);
+      return;
+    }
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(renderGameHtml(game));
+  } catch (err) {
+    res.status(500).sendFile(gameHtmlPath);
   }
 });
 

@@ -1,0 +1,19 @@
+{
+  "name": "El Rompearos - Noticias y estadísticas NBA",
+  "short_name": "El Rompearos",
+  "description": "Noticias, equipos, estadísticas, calendario y resultados de la NBA en español.",
+  "start_url": "/index.html",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0a0e17",
+  "theme_color": "#0a0e17",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "/img/brand-mark.jpg",
+      "sizes": "160x160",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

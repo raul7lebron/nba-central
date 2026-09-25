@@ -111,6 +111,7 @@ function renderPlayerHero(player) {
         ${salaryPill}
       </div>
       ${renderAwardPills(player.awards)}
+      ${renderShareButtons(`https://www.elrompearos.com${playerUrl(player)}`, `${player.first_name} ${player.last_name} - Estadísticas y contrato NBA`)}
     </div>
   `;
 }

@@ -62,15 +62,68 @@ function renderHero(team, teamId) {
         <span class="pill"><span class="conf-tag" style="background:${confVar}"></span>${team.conference}ern Conference · ${team.division}</span>
         ${historyPill}
         <span class="pill" id="salary-pill">Nómina: cargando…</span>
+        <span class="pill" id="next-game-pill" hidden></span>
       </div>
+      ${renderShareButtons(`https://www.elrompearos.com/team.html?id=${team.id}`, `${team.full_name} - Plantilla, salarios y valoración 2K`)}
     </div>
-    <button class="pill" id="team-news-btn" style="cursor:pointer;border:1px solid var(--accent);color:var(--accent)">📰 Noticias del equipo</button>
+    <div style="display:flex;gap:8px">
+      <button class="pill" id="favorite-btn" style="cursor:pointer"></button>
+      <button class="pill" id="team-news-btn" style="cursor:pointer;border:1px solid var(--accent);color:var(--accent)">📰 Noticias del equipo</button>
+    </div>
   `;
 
   document.getElementById('team-news-btn').addEventListener('click', () => showTeamNews(team));
+
+  const favoriteBtn = document.getElementById('favorite-btn');
+  renderFavoriteButton(favoriteBtn, teamId);
+  favoriteBtn.addEventListener('click', () => {
+    const isFavorite = String(getFavoriteTeamId()) === String(teamId);
+    setFavoriteTeamId(isFavorite ? null : teamId);
+    renderFavoriteButton(favoriteBtn, teamId);
+  });
+
   loadSalarySummary(teamId);
+  loadNextGame(teamId);
   updateSeoForTeam(team);
   updateBreadcrumb(team);
+}
+
+function renderFavoriteButton(btn, teamId) {
+  const isFavorite = String(getFavoriteTeamId()) === String(teamId);
+  btn.textContent = isFavorite ? '★ Favorito' : '☆ Marcar favorito';
+  btn.style.borderColor = isFavorite ? 'var(--accent)' : '';
+  btn.style.color = isFavorite ? 'var(--accent)' : '';
+}
+
+// Siguiente partido programado de este equipo (temporada en curso), para
+// que en su ficha se vea de un vistazo cuando juega. Silencioso si falla:
+// no es un dato critico de la pagina.
+async function loadNextGame(teamId) {
+  const pill = document.getElementById('next-game-pill');
+  try {
+    const res = await fetch('/api/games');
+    const data = await res.json();
+    const now = new Date();
+    const upcoming = (data.games || [])
+      .filter((g) =>
+        (String(g.home_team.id) === String(teamId) || String(g.visitor_team.id) === String(teamId)) &&
+        g.status_state !== 'final' && new Date(g.datetime) > now
+      )
+      .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+
+    if (!upcoming.length) return;
+
+    const g = upcoming[0];
+    const isHome = String(g.home_team.id) === String(teamId);
+    const opponent = isHome ? g.visitor_team : g.home_team;
+    const dateLabel = new Date(g.datetime).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    const timeLabel = new Date(g.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+    pill.hidden = false;
+    pill.textContent = `📅 Próximo: ${isHome ? 'vs' : '@'} ${displayAbbr(opponent.abbreviation)} · ${dateLabel}, ${timeLabel}`;
+  } catch (err) {
+    // silencioso
+  }
 }
 
 // Migas de pan (Inicio > Equipos > Nombre) + su JSON-LD a juego, para que

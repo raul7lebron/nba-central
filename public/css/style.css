@@ -1,5 +1,6 @@
 :root {
   --bg: #0a0e17;
+  --bg-glow: #1a2236;
   --surface: #121828;
   --surface-2: #1a2236;
   --surface-hover: #1f2a42;
@@ -19,9 +20,43 @@
   --radius-sm: 8px;
   --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   --font: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+
+/* Modo claro: mismas variables, otra paleta. Por defecto el sitio es
+   oscuro (identidad visual de la web); el interruptor de tema (theme.js)
+   añade data-theme="light" al <html> cuando el usuario lo elige, y lo
+   recuerda en localStorage para la próxima visita. */
+html[data-theme="light"] {
+  --bg: #f5f7fb;
+  --bg-glow: #e4e9f7;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --surface-hover: #e4e9f4;
+  --border: #dde3ee;
+  --text: #10131c;
+  --text-dim: #4b5468;
+  --text-faint: #7c8598;
+  --accent: #ff6a3d;
+  --accent-dim: #ff6a3d18;
+  --accent-2: #2f6fe0;
+  --east: #ff6a3d;
+  --west: #2f6fe0;
+  --positive: #1f9d4c;
+  --negative: #d23c3c;
+  --shadow: 0 8px 24px rgba(16, 19, 28, 0.08);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+
+/* El atributo hidden por si solo pierde contra cualquier clase que fije su
+   propio "display" con la misma especificidad (ej. .pill { display:
+   inline-flex }): el navegador aplica la que viene despues en la hoja de
+   estilos, no la mas "logica", y el elemento se queda visible aunque
+   tenga hidden. Con !important gana siempre, sin tener que acordarse de
+   evitar "display" en cada clase nueva. */
+[hidden] { display: none !important; }
 
 html, body { height: 100%; }
 
@@ -29,7 +64,7 @@ body {
   margin: 0;
   font-family: var(--font);
   background:
-    radial-gradient(1200px 500px at 50% -10%, #1a2236 0%, transparent 60%),
+    radial-gradient(1200px 500px at 50% -10%, var(--bg-glow) 0%, transparent 60%),
     var(--bg);
   color: var(--text);
   -webkit-font-smoothing: antialiased;
@@ -228,6 +263,37 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
 
 .search-toggle:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
 .search-toggle svg { display: block; }
+
+/* ---------- Selector de tema claro/oscuro ---------- */
+
+/* Vive dentro de nav.site-nav (ultimo elemento, inyectado por theme.js),
+   igual que hacia el selector de idioma que hubo aqui antes: en escritorio
+   queda inline al final de la barra de enlaces, en movil dentro del
+   desplegable de la hamburguesa. Ya aprendimos que un icono mas en la fila
+   fija de la cabecera (junto al logo) desborda en movil - no se repite
+   ese error aqui. */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  width: 36px;
+  margin-left: 10px;
+  padding: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.theme-toggle:hover { color: var(--text); border-color: var(--accent); }
+.theme-toggle svg { display: block; }
+
+@media (max-width: 1700px) {
+  .theme-toggle { align-self: flex-start; margin: 6px 14px 0; }
+}
 
 .search-panel {
   position: absolute;
@@ -539,6 +605,20 @@ h1 {
   color: var(--text-dim);
 }
 
+/* ---------- Equipo favorito (portada) ---------- */
+
+.favorite-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 20px;
+}
+
 /* ---------- Marcador en directo (portada) ---------- */
 
 .scoreboard-wrap {
@@ -722,7 +802,7 @@ h1 {
 .news-date { font-size: 0.74rem; color: var(--text-faint); margin-top: 10px; }
 
 .state-msg { color: var(--text-dim); padding: 20px 0; }
-.error-msg { color: #ff6b6b; padding: 20px 0; }
+.error-msg { color: var(--negative); padding: 20px 0; }
 
 /* ---------- Modal ---------- */
 

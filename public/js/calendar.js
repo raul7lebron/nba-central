@@ -86,6 +86,10 @@ function renderGames(games) {
   `).join('');
 }
 
+function gameSlug(g) {
+  return `${g.visitor_team.abbreviation.toLowerCase()}-vs-${g.home_team.abbreviation.toLowerCase()}-${g.id}`;
+}
+
 function renderGameCard(g) {
   const played = g.status_state === 'final';
   const scoreOrTime = played
@@ -93,7 +97,7 @@ function renderGameCard(g) {
     : formatGameTime(g.datetime);
 
   return `
-    <div class="player-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:8px">
+    <a class="player-card" href="/partido/${gameSlug(g)}?season=${g.season}" style="flex-direction:column;align-items:stretch;gap:8px;text-decoration:none;color:inherit">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(g.visitor_team.abbreviation, 22)}
@@ -109,7 +113,7 @@ function renderGameCard(g) {
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[1] : ''}</span>
       </div>
       ${!played ? `<div class="player-meta" style="text-align:center">${scoreOrTime || 'Por confirmar'}</div>` : ''}
-    </div>
+    </a>
   `;
 }
 

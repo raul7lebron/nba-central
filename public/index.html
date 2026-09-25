@@ -3,10 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>try{if(localStorage.getItem("elrompearos_theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
 <title>El Rompearos - Noticias NBA en español, fichajes y resultados de hoy</title>
 <meta name="description" content="Últimas noticias de baloncesto NBA en español: fichajes, traspasos, resultados y actualidad de los 30 equipos, actualizada cada 2 horas desde Marca, AS, Mundo Deportivo, Sport y Gigantes del Basket.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.elrompearos.com/">
+<link rel="alternate" type="application/rss+xml" title="El Rompearos - Noticias NBA" href="/rss.xml">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://www.elrompearos.com/">
 <meta property="og:site_name" content="El Rompearos">
@@ -19,6 +21,9 @@
 <meta name="twitter:title" content="El Rompearos - Noticias NBA en español">
 <meta name="twitter:description" content="Últimas noticias, fichajes y resultados de la NBA en español, actualizados automáticamente.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#0a0e17">
+<link rel="apple-touch-icon" href="/img/brand-mark.jpg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
@@ -57,6 +62,8 @@
 </header>
 
 <main>
+  <div id="favorite-wrap" class="favorite-wrap" hidden></div>
+
   <div id="scoreboard-wrap" class="scoreboard-wrap" hidden>
     <div id="scoreboard-strip" class="scoreboard-strip"></div>
   </div>
@@ -77,10 +84,11 @@
   <a href="https://www.sport.es" target="_blank" rel="noopener">Sport</a> y
   <a href="https://www.gigantes.com" target="_blank" rel="noopener">Gigantes del Basket</a>
   · Datos vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
-  <br><a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a>
+  <br><a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a> · <a href="/rss.xml">RSS</a>
 </footer>
 
 <script src="/js/navToggle.js" defer></script>
+<script src="/js/theme.js" defer></script>
 <script src="/js/teamColors.js" defer></script>
 <script src="/js/teamLogos.js" defer></script>
 <script src="/js/playerLinks.js" defer></script>
@@ -89,7 +97,9 @@
 <script src="/js/ads.js" defer></script>
 <script src="/js/playerModal.js" defer></script>
 <script src="/js/search.js" defer></script>
+<script src="/js/favorites.js" defer></script>
 <script src="/js/news.js" defer></script>
 <script src="/js/scoreboard.js" defer></script>
+<script src="/js/favoriteWidget.js" defer></script>
 </body>
 </html>

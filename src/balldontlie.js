@@ -183,6 +183,12 @@ async function getGamesForDate(dateStr) {
   return fetchAllPages(`/games?dates[]=${dateStr}&per_page=100`, 2);
 }
 
+// Estadisticas por jugador de un partido concreto (box score), para la
+// pagina de detalle de partido.
+async function getStatsForGame(gameId) {
+  return fetchAllPages(`/stats?game_ids[]=${gameId}&per_page=100`, 2);
+}
+
 // No existe filtro por año de draft en la API. Para construir el archivo de
 // drafts hay que traer el historial COMPLETO de jugadores de cada equipo
 // (no solo /active) y quedarnos con los que tengan draft_year.
@@ -198,6 +204,7 @@ module.exports = {
   getSeasonAveragesForPlayer,
   getGamesForSeason,
   getGamesForDate,
+  getStatsForGame,
   getFullPlayerHistoryForTeam,
   currentSeasonYear
 };
