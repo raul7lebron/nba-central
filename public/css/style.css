@@ -216,11 +216,28 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   /* clasificacion: menos espacio entre bloques para que quepa mas sin scroll */
   body.standings-page main { padding-top: 24px; }
   body.standings-page .page-head { margin-bottom: 16px; }
-  .standings-grid { gap: 10px !important; }
+  /* el grid en linea (standings.js) fuerza columnas de 360px minimo: por
+     debajo de esa medida de contenedor (~343px con el padding movil)
+     desbordaba la pagina entera 17px, aunque la tabla en si cupiera bien.
+     Una sola columna a ancho completo evita el problema de raiz. */
+  .standings-grid { gap: 10px !important; grid-template-columns: 1fr !important; }
+  /* Aun con una sola columna, un item de grid no se encoge por debajo del
+     ancho de su contenido por defecto (min-width:auto implicito) — asi que
+     por debajo de ~340px la tabla seguia empujando la pagina entera en vez
+     de activar su propio scroll horizontal interno (.table-scroll). Con
+     min-width:0 el item si puede encogerse, y el scroll queda contenido
+     donde debe. */
+  .standings-grid > div { min-width: 0; }
   .standings-title { margin-bottom: 4px !important; font-size: 1rem; }
   body.standings-page table.stats-table th,
-  body.standings-page table.stats-table td { padding: 6px 6px; }
+  body.standings-page table.stats-table td { padding: 6px 6px; font-size: 0.72rem; }
   body.standings-page table.stats-table { min-width: unset; }
+  /* la columna "Forma" (5 puntos de color) es la que menos aporta frente a
+     lo que ocupa; en movil se oculta y se deja solo "Racha" (mas
+     compacta, mismo dato resumido) para que las 8 columnas restantes
+     quepan sin scroll horizontal. */
+  body.standings-page table.stats-table th:last-child,
+  body.standings-page table.stats-table td:last-child { display: none; }
 
   /* ficha de jugador: menos aire entre columnas de estadisticas para que
      haga falta menos scroll horizontal en movil */

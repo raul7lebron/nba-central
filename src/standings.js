@@ -12,6 +12,16 @@ const NBA_CUP_KNOCKOUT_STAGES = new Set([
   'Championship'
 ]);
 
+// Ultimo resultado (mas reciente al final) y racha en curso, a partir de
+// la lista de W/L de un equipo en orden cronologico.
+function computeStreak(resultsInOrder) {
+  if (!resultsInOrder.length) return null;
+  const last = resultsInOrder[resultsInOrder.length - 1];
+  let count = 0;
+  for (let i = resultsInOrder.length - 1; i >= 0 && resultsInOrder[i] === last; i--) count++;
+  return { result: last, count };
+}
+
 function computeStandings(games, teams) {
   const records = new Map();
   for (const team of teams) {
@@ -21,15 +31,18 @@ function computeStandings(games, teams) {
       losses: 0,
       pointsFor: 0,
       pointsAgainst: 0,
-      gamesPlayed: 0
+      gamesPlayed: 0,
+      resultsInOrder: []
     });
   }
 
-  for (const game of games) {
-    if (game.postseason) continue;
-    if (NBA_CUP_KNOCKOUT_STAGES.has(game.ist_stage)) continue;
-    if (game.status_state !== 'final') continue;
+  // En orden cronologico: la "forma reciente" y la racha dependen de en
+  // que orden se jugaron, no del orden en que llegan del cache/API.
+  const finalGames = games
+    .filter((g) => !g.postseason && !NBA_CUP_KNOCKOUT_STAGES.has(g.ist_stage) && g.status_state === 'final')
+    .sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
 
+  for (const game of finalGames) {
     const home = records.get(game.home_team.id);
     const away = records.get(game.visitor_team.id);
     if (!home || !away) continue;
@@ -44,9 +57,13 @@ function computeStandings(games, teams) {
     if (game.home_team_score > game.visitor_team_score) {
       home.wins++;
       away.losses++;
+      home.resultsInOrder.push('W');
+      away.resultsInOrder.push('L');
     } else {
       away.wins++;
       home.losses++;
+      away.resultsInOrder.push('W');
+      home.resultsInOrder.push('L');
     }
   }
 
@@ -63,7 +80,9 @@ function computeStandings(games, teams) {
       winPct,
       avgDiff: record.gamesPlayed
         ? (record.pointsFor - record.pointsAgainst) / record.gamesPlayed
-        : 0
+        : 0,
+      last5: record.resultsInOrder.slice(-5),
+      streak: computeStreak(record.resultsInOrder)
     });
   }
 

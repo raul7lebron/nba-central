@@ -30,6 +30,20 @@ async function buildSeasonPicker() {
   return selected;
 }
 
+function renderForm(last5) {
+  if (!last5 || !last5.length) return '<span class="player-meta">—</span>';
+  return `<span style="display:inline-flex;gap:3px">${last5.map((r) =>
+    `<span title="${r === 'W' ? 'Victoria' : 'Derrota'}" style="width:10px;height:10px;border-radius:50%;background:${r === 'W' ? 'var(--positive)' : 'var(--negative)'};display:inline-block"></span>`
+  ).join('')}</span>`;
+}
+
+function renderStreak(streak) {
+  if (!streak) return '<span class="player-meta">—</span>';
+  const label = streak.result === 'W' ? 'V' : 'D';
+  const color = streak.result === 'W' ? 'var(--positive)' : 'var(--negative)';
+  return `<span style="color:${color};font-weight:700">${label}${streak.count}</span>`;
+}
+
 function renderConferenceTable(title, rows) {
   const body = rows.map((r) => `
     <tr class="team-row ${r.rank <= 8 ? 'playoff-row' : ''}" data-team-id="${r.team.id}" style="cursor:pointer">
@@ -42,7 +56,9 @@ function renderConferenceTable(title, rows) {
       <td>${r.losses}</td>
       <td>${(r.winPct * 100).toFixed(1)}%</td>
       <td>${r.rank === 1 ? '-' : r.gamesBehind.toFixed(1)}</td>
-      <td style="color:${r.avgDiff >= 0 ? '#3ecf6e' : '#ff6b6b'}">${r.avgDiff >= 0 ? '+' : ''}${r.avgDiff.toFixed(1)}</td>
+      <td style="color:${r.avgDiff >= 0 ? 'var(--positive)' : 'var(--negative)'}">${r.avgDiff >= 0 ? '+' : ''}${r.avgDiff.toFixed(1)}</td>
+      <td>${renderStreak(r.streak)}</td>
+      <td>${renderForm(r.last5)}</td>
     </tr>
   `).join('');
 
@@ -54,7 +70,7 @@ function renderConferenceTable(title, rows) {
           <thead>
             <tr>
               <th>#</th><th style="text-align:left;padding-left:4px">Equipo</th><th>V</th><th>D</th>
-              <th>%V</th><th>GB</th><th>DIF</th>
+              <th>%V</th><th>GB</th><th>DIF</th><th>Racha</th><th>Forma</th>
             </tr>
           </thead>
           <tbody>${body}</tbody>

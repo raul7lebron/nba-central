@@ -15,8 +15,25 @@ const STAT_OPTIONS = [
   { value: 'min', label: 'Minutos por partido', th: 'MIN' }
 ];
 
+const POSITION_OPTIONS = [
+  { value: '', label: 'Todas las posiciones' },
+  { value: 'G', label: 'Bases y escoltas (G)' },
+  { value: 'F', label: 'Aleros (F)' },
+  { value: 'C', label: 'Pívots (C)' }
+];
+
 let allLeaders = [];
 let seasonMeta = { season: null, lastRefresh: null };
+let currentPositionFilter = '';
+let currentStatKey = 'val';
+
+// balldontlie da posiciones combinadas ("F-C", "G-F"...): se agrupan por
+// la primera que listan, para no complicar el filtro con cada combinacion
+// posible.
+function positionGroup(position) {
+  if (!position) return '';
+  return position.split('-')[0].trim().toUpperCase();
+}
 
 // balldontlie da los minutos como "33:23" (mm:ss); para ordenar hace falta
 // un numero.
@@ -49,16 +66,31 @@ function renderToolbar(selected) {
     : '';
   const updatedLabel = seasonMeta.lastRefresh ? ` · actualizado ${formatDate(seasonMeta.lastRefresh)}` : '';
 
+  const positionOptions = POSITION_OPTIONS.map((o) =>
+    `<option value="${o.value}" ${o.value === currentPositionFilter ? 'selected' : ''}>${o.label}</option>`
+  ).join('');
+
   wrap.innerHTML = `
     <div style="display:flex;flex-wrap:wrap;align-items:center;gap:10px">
       <label class="pill" style="cursor:pointer">
         Ordenar por
         <select id="stat-select" style="background:transparent;border:none;color:var(--accent);font-weight:700;font-family:inherit;cursor:pointer;margin-left:4px">${options}</select>
       </label>
+      <label class="pill" style="cursor:pointer">
+        Posición
+        <select id="position-select" style="background:transparent;border:none;color:var(--accent);font-weight:700;font-family:inherit;cursor:pointer;margin-left:4px">${positionOptions}</select>
+      </label>
       <span class="player-meta">Temporada ${seasonLabel} · Top 50${updatedLabel}</span>
     </div>
   `;
-  document.getElementById('stat-select').addEventListener('change', (e) => renderTable(e.target.value));
+  document.getElementById('stat-select').addEventListener('change', (e) => {
+    currentStatKey = e.target.value;
+    renderTable(currentStatKey);
+  });
+  document.getElementById('position-select').addEventListener('change', (e) => {
+    currentPositionFilter = e.target.value;
+    renderTable(currentStatKey);
+  });
 }
 
 // Valor formateado de la estadistica elegida en el desplegable, igual que
@@ -74,12 +106,15 @@ function statCellValue(row, statKey) {
 
 function renderTable(statKey) {
   const container = document.getElementById('stats-container');
-  const sorted = [...allLeaders]
+  const filtered = currentPositionFilter
+    ? allLeaders.filter((p) => positionGroup(p.position) === currentPositionFilter)
+    : allLeaders;
+  const sorted = [...filtered]
     .sort((a, b) => getStatValue(b, statKey) - getStatValue(a, statKey))
     .slice(0, 50);
 
   if (!sorted.length) {
-    container.innerHTML = '<p class="state-msg">Todavía no hay estadísticas de esta temporada.</p>';
+    container.innerHTML = '<p class="state-msg">No hay jugadores para este filtro.</p>';
     return;
   }
 

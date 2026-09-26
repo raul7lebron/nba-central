@@ -158,13 +158,21 @@ function renderGames() {
 
 function renderMyScore() {
   const el = document.getElementById('quiniela-my-score');
+  const shareEl = document.getElementById('quiniela-share');
   const decidedGames = weekGames.filter((g) => g.status_state === 'final' && myPicks[g.id] != null);
   if (!decidedGames.length) {
     el.textContent = '';
+    shareEl.innerHTML = '';
     return;
   }
   const correct = decidedGames.filter((g) => winnerOf(g) === myPicks[g.id]).length;
   el.textContent = `Tu resultado esta semana: ${correct} de ${decidedGames.length} acertados.`;
+
+  // Estilo Wordle: una cuadricula de aciertos/fallos, facil de compartir
+  // de un vistazo sin necesidad de explicar nada mas.
+  const emojiGrid = decidedGames.map((g) => (winnerOf(g) === myPicks[g.id] ? '✅' : '❌')).join('');
+  const shareText = `Quiniela NBA de la semana en El Rompearos: ${correct}/${decidedGames.length} 🏀\n${emojiGrid}`;
+  shareEl.innerHTML = renderShareButtons('https://www.elrompearos.com/quiniela.html', shareText);
 }
 
 function updateSaveStatus(text) {

@@ -83,26 +83,58 @@ function injectPlayerSearch() {
     const token = ++searchToken;
     results.innerHTML = '<div class="search-result-empty">Buscando...</div>';
     try {
-      const res = await fetch(`/api/players/search?q=${encodeURIComponent(q)}`);
-      const players = await res.json();
+      const normalizedQ = q.toLowerCase();
+      const [playersRes, teams] = await Promise.all([
+        fetch(`/api/players/search?q=${encodeURIComponent(q)}`),
+        getTeamsCached()
+      ]);
+      const players = await playersRes.json();
       if (token !== searchToken) return;
 
-      if (!players.length) {
+      const matchingTeams = teams.filter((t) =>
+        t.full_name.toLowerCase().includes(normalizedQ) || t.abbreviation.toLowerCase().includes(normalizedQ)
+      );
+
+      if (!players.length && !matchingTeams.length) {
         results.innerHTML = '<div class="search-result-empty">Sin resultados</div>';
         return;
       }
 
-      results.innerHTML = players.map((p) => `
+      const teamsHtml = matchingTeams.map((t) => `
+        <a class="search-result-item" href="/team.html?id=${t.id}">
+          ${logoImgOrBadge(t.abbreviation, 20)}
+          <span>${t.full_name}</span>
+          <span class="search-result-tag">Equipo</span>
+        </a>
+      `).join('');
+
+      const playersHtml = players.map((p) => `
         <a class="search-result-item" href="${playerUrl(p)}">
           ${p.currentTeam ? logoImgOrBadge(p.currentTeam.abbreviation, 20) : '<span class="team-badge" style="width:20px;height:20px;font-size:0.6rem">?</span>'}
           <span>${p.first_name} ${p.last_name}</span>
           <span class="search-result-tag">${p.isActive ? 'Activo' : 'Retirado'}</span>
         </a>
       `).join('');
+
+      results.innerHTML = teamsHtml + playersHtml;
     } catch (err) {
       results.innerHTML = '<div class="search-result-empty">No se pudo buscar</div>';
     }
   }
+}
+
+// Los 30 equipos cambian muy poco: se piden una vez y se reutilizan en
+// cada busqueda, en vez de una peticion nueva por cada tecla.
+let teamsCache = null;
+async function getTeamsCached() {
+  if (teamsCache) return teamsCache;
+  try {
+    const res = await fetch('/api/teams');
+    teamsCache = await res.json();
+  } catch (err) {
+    teamsCache = [];
+  }
+  return teamsCache;
 }
 
 if (document.readyState === 'loading') {
