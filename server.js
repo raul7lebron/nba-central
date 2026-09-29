@@ -21,7 +21,6 @@ const { playerSlug } = require('./src/playerSlug');
 const { normalizeName: normalize2kName, getPeakRatingByName } = require('./src/ratings2k');
 const { computeStandings } = require('./src/standings');
 const { computePlayoffBracket } = require('./src/playoffs');
-const { isoWeekKey, buildResultsByGame, groupGamesByWeek, scoreWeeks } = require('./src/quiniela');
 const { countryFlag } = require('./src/countryFlags');
 
 const EARLIEST_SEASON = 1980;
@@ -361,9 +360,6 @@ app.get('/calendar.html', async (req, res) => {
 // un visitante que vuelve no los vuelva a descargar.
 app.use('/img', express.static(path.join(__dirname, 'public', 'img'), { maxAge: '1d' }));
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', index: false }));
-// Limite pequeño a proposito: el unico body que se envia es el de las picks
-// de la quiniela (un puñado de ids de partido/equipo), no hace falta mas.
-app.use(express.json({ limit: '20kb' }));
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok' });
@@ -461,7 +457,7 @@ const SITE_URL = process.env.SITE_URL || 'https://www.elrompearos.com';
 
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
-    '/index.html', '/teams.html', '/standings.html', '/stats.html', '/compare.html', '/trade.html', '/quiniela.html', '/calendar.html',
+    '/index.html', '/teams.html', '/standings.html', '/stats.html', '/compare.html', '/trade.html', '/paises.html', '/calendar.html',
     '/playoffs.html', '/draft.html', '/market.html', '/store.html', '/guias.html'
   ];
   const teams = readCache('teams', []);
@@ -768,6 +764,42 @@ app.get('/api/players/search', (req, res) => {
   res.json(matches);
 });
 
+// Todos los jugadores conocidos (activos e historicos) agrupados por pais
+// de nacimiento, para /paises.html. Cada jugador lleva una unica
+// "valoracion" (2K actual si esta activo, pico historico si esta retirado)
+// para poder ordenar ambos grupos con el mismo criterio. Tiene que ir antes
+// que /api/players/:id, si no esa ruta la intercepta (":id" = "countries").
+app.get('/api/players/countries', (req, res) => {
+  const maps = buildPlayerEnrichmentMaps();
+  const byCountry = new Map();
+
+  for (const p of getAllKnownPlayers()) {
+    const enriched = enrichPlayer(p, maps);
+    if (!enriched.country) continue;
+
+    if (!byCountry.has(enriched.country)) byCountry.set(enriched.country, []);
+    byCountry.get(enriched.country).push({
+      id: enriched.id,
+      first_name: enriched.first_name,
+      last_name: enriched.last_name,
+      isActive: enriched.isActive,
+      rating: enriched.isActive ? enriched.rating2k : enriched.peakRating2k
+    });
+  }
+
+  const countries = [...byCountry.entries()]
+    .map(([country, players]) => ({
+      country,
+      players: players.sort((a, b) =>
+        (a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1) || ((b.rating || 0) - (a.rating || 0))
+      )
+    }))
+    .sort((a, b) => b.players.length - a.players.length || a.country.localeCompare(b.country));
+
+  res.set('Cache-Control', 'public, max-age=3600');
+  res.json({ countries });
+});
+
 // Ficha completa de un jugador por id, para su pagina individual
 // (/jugador/<slug>-<id>). Mismo enriquecimiento que busqueda/draft.
 app.get('/api/players/:id', (req, res) => {
@@ -986,106 +1018,6 @@ app.get('/api/games/live', async (req, res) => {
     const sorted = [...games].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
     liveGamesCache = { date, games: sorted, fetchedAt: now };
     res.json({ date, games: sorted });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Partidos de una semana ISO concreta (por defecto la semana actual), para
-// la quiniela. Devuelve tambien todas las semanas con partidos en esta
-// temporada, para poder navegar entre ellas desde el cliente.
-app.get('/api/quiniela/week', async (req, res) => {
-  const season = parseInt(req.query.season, 10) || currentSeasonYear();
-  if (season < EARLIEST_SEASON || season > currentSeasonYear()) {
-    return res.status(400).json({ error: 'Temporada fuera de rango' });
-  }
-
-  try {
-    const games = await getOrFetchSeasonGames(season);
-    const weeks = groupGamesByWeek(games);
-    const availableWeeks = [...weeks.keys()].sort();
-    const week = req.query.week && weeks.has(req.query.week) ? req.query.week : isoWeekKey(new Date().toISOString().slice(0, 10));
-
-    res.json({ season, week, games: weeks.get(week) || [], availableWeeks });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Guarda (o sobrescribe) las picks de un jugador para una semana. clientId
-// es un id aleatorio generado por el propio navegador (ver quiniela.js del
-// cliente): no hay contraseña, es solo para poder acumular su marcador.
-app.post('/api/quiniela/picks', async (req, res) => {
-  const { clientId, nickname, season: rawSeason, week, picks } = req.body || {};
-
-  if (typeof clientId !== 'string' || !clientId.trim() || clientId.length > 64) {
-    return res.status(400).json({ error: 'clientId inválido' });
-  }
-  if (typeof week !== 'string' || !/^\d{4}-W\d{2}$/.test(week)) {
-    return res.status(400).json({ error: 'Semana inválida' });
-  }
-  if (!picks || typeof picks !== 'object' || Array.isArray(picks)) {
-    return res.status(400).json({ error: 'picks inválido' });
-  }
-
-  const season = parseInt(rawSeason, 10) || currentSeasonYear();
-  if (season < EARLIEST_SEASON || season > currentSeasonYear()) {
-    return res.status(400).json({ error: 'Temporada fuera de rango' });
-  }
-
-  try {
-    const games = await getOrFetchSeasonGames(season);
-    const weekGames = groupGamesByWeek(games).get(week) || [];
-    const gamesById = new Map(weekGames.map((g) => [String(g.id), g]));
-
-    // Solo se aceptan picks hacia un partido real de esa semana y hacia uno
-    // de los dos equipos que juegan ese partido: evita guardar basura (o
-    // manipulacion) desde el cliente.
-    const cleanPicks = {};
-    for (const [gameId, teamId] of Object.entries(picks)) {
-      const game = gamesById.get(String(gameId));
-      if (!game) continue;
-      const validTeamIds = [game.home_team.id, game.visitor_team.id].map(String);
-      if (!validTeamIds.includes(String(teamId))) continue;
-      cleanPicks[gameId] = teamId;
-    }
-
-    const allPicks = readCache('quiniela_picks', {});
-    if (!allPicks[season]) allPicks[season] = {};
-    if (!allPicks[season][week]) allPicks[season][week] = {};
-    allPicks[season][week][clientId] = {
-      nickname: typeof nickname === 'string' ? nickname.trim().slice(0, 24) : null,
-      picks: cleanPicks,
-      updatedAt: new Date().toISOString()
-    };
-    writeCache('quiniela_picks', allPicks);
-
-    res.json({ ok: true, savedPicks: Object.keys(cleanPicks).length });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Marcador de una semana concreta y marcador acumulado de toda la
-// temporada, calculados a partir de los mismos partidos ya terminados.
-app.get('/api/quiniela/leaderboard', async (req, res) => {
-  const season = parseInt(req.query.season, 10) || currentSeasonYear();
-  if (season < EARLIEST_SEASON || season > currentSeasonYear()) {
-    return res.status(400).json({ error: 'Temporada fuera de rango' });
-  }
-
-  try {
-    const games = await getOrFetchSeasonGames(season);
-    const resultsByGame = buildResultsByGame(games);
-    const picksByWeek = readCache('quiniela_picks', {})[season] || {};
-    const week = req.query.week && /^\d{4}-W\d{2}$/.test(req.query.week) ? req.query.week : null;
-
-    res.json({
-      season,
-      week,
-      weekLeaderboard: week ? scoreWeeks(picksByWeek, [week], resultsByGame) : [],
-      seasonLeaderboard: scoreWeeks(picksByWeek, Object.keys(picksByWeek), resultsByGame)
-    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

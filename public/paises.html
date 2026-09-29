@@ -4,17 +4,17 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>try{if(localStorage.getItem("elrompearos_theme")==="light")document.documentElement.dataset.theme="light";}catch(e){}</script>
-<title>Quiniela semanal NBA - Adivina los ganadores</title>
-<meta name="description" content="Adivina el ganador de cada partido de la semana en la NBA y compite en la clasificación semanal y de temporada de El Rompearos.">
+<title>Jugadores NBA por país - Actuales y retirados | El Rompearos</title>
+<meta name="description" content="Todos los jugadores NBA agrupados por país de nacimiento, activos y retirados, ordenados por valoración. Haz clic en un jugador para ver su ficha.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.elrompearos.com/quiniela.html">
+<link rel="canonical" href="https://www.elrompearos.com/paises.html">
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://www.elrompearos.com/quiniela.html">
+<meta property="og:url" content="https://www.elrompearos.com/paises.html">
 <meta property="og:site_name" content="El Rompearos">
 <meta property="og:image" content="https://www.elrompearos.com/img/brand-mark.jpg">
 <meta property="og:locale" content="es_ES">
-<meta property="og:title" content="Quiniela semanal NBA">
-<meta property="og:description" content="Adivina el ganador de cada partido de la semana y compite en la clasificación.">
+<meta property="og:title" content="Jugadores NBA por país">
+<meta property="og:description" content="Todos los jugadores NBA agrupados por país, activos y retirados, ordenados por valoración.">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://www.elrompearos.com/img/brand-mark.jpg">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏀</text></svg>">
@@ -27,7 +27,7 @@
 <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
 <link rel="stylesheet" href="/css/style.css">
 </head>
-<body class="quiniela-page">
+<body>
 <header class="site-header">
   <a class="brand" href="/index.html">
     <span class="brand-mark"><img src="/img/brand-mark.jpg" alt="" width="44" height="44"></span>
@@ -40,7 +40,7 @@
     <a href="/stats.html">Estadísticas</a>
     <a href="/compare.html">Comparar</a>
     <a href="/trade.html">Simulador de traspasos</a>
-    <a href="/quiniela.html" class="active">Quiniela</a>
+    <a href="/paises.html" class="active">Países</a>
     <a href="/calendar.html">Calendario</a>
     <a href="/playoffs.html">Playoffs</a>
     <a href="/draft.html">Draft</a>
@@ -52,56 +52,29 @@
 
 <main>
   <div class="page-head">
-    <h1>Quiniela semanal</h1>
-    <p class="subtitle">Elige el ganador de cada partido de la semana. Se guarda solo, sin necesidad de cuenta.</p>
+    <h1>Jugadores NBA por país</h1>
+    <p class="subtitle">En <strong>negrita</strong> los jugadores en activo, en <span style="color:var(--text-dim)">gris</span> los retirados. Ordenados por valoración dentro de cada país.</p>
   </div>
-
-  <div class="quiniela-identity">
-    <label class="pill">
-      Tu apodo
-      <input type="text" id="quiniela-nickname" placeholder="Elige un apodo" maxlength="24">
-    </label>
-    <p class="player-meta">El apodo y tus picks se guardan en este navegador, sin contraseña. Si borras los datos del sitio, empiezas de cero.</p>
+  <div id="countries-container">
+    <p class="state-msg">Cargando jugadores...</p>
   </div>
-
-  <div class="quiniela-week-nav">
-    <button id="week-prev" class="pill" type="button">← Semana anterior</button>
-    <span id="week-label" class="pill"></span>
-    <button id="week-next" class="pill" type="button">Semana siguiente →</button>
-  </div>
-
-  <div id="quiniela-games">
-    <p class="state-msg">Cargando partidos...</p>
-  </div>
-
-  <div class="quiniela-status-row">
-    <span id="quiniela-my-score" class="player-meta"></span>
-    <span id="quiniela-save-status" class="player-meta"></span>
-  </div>
-
-  <div id="quiniela-share"></div>
-
-  <div id="quiniela-leaderboard"></div>
-
-  <div id="quiniela-ad-slot"></div>
 </main>
 
 <footer class="site-footer">
-  Datos de partidos vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
+  Datos vía <a href="https://www.balldontlie.io" target="_blank" rel="noopener">balldontlie.io</a>
+  · Valoraciones vía NBA 2K
   <br><a href="/guias.html">Guías</a> · <a href="/legal.html">Aviso Legal</a> · <a href="/privacy.html">Privacidad</a> · <a href="/cookies.html">Cookies</a>
 </footer>
 
 <script src="/js/navToggle.js" defer></script>
 <script src="/js/swRegister.js" defer></script>
 <script src="/js/theme.js" defer></script>
-<script src="/js/teamColors.js" defer></script>
-<script src="/js/teamLogos.js" defer></script>
 <script src="/js/playerLinks.js" defer></script>
+<script src="/js/countryFlags.js" defer></script>
 <script src="/js/cookieConsent.js" defer></script>
 <script src="/js/analytics.js" defer></script>
 <script src="/js/ads.js" defer></script>
 <script src="/js/search.js" defer></script>
-<script src="/js/share.js" defer></script>
-<script src="/js/quiniela.js" defer></script>
+<script src="/js/paises.js" defer></script>
 </body>
 </html>
