@@ -231,6 +231,131 @@ app.get('/team.html', (req, res) => {
   res.send(renderTeamHtml(team));
 });
 
+// Igual que team.html: standings.html se servia siempre estatico (HTML
+// crudo vacio hasta que carga /api/standings), con el año de temporada
+// fijo en el titulo ("2025-26" para siempre, aunque cambie la temporada).
+// Se rellenan titulo/meta/h1 con la temporada real y una tabla de
+// clasificacion basica antes de mandar la pagina; standings.js sigue
+// pintando encima con logos y el resto de columnas sin cambios.
+const standingsHtmlPath = path.join(__dirname, 'public', 'standings.html');
+const standingsHtmlTemplate = fs.readFileSync(standingsHtmlPath, 'utf-8');
+
+function renderStandingsRowsHtml(rows) {
+  return (rows || []).map((r) => `
+    <tr>
+      <td>${r.rank}</td>
+      <td style="text-align:left">${escapeAttr(r.team.full_name)}</td>
+      <td>${r.wins}</td>
+      <td>${r.losses}</td>
+      <td>${(r.winPct * 100).toFixed(1)}%</td>
+    </tr>
+  `).join('');
+}
+
+function renderStandingsHtml(season, standings) {
+  const seasonLabel = `${season}-${String(season + 1).slice(2)}`;
+  const title = `Clasificación NBA ${seasonLabel} - Este y Oeste actualizada | El Rompearos`;
+  const description = `Clasificación NBA ${seasonLabel} actualizada por conferencia Este y Oeste: victorias, derrotas y porcentaje de victorias de cada equipo.`;
+
+  const containerHtml = `
+    <div class="standings-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:24px">
+      <div>
+        <h3 class="standings-title">Conferencia Este</h3>
+        <table class="stats-table">
+          <thead><tr><th>#</th><th style="text-align:left">Equipo</th><th>V</th><th>D</th><th>%V</th></tr></thead>
+          <tbody>${renderStandingsRowsHtml(standings.East)}</tbody>
+        </table>
+      </div>
+      <div>
+        <h3 class="standings-title">Conferencia Oeste</h3>
+        <table class="stats-table">
+          <thead><tr><th>#</th><th style="text-align:left">Equipo</th><th>V</th><th>D</th><th>%V</th></tr></thead>
+          <tbody>${renderStandingsRowsHtml(standings.West)}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  return standingsHtmlTemplate
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeAttr(title)}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(description)}">`)
+    .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(title)}">`)
+    .replace(/<meta property="og:description" content="[^"]*">/, `<meta property="og:description" content="${escapeAttr(description)}">`)
+    .replace(/<h1 class="visually-hidden">[^<]*<\/h1>/, `<h1 class="visually-hidden">Clasificación NBA ${seasonLabel}</h1>`)
+    .replace(
+      /<div id="standings-container">[\s\S]*?<\/div>/,
+      `<div id="standings-container">${containerHtml}</div>`
+    );
+}
+
+app.get('/standings.html', async (req, res) => {
+  const season = parseInt(req.query.season, 10) || currentSeasonYear();
+  if (season < EARLIEST_SEASON || season > currentSeasonYear()) {
+    res.sendFile(standingsHtmlPath);
+    return;
+  }
+
+  try {
+    const games = await getOrFetchSeasonGames(season);
+    const teams = readCache('teams', []);
+    const standings = computeStandings(games, teams);
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(renderStandingsHtml(season, standings));
+  } catch (err) {
+    res.sendFile(standingsHtmlPath);
+  }
+});
+
+// Mismo problema en calendar.html: se serv­ia siempre vacio hasta cargar
+// /api/games. Aqui no tiene sentido renderizar la temporada entera (miles
+// de partidos), asi que se rellenan solo los partidos de HOY (la misma
+// fecha que ya usa el marcador en directo) como contenido real: es
+// justo lo que busca alguien que llega desde Google con "calendario nba
+// hoy", y cambia cada dia de verdad en vez de quedarse fijo.
+const calendarHtmlPath = path.join(__dirname, 'public', 'calendar.html');
+const calendarHtmlTemplate = fs.readFileSync(calendarHtmlPath, 'utf-8');
+
+function renderTodayGamesHtml(games, todayLabel) {
+  if (!games.length) {
+    return `<p class="state-msg">No hay partidos programados para hoy, ${escapeAttr(todayLabel)}.</p>`;
+  }
+  const items = games.map((g) => {
+    const played = g.status_state === 'final';
+    const scoreOrTime = played
+      ? `${g.visitor_team_score} - ${g.home_team_score}`
+      : new Date(g.datetime).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+    return `<li>${escapeAttr(g.visitor_team.full_name)} @ ${escapeAttr(g.home_team.full_name)} — ${played ? `Final ${escapeAttr(scoreOrTime)}` : escapeAttr(scoreOrTime)}</li>`;
+  }).join('');
+  return `<p class="player-meta">Partidos de hoy, ${escapeAttr(todayLabel)}:</p><ul>${items}</ul>`;
+}
+
+function renderCalendarHtml(games, todayLabel) {
+  const title = `Calendario NBA - Partidos de hoy (${todayLabel}) y resultados por equipo | El Rompearos`;
+  const description = `Partidos NBA de hoy ${todayLabel} y calendario completo con resultados, filtrable por equipo y por temporada desde 1980.`;
+
+  return calendarHtmlTemplate
+    .replace(/<title>[\s\S]*?<\/title>/, `<title>${escapeAttr(title)}</title>`)
+    .replace(/<meta name="description" content="[^"]*">/, `<meta name="description" content="${escapeAttr(description)}">`)
+    .replace(/<meta property="og:title" content="[^"]*">/, `<meta property="og:title" content="${escapeAttr(title)}">`)
+    .replace(
+      /<div id="calendar-container">[\s\S]*?<\/div>/,
+      `<div id="calendar-container">${renderTodayGamesHtml(games, todayLabel)}</div>`
+    );
+}
+
+app.get('/calendar.html', async (req, res) => {
+  try {
+    const date = nbaTodayISO();
+    const games = await getGamesForDate(date);
+    const sorted = [...games].sort((a, b) => new Date(a.datetime) - new Date(b.datetime));
+    const todayLabel = new Date(`${date}T12:00:00Z`).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' });
+    res.set('Cache-Control', 'public, max-age=300');
+    res.send(renderCalendarHtml(sorted, todayLabel));
+  } catch (err) {
+    res.sendFile(calendarHtmlPath);
+  }
+});
+
 // Los logos/escudo cambian muy de vez en cuando (alguna sustitucion
 // puntual), no en cada despliegue como el JS/CSS: cache mas largo para que
 // un visitante que vuelve no los vuelva a descargar.
