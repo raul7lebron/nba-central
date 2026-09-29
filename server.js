@@ -765,10 +765,11 @@ app.get('/api/players/search', (req, res) => {
 });
 
 // Todos los jugadores conocidos (activos e historicos) agrupados por pais
-// de nacimiento, para /paises.html. Cada jugador lleva una unica
-// "valoracion" (2K actual si esta activo, pico historico si esta retirado)
-// para poder ordenar ambos grupos con el mismo criterio. Tiene que ir antes
-// que /api/players/:id, si no esa ruta la intercepta (":id" = "countries").
+// de nacimiento, para /paises.html. Los activos van primero, ordenados por
+// valoracion (2K actual) de mejor a peor; los retirados van despues, por
+// orden alfabetico (no tienen una valoracion tan comparable entre epocas
+// distintas del juego). Tiene que ir antes que /api/players/:id, si no esa
+// ruta la intercepta (":id" = "countries").
 app.get('/api/players/countries', (req, res) => {
   const maps = buildPlayerEnrichmentMaps();
   const byCountry = new Map();
@@ -787,13 +788,16 @@ app.get('/api/players/countries', (req, res) => {
     });
   }
 
+  function fullName(p) {
+    return `${p.first_name} ${p.last_name}`;
+  }
+
   const countries = [...byCountry.entries()]
-    .map(([country, players]) => ({
-      country,
-      players: players.sort((a, b) =>
-        (a.isActive === b.isActive ? 0 : a.isActive ? -1 : 1) || ((b.rating || 0) - (a.rating || 0))
-      )
-    }))
+    .map(([country, players]) => {
+      const active = players.filter((p) => p.isActive).sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      const retired = players.filter((p) => !p.isActive).sort((a, b) => fullName(a).localeCompare(fullName(b)));
+      return { country, players: [...active, ...retired] };
+    })
     .sort((a, b) => b.players.length - a.players.length || a.country.localeCompare(b.country));
 
   res.set('Cache-Control', 'public, max-age=3600');
