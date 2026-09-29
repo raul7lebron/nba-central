@@ -1,5 +1,6 @@
 const cron = require('node-cron');
 const { refreshAll, refreshNews, refreshSalaries, refreshRatings2k, refreshBirthYears, refreshDraftArchive } = require('./refreshAll');
+const { checkFinishedGames } = require('./gameResults');
 
 function startScheduler() {
   // Equipos, plantillas y noticias completas: todos los dias a las 06:00
@@ -12,6 +13,15 @@ function startScheduler() {
   cron.schedule('*/30 * * * *', () => {
     console.log('[cron] refresco de noticias');
     refreshNews().catch((err) => console.error('[cron] error refresco noticias:', err));
+  });
+
+  // Resultados finales: cada 10 minutos, para publicar en redes (X/Telegram,
+  // si hay credenciales configuradas) el resultado de un partido casi al
+  // instante de terminar, que es cuando mas se busca ("resultado X hoy").
+  // El refresco completo de partidos de refreshAll solo corre una vez al
+  // dia a las 06:00, demasiado tarde para esto.
+  cron.schedule('*/10 * * * *', () => {
+    checkFinishedGames().catch((err) => console.error('[cron] error comprobando resultados finales:', err));
   });
 
   // Salarios: solo cambian con fichajes/traspasos, basta con una vez por semana
@@ -38,7 +48,7 @@ function startScheduler() {
     refreshBirthYears().catch((err) => console.error('[cron] error refresco años de nacimiento:', err));
   });
 
-  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, salarios/2K/draft/nacimientos domingos 07:00');
+  console.log('[cron] tareas programadas: refresco completo 06:00, noticias cada 30min, resultados finales cada 10min, salarios/2K/draft/nacimientos domingos 07:00');
 }
 
 module.exports = { startScheduler };
