@@ -1017,13 +1017,20 @@ table.stats-table tbody tr.playoff-row:nth-of-type(8) td { border-bottom: 2px so
   line-height: 1.5;
 }
 
-/* ---------- Paginas legales ---------- */
+/* ---------- Paginas legales y guias ---------- */
 
-.legal-content { max-width: 760px; color: var(--text-dim); line-height: 1.7; font-size: 0.95rem; }
-.legal-content h3 { color: var(--text); margin-top: 28px; margin-bottom: 8px; font-size: 1.05rem; }
-.legal-content ul { padding-left: 20px; }
-.legal-content li { margin-bottom: 6px; }
-.legal-content a { color: var(--accent); }
+.legal-content, .guide-content { max-width: 760px; color: var(--text-dim); line-height: 1.7; font-size: 0.95rem; }
+.legal-content h3, .guide-content h2, .guide-content h3 { color: var(--text); margin-top: 28px; margin-bottom: 8px; font-size: 1.05rem; }
+.legal-content ul, .guide-content ul { padding-left: 20px; }
+.legal-content li, .guide-content li { margin-bottom: 6px; }
+.legal-content a, .guide-content a { color: var(--accent); }
+.guide-content h2 { font-size: 1.25rem; border-top: 1px solid var(--border); padding-top: 24px; }
+.guide-content h2:first-child { border-top: none; padding-top: 0; }
+
+.guide-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 20px; }
+.guide-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-decoration: none; display: block; }
+.guide-card h2 { margin: 0 0 8px; font-size: 1.05rem; color: var(--text); }
+.guide-card p { margin: 0; color: var(--text-dim); font-size: 0.9rem; line-height: 1.5; }
 
 .legal-placeholder-notice {
   background: var(--accent-dim);
