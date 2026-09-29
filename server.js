@@ -462,8 +462,7 @@ const SITE_URL = process.env.SITE_URL || 'https://www.elrompearos.com';
 app.get('/sitemap.xml', (req, res) => {
   const staticPages = [
     '/index.html', '/teams.html', '/standings.html', '/stats.html', '/compare.html', '/trade.html', '/quiniela.html', '/calendar.html',
-    '/playoffs.html', '/draft.html', '/market.html', '/store.html',
-    '/guias.html', '/guia-reglas-nba.html', '/guia-draft-nba.html', '/guia-playoffs-nba.html', '/guia-estadisticas-nba.html'
+    '/playoffs.html', '/draft.html', '/market.html', '/store.html', '/guias.html'
   ];
   const teams = readCache('teams', []);
   const teamUrls = teams.map((t) => `/team.html?id=${t.id}`);
