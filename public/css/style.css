@@ -208,7 +208,10 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   nav.site-nav.nav-open { display: flex; }
   nav.site-nav a { padding: 12px 14px; font-size: 0.95rem; }
 
-  /* con el menu plegado, el buscador vuelve a quedar junto al icono hamburguesa */
+  /* con el menu plegado, el boton de instalar y el buscador vuelven a
+     quedar junto al icono hamburguesa (que pasa a ser el que empuja el
+     grupo entero al borde derecho via su propio margin-left:auto) */
+  .nav-toggle ~ .install-app-btn,
   .nav-toggle ~ .nav-search { margin-left: 0; }
 }
 
@@ -255,11 +258,40 @@ nav.site-nav a.active { color: var(--text); background: var(--surface-2); }
   body.compare-page .compare-table td { padding: 8px 6px; font-size: 0.85rem; }
 }
 
+/* ---------- Boton "instalar app" ---------- */
+
+/* Antes era el buscador el primer elemento del grupo final de la cabecera
+   en escritorio (el hamburguesa solo existe por debajo de 1700px), asi
+   que era el que llevaba el margin-left:auto para quedar pegado al borde
+   derecho. Ahora ese puesto lo ocupa este boton (va justo antes de
+   #nav-search en el DOM) y el buscador pasa a margin-left:0 para no
+   competir por el mismo espacio libre y acabar separados entre si. */
+.install-app-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  padding: 0 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.install-app-btn:hover { color: var(--text); border-color: var(--accent); background: var(--surface); }
+
 /* ---------- Buscador de jugadores ---------- */
 
 .nav-search {
   position: relative;
-  margin-left: auto;
+  margin-left: 0;
   flex-shrink: 0;
 }
 
