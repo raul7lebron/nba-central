@@ -111,6 +111,7 @@ function renderPlayerHero(player) {
         ${salaryPill}
       </div>
       ${renderAwardPills(player.awards)}
+      <p style="margin-top:10px"><a href="/compare.html">Comparar con otro jugador →</a></p>
       ${renderShareButtons(`https://www.elrompearos.com${playerUrl(player)}`, `${player.first_name} ${player.last_name} - Estadísticas y contrato NBA`)}
     </div>
   `;

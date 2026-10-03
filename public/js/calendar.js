@@ -90,6 +90,10 @@ function gameSlug(g) {
   return `${g.visitor_team.abbreviation.toLowerCase()}-vs-${g.home_team.abbreviation.toLowerCase()}-${g.id}`;
 }
 
+// Antes la tarjeta entera era un unico <a> al partido: los equipos no
+// enlazaban a su ficha porque un <a> dentro de otro <a> es HTML invalido.
+// Ahora cada fila de equipo es su propio enlace a /team.html y el partido
+// se enlaza aparte, en el boton de abajo.
 function renderGameCard(g) {
   const played = g.status_state === 'final';
   const scoreOrTime = played
@@ -97,23 +101,24 @@ function renderGameCard(g) {
     : formatGameTime(g.datetime);
 
   return `
-    <a class="player-card" href="/partido/${gameSlug(g)}?season=${g.season}" style="flex-direction:column;align-items:stretch;gap:8px;text-decoration:none;color:inherit">
-      <div style="display:flex;align-items:center;justify-content:space-between">
+    <div class="player-card" style="flex-direction:column;align-items:stretch;gap:8px">
+      <a href="/team.html?id=${g.visitor_team.id}" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:inherit">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(g.visitor_team.abbreviation, 22)}
           <span class="player-meta">${displayAbbr(g.visitor_team.abbreviation)}</span>
         </div>
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[0] : ''}</span>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      </a>
+      <a href="/team.html?id=${g.home_team.id}" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none;color:inherit">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(g.home_team.abbreviation, 22)}
           <span class="player-meta">${displayAbbr(g.home_team.abbreviation)}</span>
         </div>
         <span style="font-weight:700">${played ? scoreOrTime.split(' - ')[1] : ''}</span>
-      </div>
+      </a>
       ${!played ? `<div class="player-meta" style="text-align:center">${scoreOrTime || 'Por confirmar'}</div>` : ''}
-    </a>
+      <a href="/partido/${gameSlug(g)}?season=${g.season}" class="pill" style="text-align:center;text-decoration:none">${played ? 'Ver resultado →' : 'Ver partido →'}</a>
+    </div>
   `;
 }
 

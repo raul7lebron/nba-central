@@ -30,20 +30,20 @@ function renderSeries(s) {
   const winnerIsA = s.winner.id === s.teamA.id;
   return `
     <div class="player-card" style="cursor:default;flex-direction:column;align-items:stretch;gap:10px;padding:16px">
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      <a href="/team.html?id=${s.teamA.id}" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(s.teamA.abbreviation, 26)}
           <span style="font-weight:${winnerIsA ? 700 : 500};color:${winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${displayAbbr(s.teamA.abbreviation)}</span>
         </div>
         <span style="font-weight:800;font-size:1.1rem">${s.winsA}</span>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between">
+      </a>
+      <a href="/team.html?id=${s.teamB.id}" style="display:flex;align-items:center;justify-content:space-between;text-decoration:none">
         <div style="display:flex;align-items:center;gap:8px">
           ${logoImgOrBadge(s.teamB.abbreviation, 26)}
           <span style="font-weight:${!winnerIsA ? 700 : 500};color:${!winnerIsA ? 'var(--text)' : 'var(--text-dim)'}">${displayAbbr(s.teamB.abbreviation)}</span>
         </div>
         <span style="font-weight:800;font-size:1.1rem">${s.winsB}</span>
-      </div>
+      </a>
     </div>
   `;
 }

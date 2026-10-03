@@ -81,6 +81,7 @@ function renderToolbar(selected) {
         <select id="position-select" style="background:transparent;border:none;color:var(--accent);font-weight:700;font-family:inherit;cursor:pointer;margin-left:4px">${positionOptions}</select>
       </label>
       <span class="player-meta">Temporada ${seasonLabel} · Top 50${updatedLabel}</span>
+      <a href="/compare.html" class="pill">Comparar jugadores →</a>
     </div>
   `;
   document.getElementById('stat-select').addEventListener('change', (e) => {
