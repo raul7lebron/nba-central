@@ -4,7 +4,7 @@ const compression = require('compression');
 const path = require('path');
 const fs = require('fs');
 
-const { readCache, writeCache } = require('./src/cache');
+const { readCache, writeCache, cacheAge } = require('./src/cache');
 const {
   getPlayerStatsHistory,
   getPlayerCareerStatsHistory,
@@ -1029,11 +1029,18 @@ app.get('/api/games/live', async (req, res) => {
 
 // Las estadisticas de cada jugador se piden bajo demanda (al hacer click) y se
 // cachean en disco para no golpear el limite de peticiones de la API gratuita.
+// Solo 24h: a diferencia del historial de carrera (fijo, un jugador retirado
+// no juega mas partidos), esto incluye la temporada EN CURSO, que cambia con
+// cada partido. Cachearlo para siempre (como se hacia antes) significaba que
+// la ficha de cualquier jugador visitada antes de que arrancara la temporada
+// se quedaba congelada sin ella, sin ningun mecanismo que la refrescara.
+const PLAYER_STATS_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 app.get('/api/players/:id/stats', async (req, res) => {
   const playerId = req.params.id;
   const cacheKey = `player_stats_${playerId}`;
   const cached = readCache(cacheKey);
-  if (cached) return res.json(cached);
+  if (cached && cacheAge(cacheKey) < PLAYER_STATS_CACHE_TTL_MS) return res.json(cached);
 
   try {
     const stats = await getPlayerStatsHistory(playerId);
